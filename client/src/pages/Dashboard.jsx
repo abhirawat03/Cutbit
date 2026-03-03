@@ -26,7 +26,7 @@ function Dashboard() {
         </div>
         <div className='bg-gradient-to-br from-violet-900/60 to-[#1e293b62] p-8 rounded-2xl border-2 border-violet-900 relative overflow-hidden'>
           <div className='flex items-center justify-between mb-5'>
-            <h2 className='uppercase text-xl font-bold tracking-widest text-violet-600'>Total Engagement</h2>
+            <h2 className='uppercase text-xl font-bold tracking-widest text-violet-600'>Activity Reach</h2>
             <div className='bg-violet-600/40 py-4 px-3 rounded-lg'>
               <MdAdsClick size={25} className='text-violet-500'/>
             </div>
@@ -41,7 +41,7 @@ function Dashboard() {
         </div>
         <div className='bg-gradient-to-br from-green-900/60 to-[#1e293b62] p-8 rounded-2xl border-2 border-green-900 relative overflow-hidden'>
           <div className='flex items-center justify-between mb-5'>
-            <h2 className='uppercase text-xl font-bold tracking-widest text-green-600'>Total Engagement</h2>
+            <h2 className='uppercase text-xl font-bold tracking-widest text-green-600'>Unique Influence</h2>
             <div className='bg-green-600/40 py-4 px-3 rounded-lg'>
               <MdOutlinePersonOutline size={25} className='text-green-500'/>
             </div>

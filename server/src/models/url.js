@@ -23,9 +23,9 @@ const urlSchema = new Schema(
       type: Number,
       default: 0,
     },
-    uniqueClicks:{
-        type:Number,
-        default:0,
+    totalUniqueVisitors: {   // lifetime only
+      type: Number,
+      default: 0,
     },
     //     type:Map,
     //     of:Number,

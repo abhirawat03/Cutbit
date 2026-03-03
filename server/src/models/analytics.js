@@ -7,6 +7,12 @@ const anayticsSchema = new Schema({
         required:true,
         index: true,
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
+    },
     date:{
         type:Date,
         required:true,
@@ -20,14 +26,13 @@ const anayticsSchema = new Schema({
         type:Number,
         default:0,
     },
-    deviceBreakdown: {
-        mobile: { type: Number, default: 0 },
-        desktop: { type: Number, default: 0 },
-        tablet: { type: Number, default: 0 },
-        other: { type: Number, default: 0 },
+    deviceStats: {
+        type: Map,
+        of: Number,
+        default: {},
     },
 
-    countryBreakdown: {
+    countryStats: {
         type: Map,
         of: Number,
         default: {},

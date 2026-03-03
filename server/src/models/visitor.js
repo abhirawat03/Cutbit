@@ -7,6 +7,17 @@ const visitorSchema = new Schema({
         required:true,
         index:true,
     },
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        required:true,
+        index:true,
+    },
+    visitorId: {              // PRODUCTION IDENTITY
+        type: String,
+        required: true,
+        index: true,
+    },
     ipHash:{
         type:String,
         required:true,
@@ -33,7 +44,7 @@ const visitorSchema = new Schema({
 },{timestamps:true})
 
 visitorSchema.index(
-    {urlId:1, ipHash:1, date:1},
+    {urlId:1, visitorId:1, date:1},
     {unique:true}
 )
 
