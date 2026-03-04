@@ -22,7 +22,7 @@ import userRouter from "./routes/user.js"
 import dashboardRouter from "./routes/dashboard.js"
 
 //routes declaration
-app.use("/url",urlRoutes)
+app.use("/api/v1/",urlRoutes)
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 

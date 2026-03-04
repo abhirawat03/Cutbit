@@ -173,7 +173,9 @@ function Dashboard() {
                             {link.name}
                           </span>
                           <span className="text-blue-500 text-sm">
-                            {link.shortUrl}
+                            <a href={`${window.location.origin}/api/v1/${link.shortUrl}`}>
+                              {link.shortUrl}
+                            </a>
                           </span>
                         </div>
                       </td>
