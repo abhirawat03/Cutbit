@@ -5,7 +5,8 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import mongoose from "mongoose";
 
 const createShortUrl = async(req,res)=>{
-    const {originalUrl,customAlias} = req.body
+    const userId = req.user._id;
+    const {originalUrl,customAlias,expiryDate} = req.body
 
     if(!originalUrl) throw new ApiError(400,"Url required")
 
@@ -13,8 +14,10 @@ const createShortUrl = async(req,res)=>{
 
     // const shortUrl = nanoid(6);
     const newUrl = await Url.create({
+        userId,
         originalUrl,
-        shortUrl
+        shortUrl,
+        expiryDate
     })
 
     if(!newUrl) throw new ApiError(404,"custom alias already exist")
@@ -58,30 +61,35 @@ const redirectUrl = async(req,res)=>{
 }
 
 const getalllinks= async(req,res)=>{
-    const links = await Url.find().sort({createdAt:-1});
-    return res
-    .status(200)
-    .json(
-        new ApiResponse(
-            200,
-            links,
-            "Links fetched successfully"
-        )
-    )
-}
+    const userId = req.user._id;
+    if(!userId) throw new ApiError(401,"unauthorized")
 
-const getstats = async(req,res) =>{
-    const stats = await Url.aggregate([
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const result = await Url.aggregate([
         {
-            $group:{
-                _id:null,
-                totalLinks: { $sum: 1 },
-                totalClicks:{
-                    $sum:"$clicks"
-                }
+            $match:{userId}
+        },
+        {
+            $sort:{createdAt:-1}
+        },
+        {
+            $facet:{
+                links:[
+                    {$skip:skip},
+                    {$limit:limit}
+                ],
+                totalCount:[
+                    {$count:"count"}
+                ]
             }
         }
     ])
+
+    const links = result[0].links;
+    const totalLinks = result[0].totalCount[0]?.count || 0;
 
     return res
     .status(200)
@@ -89,18 +97,72 @@ const getstats = async(req,res) =>{
         new ApiResponse(
             200,
             {
-                totalLinks:stats[0]?.totalLinks || 0,
-                totalClicks:stats[0]?.totalClicks || 0,
-            }
+                links,
+                pagination:{
+                    totalLinks,
+                    page,
+                    totalPages: Math.max(Math.ceil(totalLinks / limit), 1)
+                }
+            },
+            "Links fetched successfully"
+        )
+    )
+}
+
+const updateLink = async(req,res) =>{
+    const {linkId} = req.params
+    const userId = req.user._id;
+    if(!userId) throw new ApiError(401,"unauthorized")
+
+    const { originalUrl, shortUrl, expiryDate, status } = req.body;
+    if (shortUrl) {
+        const existing = await Url.findOne({ shortUrl });
+
+        if (existing && existing._id.toString() !== linkId) {
+            throw new ApiError(400, "Alias already taken");
+        }
+    }
+
+    if (expiryDate && new Date(expiryDate) < new Date()) {
+        throw new ApiError(400, "Expiry date must be in the future")
+    }
+
+    const updateFields = {}
+    if (originalUrl) updateFields.originalUrl = originalUrl;
+    if (shortUrl) updateFields.shortUrl = shortUrl;
+    if (expiryDate) updateFields.expiryDate = expiryDate;
+    if (status) updateFields.status = status;
+
+    const link = await Url.findOneAndUpdate(
+        { _id: linkId, userId },
+        { $set: updateFields },
+        { new: true }
+    );
+    if (!link) {
+        throw new ApiError(404, "Link not found");
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            link,
+            "Link updated successfully"
         )
     )
 }
 
 const deleteLink = async(req,res)=>{
-    const {id} = req.params
-    if(!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400,"Invalid id")
-    const deleted = await Url.findByIdAndDelete(id);
-    if(!deleted) throw new ApiError(404,"Link not found")
+    const userId = req.user._id;
+    const {linkId} = req.params
+    if(!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400,"Invalid id")
+
+    const link = await Url.findOneAndDelete({
+        _id: linkId,
+        userId
+    });
+    if(!link) throw new ApiError(404,"Link not found")
 
     return res
     .status(200)
@@ -113,4 +175,44 @@ const deleteLink = async(req,res)=>{
     )
 }
 
-export {createShortUrl,redirectUrl,getalllinks,getstats,deleteLink}
+const getstats = async(req,res) =>{
+    const userId = req.user._id;
+
+    const stats = await Url.aggregate([
+        {
+            $match:{userId}
+        },
+        {
+            $group:{
+                _id:null,
+                totalLinks: { $sum: 1 },
+                totalClicks:{
+                    $sum:"$totalClicks"
+                },
+                totalActive:{
+                    $sum:{
+                        $cond:[{$eq:["$status","active"]},1,0]
+                    }
+                }
+            }
+        }
+    ])
+
+    const data = stats[0] || {
+        totalLinks: 0,
+        totalClicks: 0,
+        totalActive: 0
+    };
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            data,
+            "Links stats fetched successfully"
+        )
+    )
+}
+
+export {createShortUrl,redirectUrl,getalllinks,getstats,updateLink,deleteLink}

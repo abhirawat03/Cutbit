@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const anayticsSchema = new Schema({
+const analyticsSchema = new Schema({
     urlId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Url",
@@ -40,9 +40,9 @@ const anayticsSchema = new Schema({
 
 },{timestamps:true});
 
-anayticsSchema.index(
+analyticsSchema.index(
     {urlId:1, date:1},
     {unique:true}
 );
 
-export const Analytics = mongoose.model("Analytics", anayticsSchema);
+export const Analytics = mongoose.model("Analytics", analyticsSchema);

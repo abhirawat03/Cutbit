@@ -19,6 +19,10 @@ const urlSchema = new Schema(
       unique: true,
       index:true
     },
+    name:{
+      type: String,
+      required: true,
+    },
     totalClicks: {
       type: Number,
       default: 0,
@@ -48,5 +52,5 @@ const urlSchema = new Schema(
   },
   { timestamps: true },
 );
-
+urlSchema.index({ userId: 1, createdAt: -1 });
 export const Url = mongoose.model("Url", urlSchema);
