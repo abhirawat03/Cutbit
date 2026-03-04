@@ -105,10 +105,10 @@ function Mylinks() {
                                     <RiEdit2Fill className="text-gray-400 hover:text-green-400" size={28}
                                         onClick={() => {
                                             setSelectedLink({
-  originalUrl: "https://store.example.com/collections/summer",
-  shortCode: "summer24",
-  status: "active",
-});
+                                                originalUrl: "https://store.example.com/collections/summer",
+                                                shortCode: "summer24",
+                                                status: "active",
+                                            });
                                             setEditOpen(true);
                                         }} />
                                     <MdAnalytics className="text-gray-400 hover:text-yellow-400" size={28} />

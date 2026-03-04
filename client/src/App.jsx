@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route} from "react-router-dom";
 import Home from "./pages/Home";
 import Layout from "./components/Layout.jsx";
 import AuthLayout from "./components/AuthLayout.jsx";
@@ -11,6 +11,8 @@ import Mylinks from "./pages/Mylinks.jsx";
 import Analytics from "./pages/Analytics.jsx";
 import LinkBrief from "./pages/LinkBrief.jsx";
 import Settings from "./pages/Settings.jsx";
+// import Link from "./pages/Link.jsx";
+import LinkView from "./pages/Link.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -33,9 +35,9 @@ function App() {
         <Route element={<DashLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/links" element={<Mylinks />} />
-          <Route path="/dashboard/analytics" element={<Analytics />} />
+          <Route path="/dashboard/link" element={<LinkView />} />
           <Route path="/dashboard/settings" element={<Settings />} />
-          <Route path="/dashboard/link" element={<LinkBrief />} />
+          <Route path="/dashboard/analytics" element={<LinkBrief />} />
         </Route>
       </Routes>
     </BrowserRouter>
