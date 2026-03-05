@@ -26,8 +26,6 @@ const createShortUrl = async (req, res) => {
       shortUrl = nanoid(6);
     }
 
-    
-
   // const shortUrl = nanoid(6);
   const newUrl = await Url.create({
     userId,
@@ -43,36 +41,9 @@ const createShortUrl = async (req, res) => {
     new ApiResponse(
       201,
       newUrl,
-      // `http://localhost:8000/${shortUrl}`,
       "Shorturl created successfully",
     ),
   );
-};
-
-const redirectUrl = async (req, res) => {
-  const { shortUrl } = req.params;
-
-  if (!shortUrl) throw new ApiError(400, "Invalid shorturl");
-
-  const url = await Url.findOneAndUpdate(
-    { shortUrl: shortUrl },
-    { $inc: { clicks: 1 } },
-    // {new:true}
-  );
-
-  if (!url) throw new ApiError(404, "short url not found");
-
-  res.redirect(url.originalUrl);
-
-  // return res
-  // .status(200)
-  // .json(
-  //     new ApiResponse(
-  //         200,
-  //         url,
-  //         "Successfully redirect to the url"
-  //     )
-  // )
 };
 
 const getalllinks = async (req, res) => {
@@ -208,7 +179,6 @@ const getstats = async (req, res) => {
 
 export {
   createShortUrl,
-  redirectUrl,
   getalllinks,
   getstats,
   updateLink,

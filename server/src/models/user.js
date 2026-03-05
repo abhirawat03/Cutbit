@@ -17,7 +17,7 @@ const userSchema = new Schema({
     password:{
         type:String,
         required:true,
-        select: false,
+        // select: false,
     },
     avatar:{
         type:String,//cloudinary url

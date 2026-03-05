@@ -8,7 +8,7 @@ const analyticsSchema = new Schema({
         index: true,
     },
     userId: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
         index: true,
@@ -43,6 +43,9 @@ const analyticsSchema = new Schema({
 analyticsSchema.index(
     {urlId:1, date:1},
     {unique:true}
+);
+analyticsSchema.index(
+    { userId:1, date:1 }
 );
 
 export const Analytics = mongoose.model("Analytics", analyticsSchema);

@@ -14,12 +14,13 @@ function Dashboard() {
   const [range, setRange] = useState(7);
 
   const fetchDashboard = async (selectedRange) => {
+    setLoading(true)
     try {
 
       const res = await Api.get(`/dashboard/stats?range=${selectedRange}`);
 
       setDashboard(res.data.data);
-      // console.log(dashboard)
+      console.log(res.data.data)
 
     } catch (error) {
       console.error("Dashboard fetch error", error);
@@ -27,6 +28,7 @@ function Dashboard() {
       setLoading(false);
     }
   };
+  console.log(dashboard?.chart)
   useEffect(() => {
     fetchDashboard(range);
   }, [range]);
@@ -126,12 +128,12 @@ function Dashboard() {
               <h3 className='text-2xl text-blue-500 font-bold'>{dashboard.topLink.shortUrl}</h3>
               <div className='grid grid-cols-2 mt-7 gap-5'>
                 <div className='bg-[#40444a6d] py-3 px-4 rounded-xl space-y-2'>
-                  <h3 className='text-xs tracking-widest font-bold text-gray-400'>{dashboard.topLink.clicks}</h3>
-                  <p className='text-2xl font-bold'>12405</p>
+                  <h3 className='text-xs tracking-widest font-bold text-gray-400'>Total Clicks</h3>
+                  <p className='text-2xl font-bold'>{dashboard.topLink.clicks}</p>
                 </div>
                 <div className='bg-[#40444a6d] py-3 px-4 rounded-xl space-y-2'>
-                  <h3 className='text-xs tracking-widest font-bold text-gray-400'>{dashboard.topLink.uniqueVisitors}</h3>
-                  <p className='text-2xl font-bold'>2546</p>
+                  <h3 className='text-xs tracking-widest font-bold text-gray-400'>Total Unique</h3>
+                  <p className='text-2xl font-bold'>{dashboard.topLink.uniqueVisitors}</p>
                 </div>
               </div>
               <button className='bg-[#40444a6d] text-xl font-bold py-2 px-4 rounded-xl mt-8 md:mt-20 hover:bg-[#33383ea4]'>View Full Report</button>
@@ -173,7 +175,7 @@ function Dashboard() {
                             {link.name}
                           </span>
                           <span className="text-blue-500 text-sm">
-                            <a href={`${window.location.origin}/api/v1/${link.shortUrl}`}>
+                            <a href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}>
                               {link.shortUrl}
                             </a>
                           </span>

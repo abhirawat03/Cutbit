@@ -9,8 +9,14 @@ export const getDashboardData = async(req,res)=>{
         const userId = req.user._id;
         const range = parseInt(req.query.range) || 7;
         const today = new Date();
-        const startDate = new Date();
-        startDate.setDate(today.getDate() - range)
+        today.setHours(0,0,0,0)
+
+        const endOfToday = new Date(today)
+        endOfToday.setHours(23,59,59,999)
+
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - (range - 1))
+        // startDate.setHours(0,0,0,0)
     
         const prevStartDate = new Date();
         prevStartDate.setDate(startDate.getDate() - range);
@@ -49,6 +55,8 @@ export const getDashboardData = async(req,res)=>{
             lifetimeClicks:0,
             lifetimeUnique:0,
         }
+        console.log("Start:", startDate)
+console.log("End:", endOfToday)
     
         //current range stats
     
@@ -102,11 +110,44 @@ export const getDashboardData = async(req,res)=>{
         }
     
         //chart data
-        const chart = await Analytics.find({
-            userId,
-            date:{$gte:startDate,$lte:today},
-        }).sort({date:1})
-        .select("date clicks uniqueVisitors -_id");
+        const analytics = await Analytics.find({
+      userId: new mongoose.Types.ObjectId(userId),
+      date: { $gte: startDate, $lte: endOfToday },
+    })
+      .sort({ date: 1 })
+      .select("date clicks uniqueVisitors -_id")
+    console.log("Analytics docs:", analytics)
+    console.log(await Analytics.find())
+    // Create full date range
+    const dates = []
+    const current = new Date(startDate)
+
+    while (current <= endOfToday) {
+      dates.push(new Date(current))
+      current.setDate(current.getDate() + 1)
+    }
+    // Convert analytics to map
+    const analyticsMap = new Map()
+
+    analytics.forEach((item) => {
+      const key = item.date.toLocaleDateString("en-CA")
+
+      analyticsMap.set(key, {
+        clicks: item.clicks,
+        uniqueVisitors: item.uniqueVisitors,
+      })
+    })
+
+    // Fill missing days
+    const chart = dates.map((date) => {
+      const key = date.toLocaleDateString("en-CA")
+
+      return {
+        date: key,
+        clicks: analyticsMap.get(key)?.clicks || 0,
+        uniqueVisitors: analyticsMap.get(key)?.uniqueVisitors || 0,
+      }
+    })
     
         // TOP PERFORMING LINK
         const topLink = await Analytics.aggregate([

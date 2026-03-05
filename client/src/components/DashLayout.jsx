@@ -99,7 +99,7 @@ function DashLayout() {
           onClick={() => setIsOpen(false)}
         />)}
       
-      <div className='flex flex-col min-h-screen'>
+      <div className='flex flex-col min-h-screen md:h-screen'>
         <div className=' flex justify-between items-center p-4 fixed top-0 right-0 left-0 md:left-[260px] z-30 backdrop-blur-md bg-[#030a2a]/40 border-b border-[#63686c5e]'>
           <button
             className="md:hidden text-white z-80"

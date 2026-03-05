@@ -76,7 +76,9 @@ const registerUser = async(req,res)=>{
 const loginUser = async(req,res)=>{
     const {email, password} = req.body
 
-    if(!email) throw new ApiError(400,"Email is required")
+    if (!email || !password) {
+        throw new ApiError(400, "Email and password are required")
+    }
     
     const user = await User.findOne({
         email

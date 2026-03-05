@@ -29,7 +29,7 @@ const visitorSchema = new Schema({
     },
     device: {
         type: String,
-        enum: ["mobile", "desktop", "tablet", "other"],
+        enum: ["mobile", "desktop","bot", "tablet", "other"],
         required: true,
     },
 
@@ -47,5 +47,8 @@ visitorSchema.index(
     {urlId:1, visitorId:1, date:1},
     {unique:true}
 )
+visitorSchema.index(
+    { urlId:1, date:1 }
+);
 
 export const Visitor = mongoose.model("Visitor",visitorSchema)
