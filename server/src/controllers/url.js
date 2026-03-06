@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import { validateAlias } from "../utils/validateAlias.js";
 
 const createShortUrl = async (req, res) => {
     const userId = req.user?._id;
@@ -15,7 +16,7 @@ const createShortUrl = async (req, res) => {
 
         // If user provided alias
     if (customAlias) {
-        shortUrl = customAlias.trim().toLowerCase();
+        shortUrl = validateAlias(customAlias);
 
         const existing = await Url.findOne({ shortUrl });
 
@@ -94,23 +95,37 @@ const updateLink = async (req, res) => {
   if (!userId) throw new ApiError(401, "unauthorized");
 
   const { originalUrl, shortUrl, expiryDate, status } = req.body;
+  const updateFields = {};
+  // original url
+  if (originalUrl) {
+    updateFields.originalUrl = originalUrl;
+  }
+
   if (shortUrl) {
-    const existing = await Url.findOne({ shortUrl });
+    const normalizedAlias = validateAlias(shortUrl);
+    const existing = await Url.findOne({ shortUrl: normalizedAlias });
 
     if (existing && existing._id.toString() !== linkId) {
       throw new ApiError(400, "Alias already taken");
     }
+    updateFields.shortUrl = normalizedAlias;
   }
 
   if (expiryDate && new Date(expiryDate) < new Date()) {
     throw new ApiError(400, "Expiry date must be in the future");
   }
+  updateFields.expiryDate = date;
 
-  const updateFields = {};
-  if (originalUrl) updateFields.originalUrl = originalUrl;
-  if (shortUrl) updateFields.shortUrl = shortUrl;
-  if (expiryDate) updateFields.expiryDate = expiryDate;
-  if (status) updateFields.status = status;
+  // status validation
+  if (status) {
+    const allowedStatus = ["active", "paused"];
+
+    if (!allowedStatus.includes(status)) {
+      throw new ApiError(400, "Invalid status");
+    }
+
+    updateFields.status = status;
+  }
 
   const link = await Url.findOneAndUpdate(
     { _id: linkId, userId },
@@ -128,6 +143,9 @@ const updateLink = async (req, res) => {
 
 const deleteLink = async (req, res) => {
   const userId = req.user._id;
+  if (!userId) {
+    throw new ApiError(401, "Unauthorized");
+  }
   const { linkId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(linkId))
     throw new ApiError(400, "Invalid id");
