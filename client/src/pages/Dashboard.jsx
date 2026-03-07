@@ -47,9 +47,6 @@ function Dashboard() {
           </div>
           <div >
             <h1 className='text-3xl sm:text-4xl md:text-5xl mb-2 font-extrabold'>{dashboard.stats.totalLinks}</h1>
-            <span>
-              {/* +12.5% vs {range}D */}
-            </span>
           </div>
           <IoLink className='absolute bottom-0 -right-4 text-gray-700' size={120} />
         </div>
@@ -84,7 +81,7 @@ function Dashboard() {
           <MdOutlinePersonOutline className='absolute bottom-0 -right-4 text-gray-700' size={120} />
         </div>
       </div>
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-3 my-4 ">
 
         <button
           onClick={() => setRange(7)}
@@ -100,14 +97,6 @@ function Dashboard() {
             }`}
         >
           30D
-        </button>
-
-        <button
-          onClick={() => setRange(90)}
-          className={`px-4 py-2 rounded-lg ${range === 90 ? "bg-blue-600" : "bg-[#40444a6d]"
-            }`}
-        >
-          90D
         </button>
 
       </div>

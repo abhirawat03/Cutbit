@@ -1,4 +1,4 @@
-import { RESERVED_WORDS } from "./reservedWords.js";
+import { RESERVED_WORDS } from "./reservedWord.js";
 import { ApiError } from "../utils/ApiError.js";
 
 export const validateAlias = (alias) => {

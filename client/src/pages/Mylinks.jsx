@@ -48,7 +48,7 @@ function Mylinks() {
 
     const deleteLink = async (id) => {
         try {
-            await Api.delete(`/links/${id}`);
+            await Api.delete(`/link/${id}`);
 
             setLinks((prev) => prev.filter((link) => link._id !== id));
         } catch (error) {
@@ -150,7 +150,7 @@ function Mylinks() {
                                         <td className="px-6 py-4 text-gray-400">{link.totalUniqueVisitors}</td>
                                         <td className="px-6 py-4 text-gray-400">{new Date(link.createdAt).toLocaleDateString()}</td>
 
-                                        <td className="py-4 text-right space-x-3 flex items-center">
+                                        <td className="flex items-center py-5">
                                             <MdQrCode2 className="text-gray-400 hover:text-blue-400" size={28} />
                                             <RiEdit2Fill className="text-gray-400 hover:text-green-400" size={28}
                                                 onClick={() => {

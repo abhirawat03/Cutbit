@@ -4,6 +4,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import { validateAlias } from "../utils/validateAlias.js";
+import { Analytics } from "../models/analytics.js";
+import { Visitor } from "../models/visitor.js";
 
 const createShortUrl = async (req, res) => {
     const userId = req.user?._id;
@@ -114,7 +116,7 @@ const updateLink = async (req, res) => {
   if (expiryDate && new Date(expiryDate) < new Date()) {
     throw new ApiError(400, "Expiry date must be in the future");
   }
-  updateFields.expiryDate = date;
+  updateFields.expiryDate = expiryDate;
 
   // status validation
   if (status) {
@@ -147,15 +149,18 @@ const deleteLink = async (req, res) => {
     throw new ApiError(401, "Unauthorized");
   }
   const { linkId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(linkId))
-    throw new ApiError(400, "Invalid id");
+  if (!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400, "Invalid id");
 
   const link = await Url.findOneAndDelete({
     _id: linkId,
     userId,
   });
   if (!link) throw new ApiError(404, "Link not found");
+   // delete related analytics
+  await Analytics.deleteMany({ urlId: linkId });
 
+  // delete visitor records
+  await Visitor.deleteMany({ urlId: linkId });
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Link deleted successfully"));

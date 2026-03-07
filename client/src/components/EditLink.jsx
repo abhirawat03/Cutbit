@@ -4,7 +4,7 @@ import { IoClose } from "react-icons/io5";
 export default function EditLink({ link, onClose }) {
   const [form, setForm] = useState({
     originalUrl: link?.originalUrl || "",
-    alias: link?.shortCode || "",
+    shortUrl: link?.shortUrl || "",
     expiry: "",
     status: link?.status || "active",
   });
@@ -53,8 +53,8 @@ export default function EditLink({ link, onClose }) {
               </span>
               <input
                 type="text"
-                value={form.alias}
-                onChange={(e) =>
+                value={form.shortUrl}
+                onChange={(e) =>  
                   setForm({ ...form, alias: e.target.value })
                 }
                 className="flex-1 bg-[#1e293b] border border-[#334155] rounded-r-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"

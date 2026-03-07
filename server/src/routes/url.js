@@ -7,6 +7,6 @@ const router = Router()
 router.route("/short").post(verifyJwt, createShortUrl)
 router.route("/links").get(verifyJwt,getalllinks)
 router.route("/stats").get(verifyJwt,getstats)
-router.route("/link/:id").delete(deleteLink)
+router.route("/link/:linkId").delete(verifyJwt,deleteLink)
 
 export default router;

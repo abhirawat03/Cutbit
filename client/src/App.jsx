@@ -40,7 +40,7 @@ function App() {
           <Route element={<DashLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/links" element={<Mylinks />} />
-            <Route path="/dashboard/link" element={<LinkView />} />
+            <Route path="/dashboard/links/:id" element={<LinkView />} />
             <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/dashboard/analytics" element={<LinkBrief />} />
           </Route>
