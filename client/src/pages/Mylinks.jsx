@@ -233,6 +233,7 @@ function Mylinks() {
                     <EditLink
                         link={selectedLink}
                         onClose={() => setEditOpen(false)}
+                        onUpdated={fetchLinks}
                     />
                 )}
                 <div className="flex flex-col md:flex-row justify-between items-center p-4 border-t border-[#1e293b] bg-[#0f172a] text-sm text-gray-400 gap-4">

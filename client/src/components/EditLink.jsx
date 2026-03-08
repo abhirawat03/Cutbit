@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import Api from "../api/axios";
 
-export default function EditLink({ link, onClose }) {
+export default function EditLink({ link, onClose, onUpdated }) {
   const formattedExpiry = link?.expiryDate
     ? new Date(link.expiryDate).toISOString().split("T")[0]
     : "";
@@ -11,21 +11,22 @@ export default function EditLink({ link, onClose }) {
   const [form, setForm] = useState({
     originalUrl: link?.originalUrl || "",
     shortUrl: link?.shortUrl || "",
-    expiry: formattedExpiry,
+    expiryDate: formattedExpiry,
     status: link?.status || "active",
   });
   const hasChanges =
   form.originalUrl !== link.originalUrl ||
   form.shortUrl !== link.shortUrl ||
   form.status !== link.status ||
-  form.expiry !== formattedExpiry;
+  form.expiryDate !== formattedExpiry;
 
   const updateLink = async () => {
   try {
 
     await Api.patch(`/link/${link._id}`,form);
 
-    onClose()
+    onUpdated();   // refetch links
+    onClose();     // close modal
 
   } catch (error) {
     console.error("Update failed", error);
@@ -92,9 +93,9 @@ export default function EditLink({ link, onClose }) {
             </label>
             <input
               type="date"
-              value={form.expiry}
+              value={form.expiryDate}
               onChange={(e) =>
-                setForm({ ...form, expiry: e.target.value })
+                setForm({ ...form, expiryDate: e.target.value })
               }
               className="w-full mt-2 bg-[#1e293b] border border-[#334155] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"
             />

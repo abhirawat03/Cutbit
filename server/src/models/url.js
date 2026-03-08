@@ -43,6 +43,7 @@ const urlSchema = new Schema(
     // },
     expiryDate: {
       type: Date,
+      default:null,
     },
     status: {
       type: String,
