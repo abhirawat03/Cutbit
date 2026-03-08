@@ -1,6 +1,136 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
+import Api from "../api/axios";
 
 export default function Settings() {
+  const [avatarImg, setAvatarImg] = useState(null);
+  const [preview, setPreview] = useState({
+    avatar: null,
+    email: "",
+    fullName: ""
+  });
+
+  const [originalUser, setOriginalUser] = useState({
+    avatar: null,
+    email: "",
+    fullName: ""
+  })
+  const DEFAULT_AVATAR =
+    "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+  const uploadAvatar = async () => {
+    if (!avatarImg) return
+    // const previewUrl = URL.createObjectURL(avatarImg)
+
+    // setPreview(prev => ({
+    //   ...prev,
+    //   avatar: previewUrl
+    // }))
+
+    const formData = new FormData()
+    formData.append("avatar", avatarImg)
+
+    try {
+
+      const res = await Api.patch("/users/avatar", formData)
+
+      // alert("Avatar updated")
+      setPreview(prev => ({
+        ...prev,
+        avatar: res.data.data.avatar
+      }))
+      setAvatarImg(null)
+
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const removeAvatar = async () => {
+    try {
+
+      await Api.delete("/users/avatar")
+
+      setAvatarImg(null)
+      setPreview(prev => ({
+        ...prev,
+        avatar: null
+      }));
+
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const hasChanges =
+    preview.fullName !== originalUser.fullName ||
+    preview.email !== originalUser.email
+
+  const updateProfile = async () => {
+    try {
+      const res = await Api.patch("/users/update-account", {
+        fullName: preview.fullName,
+        email: preview.email
+      });
+
+      const user = res.data.data
+
+      setPreview({
+        avatar: user.avatar,
+        email: user.email,
+        fullName: user.fullName
+      })
+      setOriginalUser({
+        avatar: user.avatar,
+        email: user.email,
+        fullName: user.fullName
+      })
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarImg(file);
+    setPreview(prev => ({
+      ...prev,
+      avatar: URL.createObjectURL(file)
+    }));
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await Api.get("/users/current-user")
+
+        const user = res.data.data
+        console.log(user)
+        const formattedUser = {
+          avatar: user.avatar,
+          email: user.email,
+          fullName: user.fullName
+        }
+
+        setPreview(formattedUser)
+        setOriginalUser(formattedUser)
+
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    fetchUser()
+
+  }, [])
+  useEffect(() => {
+  return () => {
+    if (preview.avatar?.startsWith("blob:")) {
+      URL.revokeObjectURL(preview.avatar)
+    }
+  }
+}, [preview.avatar])
   return (
     <div className="min-h-screen text-white p-6">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -26,14 +156,40 @@ export default function Settings() {
 
             {/* Avatar Section */}
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-blue-600" />
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-700">
+                <img
+                  src={preview?.avatar || DEFAULT_AVATAR}
+                  alt="avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="flex gap-4 text-sm">
-                <button className="text-blue-500 hover:text-blue-400">
-                  Change Photo
-                </button>
-                <button className="text-gray-400 hover:text-gray-300">
-                  Remove
-                </button>
+                {!avatarImg ? (
+                  <label className="text-blue-500 hover:text-blue-400 cursor-pointer">
+                    Choose Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <button
+                    onClick={uploadAvatar}
+                    className="text-green-400 hover:text-green-300 cursor-pointer"
+                  >
+                    Upload
+                  </button>
+                )}
+                {preview.avatar && (
+                  <button
+                    onClick={removeAvatar}
+                    className="text-gray-400 hover:text-gray-300 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </div>
 
@@ -45,18 +201,28 @@ export default function Settings() {
                 </label>
                 <input
                   type="text"
-                  defaultValue="Alex Rivera"
+                  name="fullName"
+                  id="fullName"
+                  value={preview.fullName || ""}
+                  onChange={(e) =>
+                    setPreview(prev => ({ ...prev, fullName: e.target.value }))
+                  }
                   className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-gray-400">
+                <label htmlFor="email" className="text-sm text-gray-400">
                   Email Address
                 </label>
                 <input
                   type="email"
-                  defaultValue="alex@example.com"
+                  name="email"
+                  id="email"
+                  value={preview.email || ""}
+                  onChange={(e) =>
+                    setPreview(prev => ({ ...prev, email: e.target.value }))
+                  }
                   className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
               </div>
@@ -64,8 +230,15 @@ export default function Settings() {
           </div>
 
           <div className="bg-[#0f172a] px-6 py-4 flex justify-end">
-            <button className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg text-sm font-medium">
-              Save Name
+            <button
+              onClick={updateProfile}
+              disabled={!hasChanges}
+              className={`px-6 py-2 rounded-lg text-sm font-medium
+                ${hasChanges
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-600 cursor-not-allowed"}
+              `}>
+              Save Changes
             </button>
           </div>
         </div>
