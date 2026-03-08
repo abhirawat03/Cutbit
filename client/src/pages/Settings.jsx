@@ -3,6 +3,7 @@ import Api from "../api/axios";
 
 export default function Settings() {
   const [avatarImg, setAvatarImg] = useState(null);
+  const [showAvatar, setShowAvatar] = useState(false)
   const [preview, setPreview] = useState({
     avatar: null,
     email: "",
@@ -156,7 +157,9 @@ export default function Settings() {
 
             {/* Avatar Section */}
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-700">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-700 cursor-pointer"
+                onClick={() => setShowAvatar(true)}
+              >
                 <img
                   src={preview?.avatar || DEFAULT_AVATAR}
                   alt="avatar"
@@ -320,6 +323,19 @@ export default function Settings() {
         </div>
 
       </div>
+      {showAvatar && (
+  <div
+    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+    onClick={() => setShowAvatar(false)}
+  >
+    <img
+      src={preview?.avatar || DEFAULT_AVATAR}
+      alt="avatar large"
+      className="max-w-[90%] max-h-[90%] rounded-lg shadow-xl"
+      onClick={(e) => e.stopPropagation()}
+    />
+  </div>
+)}
     </div>
   )
 }
