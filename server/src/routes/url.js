@@ -8,5 +8,6 @@ router.route("/short").post(verifyJwt, createShortUrl)
 router.route("/links").get(verifyJwt,getalllinks)
 router.route("/stats").get(verifyJwt,getstats)
 router.route("/link/:linkId").delete(verifyJwt,deleteLink)
+router.route("/link/:linkId").patch(verifyJwt,updateLink)
 
 export default router;

@@ -1,13 +1,36 @@
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
+import Api from "../api/axios";
 
 export default function EditLink({ link, onClose }) {
+  const formattedExpiry = link?.expiryDate
+    ? new Date(link.expiryDate).toISOString().split("T")[0]
+    : "";
+
+  
   const [form, setForm] = useState({
     originalUrl: link?.originalUrl || "",
     shortUrl: link?.shortUrl || "",
-    expiry: "",
+    expiry: formattedExpiry,
     status: link?.status || "active",
   });
+  const hasChanges =
+  form.originalUrl !== link.originalUrl ||
+  form.shortUrl !== link.shortUrl ||
+  form.status !== link.status ||
+  form.expiry !== formattedExpiry;
+
+  const updateLink = async () => {
+  try {
+
+    await Api.patch(`/link/${link._id}`,form);
+
+    onClose()
+
+  } catch (error) {
+    console.error("Update failed", error);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -55,7 +78,7 @@ export default function EditLink({ link, onClose }) {
                 type="text"
                 value={form.shortUrl}
                 onChange={(e) =>  
-                  setForm({ ...form, alias: e.target.value })
+                  setForm({ ...form, shortUrl: e.target.value })
                 }
                 className="flex-1 bg-[#1e293b] border border-[#334155] rounded-r-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"
               />
@@ -106,12 +129,25 @@ export default function EditLink({ link, onClose }) {
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row gap-4 pt-4">
-            <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition">
+            <button className={`flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition 
+            ${hasChanges
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-600 cursor-not-allowed"}
+            `}
+              onClick={updateLink}
+              disabled={!hasChanges}
+            >
               Save Changes
             </button>
             <button
               onClick={onClose}
-              className="flex-1 bg-[#1e293b] hover:bg-[#334155] text-gray-300 font-semibold py-3 rounded-lg transition"
+              className={`flex-1 bg-[#1e293b] hover:bg-[#334155] text-gray-300 font-semibold py-3 rounded-lg transition
+                ${
+                hasChanges
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-600 cursor-not-allowed"
+              }
+                `}
             >
               Cancel
             </button>
