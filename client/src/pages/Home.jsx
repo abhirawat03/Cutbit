@@ -13,10 +13,13 @@ import { HiFolder } from "react-icons/hi2";
 import { FaStopwatch } from "react-icons/fa6";
 import { IoQrCodeSharp } from "react-icons/io5";
 import graph from "../images/graph-i.png"
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useCreateLink } from "../hooks/mutations/useCreateLink";
 
 
 function Home() {
+    const navigate = useNavigate()
+    const createLinkMutation = useCreateLink();
     const location = useLocation();
     useEffect(() => {
         if (location.hash) {
@@ -36,25 +39,44 @@ function Home() {
     const [url, setUrl] = useState("");
     const [alias, setAlias] = useState("");
     const [shortUrl, setShortUrl] = useState("");
-    const [loading, setLoading] = useState(false);
     const [showQR, setShowQR] = useState(false);
 
-    const handleShorten = async () => {
+    const handleShorten = () => {
+
         if (!url) return alert("Enter the url");
 
-        try {
-            setLoading(true);
-            const res = await Api.post("/shorten", {
+        createLinkMutation.mutate(
+            {
                 originalUrl: url,
                 customAlias: alias
-            });
-            // console.log(res.data.data);
-            setShortUrl(res.data.data.shortUrl)
-        } catch (err) {
-            alert(err.response?.data?.message || "Error")
-        } finally {
-            setLoading(false)
-        }
+            },
+            {
+                onSuccess: (data) => {
+                    setShortUrl(data.shortUrl);
+                },
+
+                onError: (err) => {
+
+                    if (err.response?.status === 401) {
+
+                        localStorage.setItem(
+                            "pendingLink",
+                            JSON.stringify({
+                                originalUrl: url,
+                                customAlias: alias
+                            })
+                        );
+
+                        navigate("/login");
+                        return;
+                    }
+
+                    alert(err.response?.data?.message || "Error");
+
+                }
+            }
+        );
+
     };
 
     const copyToClipboard = () => {
@@ -125,9 +147,14 @@ function Home() {
 
                     <button
                         onClick={handleShorten}
-                        className="bg-[#2563EB] font-bold text-white px-6 text-nowrap flex flex-nowrap items-center gap-2 rounded-lg text-base hover:bg-blue-700 cursor-pointer"
+                        disabled={createLinkMutation.isPending}
+                        className={`font-bold text-white px-6 rounded-lg flex items-center gap-2
+  ${createLinkMutation.isPending
+                                ? "bg-gray-600 cursor-not-allowed"
+                                : "bg-[#2563EB] hover:bg-blue-700"
+                            }`}
                     >
-                        {loading ? "..." : "Shorten Now"}
+                        {createLinkMutation.isPending ? "..." : "Shorten Now"}
                         <AiFillThunderbolt />
                     </button>
                 </div>

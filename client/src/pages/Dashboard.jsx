@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { IoLink } from "react-icons/io5";
 import { ChartLine } from '../components/ChartLine';
 import { GiAlliedStar } from "react-icons/gi";
@@ -7,6 +7,7 @@ import { MdOutlinePersonOutline } from "react-icons/md";
 // import Api from '../api/axios';
 import { Link } from 'react-router-dom';
 import { useDashboard } from "../hooks/queries/useDashboard.js";
+import { useCreateLink } from "../hooks/mutations/useCreateLink";
 
 
 function Dashboard() {
@@ -14,11 +15,22 @@ function Dashboard() {
   // const [loading, setLoading] = useState(true);
   const [range, setRange] = useState(7);
   const { data:dashboard, isLoading, error } = useDashboard(range);
+  const createLinkMutation = useCreateLink();
 
+  useEffect(() => {
+    const pending = localStorage.getItem("pendingLink");
+    if (!pending) return;
+    const data = JSON.parse(pending);
+    
+    createLinkMutation.mutate(data);
+    
+    localStorage.removeItem("pendingLink");
+    
+  });
   
   if (isLoading) {
-  return <p className="text-white">Loading dashboard...</p>;
-}
+    return <p className="text-white">Loading dashboard...</p>;
+  }
 
 if (error) {
   return <p className="text-red-500">Failed to load dashboard</p>;

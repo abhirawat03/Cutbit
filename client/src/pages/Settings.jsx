@@ -3,18 +3,25 @@ import { useCurrentUser } from "../hooks/queries/useCurrentUser";
 import { useUpdateProfile } from "../hooks/mutations/useUpdateProfile";
 import { useUpdateAvatar } from "../hooks/mutations/useUpdateAvatar";
 import { useDeleteAvatar } from "../hooks/mutations/useDeleteAvatar";
+import { useChangePassword } from "../hooks/mutations/useChangePassword";
 
 export default function Settings() {
   const { data: user, isLoading } = useCurrentUser();
   const updateProfileMutation = useUpdateProfile();
   const updateAvatarMutation = useUpdateAvatar();
   const deleteAvatarMutation = useDeleteAvatar();
+  const changePasswordMutation = useChangePassword();
   const [avatarImg, setAvatarImg] = useState(null);
   const [showAvatar, setShowAvatar] = useState(false)
   const [form, setForm] = useState({
     avatar: null,
     email: "",
     fullName: ""
+  });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
   });
   const DEFAULT_AVATAR =
     "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -49,10 +56,10 @@ export default function Settings() {
     updateAvatarMutation.mutate(formData, {
       onSuccess: (data) => {
         setForm(prev => ({
-        ...prev,
-        avatar: data.avatar
-      }));
-      setAvatarImg(null);
+          ...prev,
+          avatar: data.avatar
+        }));
+        setAvatarImg(null);
       }
     });
   };
@@ -70,8 +77,8 @@ export default function Settings() {
   };
 
   const hasChanges =
-  form.fullName !== user?.fullName ||
-  form.email !== user?.email;
+    form.fullName !== user?.fullName ||
+    form.email !== user?.email;
 
   const updateProfile = () => {
     updateProfileMutation.mutate(
@@ -82,10 +89,10 @@ export default function Settings() {
       {
         onSuccess: (user) => {
           setForm({
-          avatar: user.avatar,
-          email: user.email,
-          fullName: user.fullName
-        });
+            avatar: user.avatar,
+            email: user.email,
+            fullName: user.fullName
+          });
         }
       }
     );
@@ -97,13 +104,54 @@ export default function Settings() {
     setAvatarImg(file);
     const previewUrl = URL.createObjectURL(file);
     setForm(prev => ({
-    ...prev,
-    avatar: previewUrl
-  }));
+      ...prev,
+      avatar: previewUrl
+    }));
   };
-  
 
-  
+  const updatePassword = () => {
+    if (!canUpdatePassword) return;
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      alert("New password must be different from current password");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      alert("Password must be at least 8 characters");
+      return;
+    }
+
+    changePasswordMutation.mutate(
+      {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      },
+      {
+        onSuccess: () => {
+
+          setPasswordForm({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: ""
+          });
+
+          alert("Password updated successfully");
+        }
+      }
+    );
+  };
+
+  const canUpdatePassword =
+    Boolean(passwordForm.currentPassword) &&
+    Boolean(passwordForm.newPassword) &&
+    Boolean(passwordForm.confirmPassword);
+
 
   if (isLoading) {
     return <p className="text-white p-6">Loading user...</p>;
@@ -239,6 +287,13 @@ export default function Settings() {
               </label>
               <input
                 type="password"
+                value={passwordForm.currentPassword}
+                onChange={(e) =>
+                  setPasswordForm(prev => ({
+                    ...prev,
+                    currentPassword: e.target.value
+                  }))
+                }
                 className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
             </div>
@@ -250,6 +305,13 @@ export default function Settings() {
                 </label>
                 <input
                   type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) =>
+                    setPasswordForm(prev => ({
+                      ...prev,
+                      newPassword: e.target.value,
+                    }))
+                  }
                   placeholder="Minimum 8 characters"
                   className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
@@ -261,6 +323,13 @@ export default function Settings() {
                 </label>
                 <input
                   type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordForm(prev => ({
+                      ...prev,
+                      confirmPassword: e.target.value
+                    }))
+                  }
                   className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
               </div>
@@ -268,8 +337,15 @@ export default function Settings() {
           </div>
 
           <div className="bg-[#0f172a] px-6 py-4 flex justify-end">
-            <button className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg text-sm font-medium">
-              Update Password
+            <button
+              onClick={updatePassword}
+              disabled={!canUpdatePassword || changePasswordMutation.isPending}
+              className={`px-6 py-2 rounded-lg text-sm font-medium
+    ${canUpdatePassword
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-600 cursor-not-allowed"
+                }`}>
+              {changePasswordMutation.isPending ? "Updating..." : "Update Password"}
             </button>
           </div>
         </div>

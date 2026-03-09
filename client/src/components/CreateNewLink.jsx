@@ -2,17 +2,19 @@ import React from "react";
 import { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import Api from "../api/axios.js";
-import {QRCodeCanvas} from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
+import { useCreateLink } from "../hooks/mutations/useCreateLink";
+
 
 export default function CreateNewLink({ onClose }) {
+  const createLinkMutation = useCreateLink();
   const [formData, setFormData] = useState({
-    name:"",
+    name: "",
     originalUrl: "",
     customAlias: "",
     expiryDate: ""
   });
   const [generatedLink, setGeneratedLink] = useState(null);
-  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,43 +22,36 @@ export default function CreateNewLink({ onClose }) {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
 
-      setLoading(true);
-
-      const res = await Api.post(
-        "/short",
-        formData
-      );
-
-      setGeneratedLink(res.data.data.shortUrl);
-      console.log(res.data.data.shortUrl)
-
-    } catch (error) {
-
-      console.error("Create link error", error);
-
-    } finally {
-
-      setLoading(false);
-
-    }
+    createLinkMutation.mutate(formData, {
+      onSuccess: (data) => {
+        setGeneratedLink(data.shortUrl);
+      },
+      onError: (error) => {
+        console.error("Create link error", error);
+      }
+    });
   };
   const downloadQR = () => {
-        const canvas = document.getElementById("big-qr");
-        const pngUrl = canvas
-            .toDataURL("image/png")
-            .replace("image/png", "image/octet-stream");
+    const canvas = document.getElementById("big-qr");
+    const pngUrl = canvas
+      .toDataURL("image/png")
+      .replace("image/png", "image/octet-stream");
 
-        const link = document.createElement("a");
-        link.href = pngUrl;
-        link.download = "qr-code.png";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const link = document.createElement("a");
+    link.href = pngUrl;
+    link.download = "qr-code.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  const canGenerate =
+    formData.originalUrl.trim() !== "" &&
+    formData.name.trim() !== "";
+
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
 
@@ -137,8 +132,15 @@ export default function CreateNewLink({ onClose }) {
                 />
               </div>
 
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-semibold transition">
-                {loading ? "Generating..." : "Generate Link"}
+              <button
+                type="submit"
+                disabled={!canGenerate || createLinkMutation.isPending}
+                className={`w-full py-3 rounded-lg font-semibold transition
+                ${createLinkMutation.isPending
+                    ? "bg-gray-600 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                  }`}>
+                {createLinkMutation.isPending ? "Generating..." : "Generate Link"}
               </button>
             </div>
           </form>

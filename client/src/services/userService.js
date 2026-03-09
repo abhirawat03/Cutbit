@@ -10,6 +10,10 @@ const updateProfile = async (data) => {
   return res.data.data;
 };
 
+export const changePassword = async (data) => {
+  const res = await Api.patch("/users/change-password", data);
+  return res.data.data;
+};
 
 const logoutUser = async () => {
   const res = await Api.post("/users/logout");

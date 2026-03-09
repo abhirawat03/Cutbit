@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import Api from "../api/axios"
 
 function PublicRoute() {
-//   const [loading, setLoading] = useState(true)
   const [isAuth, setIsAuth] = useState(false)
 
   useEffect(() => {
@@ -13,15 +12,11 @@ function PublicRoute() {
         setIsAuth(true)
       } catch {
         setIsAuth(false)
-      } finally {
-        // setLoading(false)
-      }
+      } 
     }
 
     checkAuth()
   }, [])
-
-//   if (loading) return <div>Loading...</div>
 
   return isAuth ? <Navigate to="/dashboard" replace /> : <Outlet />
 }

@@ -22,12 +22,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* layout wrapper */}
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+        </Route>
         <Route element={<PublicRoute />}>
-          {/* layout wrapper */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-          </Route>
-
           {/* AUTH PAGES */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />

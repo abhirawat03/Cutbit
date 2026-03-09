@@ -13,7 +13,7 @@ const createLink = async (data) => {
 const getStats = async () => {
   const res = await Api.get("/stats");
   console.log(res.data.data)
-  return res.data.data;
+  return res.data.data; 
 
 };
 
