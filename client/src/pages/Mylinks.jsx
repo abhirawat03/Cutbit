@@ -17,9 +17,10 @@ function Mylinks() {
     
     const [page, setPage] = useState(1);
     const deleteMutation = useDeleteLink();
-    const { data:links, isLoading } = useLinks(page);
-    const { data: stats } = useLinkStats();
-    const pagination = links?.pagination;
+    const { data, isLoading } = useLinks(page);
+    const { data: stats,isLoading: statsLoading } = useLinkStats();
+    const links = data?.links || [];
+    const pagination = data?.pagination;
 
     const copyToClipboard = (shortUrl) => {
         navigator.clipboard.writeText(
@@ -46,7 +47,7 @@ function Mylinks() {
         };
     }, [editOpen]);
 
-    if (isLoading) {
+    if (isLoading || statsLoading) {
         return <p className="text-white">Loading links...</p>;
     }
     return (
@@ -59,7 +60,7 @@ function Mylinks() {
                         </div>
                         <h4 className=' text-gray-400 tracking-wider font-semibold'>Total Active Links</h4>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl md:text-4xl mb-2 font-semibold'>{stats.totalActive}</h3>
+                    <h3 className='text-2xl sm:text-3xl md:text-4xl mb-2 font-semibold'>{stats?.totalActive ?? 0}</h3>
                 </div>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
                     <div className='flex flex-col items-center justify-between'>
@@ -68,7 +69,7 @@ function Mylinks() {
                         </div>
                         <h4 className=' text-gray-400 tracking-wider font-semibold'>Total Clicks </h4>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl md:text-4xl mb-2 font-semibold'>{stats.totalClicks}</h3>
+                    <h3 className='text-2xl sm:text-3xl md:text-4xl mb-2 font-semibold'>{stats?.totalClicks ?? 0}</h3>
                 </div>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
                     <div className='flex flex-col items-center justify-between'>
@@ -77,7 +78,7 @@ function Mylinks() {
                         </div>
                         <h4 className=' text-gray-400 tracking-wider font-semibold'>Total Links</h4>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl md:text-4xl font-semibold'>{stats.totalLinks}</h3>
+                    <h3 className='text-2xl sm:text-3xl md:text-4xl font-semibold'>{stats?.totalLinks ?? 0}</h3>
                 </div>
             </div>
             <div className="bg-[#0f172a] rounded-xl mt-6 border border-[#1e293b] overflow-hidden">

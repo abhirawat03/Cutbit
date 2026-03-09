@@ -8,8 +8,8 @@ export const useCreateLink = () => {
   return useMutation({
     mutationFn: createLink,
     onSuccess: () => {
-      queryClient.invalidateQueries(["links"]);
-      queryClient.invalidateQueries(["dashboardStats"]);
+      queryClient.invalidateQueries({ queryKey: ["links"]});
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"]});
     }
   });
 };

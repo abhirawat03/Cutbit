@@ -8,9 +8,9 @@ export const useDeleteLink = () => {
   return useMutation({
     mutationFn: deleteLink,
     onSuccess: () => {
-      queryClient.invalidateQueries(["links"]);
-      queryClient.invalidateQueries(["dashboardStats"]);
-      queryClient.invalidateQueries(["linkStats"]);
+      queryClient.invalidateQueries({ queryKey: ["links"]});
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"]});
+      queryClient.invalidateQueries({ queryKey: ["linkStats"]});
     }
   });
 };

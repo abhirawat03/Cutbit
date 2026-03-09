@@ -8,7 +8,7 @@ export const useUpdateLink = () => {
   return useMutation({
     mutationFn: updateLink,
     onSuccess: () => {
-      queryClient.invalidateQueries(["links"]);
+      queryClient.invalidateQueries({ queryKey: ["links"]});
     }
   });
 };

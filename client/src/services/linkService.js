@@ -2,7 +2,7 @@ import Api from "../api/axios";
 
 const getLinks = async (currentPage) => {
   const res = await Api.get(`/links?page=${currentPage}`);
-  return res.data.data.links;
+  return res.data.data;
 };
 
 const createLink = async (data) => {

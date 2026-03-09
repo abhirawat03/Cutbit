@@ -5,6 +5,7 @@ export const useLinkStats = () => {
   return useQuery({
     queryKey: ["linkStats"],
     queryFn: getStats,
-    keepPreviousData: true
+    keepPreviousData: true,
+    staleTime: 60000
   });
 };

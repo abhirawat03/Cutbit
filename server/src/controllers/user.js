@@ -296,7 +296,7 @@ const deleteUserAvatar = async (req, res) => {
     const publicId = oldAvatar.split('/').pop().split('.')[0]   
     await cloudinary.uploader.destroy(publicId).catch(() => {})
 
-    const updatedUser = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
         req.user._id,
         {
             $set: {

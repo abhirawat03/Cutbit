@@ -5,6 +5,7 @@ export const useDashboard = (range) => {
   return useQuery({
     queryKey: ["dashboardStats", range],
     queryFn: () => getDashboardStats(range),
-    keepPreviousData: true
+    keepPreviousData: true,
+    staleTime:120000,
   });
 };

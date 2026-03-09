@@ -1,137 +1,113 @@
 import React, { useEffect, useState } from "react"
-import Api from "../api/axios";
+import { useCurrentUser } from "../hooks/queries/useCurrentUser";
+import { useUpdateProfile } from "../hooks/mutations/useUpdateProfile";
+import { useUpdateAvatar } from "../hooks/mutations/useUpdateAvatar";
+import { useDeleteAvatar } from "../hooks/mutations/useDeleteAvatar";
 
 export default function Settings() {
+  const { data: user, isLoading } = useCurrentUser();
+  const updateProfileMutation = useUpdateProfile();
+  const updateAvatarMutation = useUpdateAvatar();
+  const deleteAvatarMutation = useDeleteAvatar();
   const [avatarImg, setAvatarImg] = useState(null);
   const [showAvatar, setShowAvatar] = useState(false)
-  const [preview, setPreview] = useState({
+  const [form, setForm] = useState({
     avatar: null,
     email: "",
     fullName: ""
   });
-
-  const [originalUser, setOriginalUser] = useState({
-    avatar: null,
-    email: "",
-    fullName: ""
-  })
   const DEFAULT_AVATAR =
     "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-  const uploadAvatar = async () => {
-    if (!avatarImg) return
-    // const previewUrl = URL.createObjectURL(avatarImg)
+  useEffect(() => {
 
-    // setPreview(prev => ({
-    //   ...prev,
-    //   avatar: previewUrl
-    // }))
+    if (!user) return;
 
-    const formData = new FormData()
-    formData.append("avatar", avatarImg)
+    setForm({
+      avatar: user.avatar,
+      email: user.email,
+      fullName: user.fullName
+    });
 
-    try {
+  }, [user]);
 
-      const res = await Api.patch("/users/avatar", formData)
-
-      // alert("Avatar updated")
-      setPreview(prev => ({
-        ...prev,
-        avatar: res.data.data.avatar
-      }))
-      setAvatarImg(null)
-
-    } catch (error) {
-      console.error(error)
+  useEffect(() => {
+    const avatar = form.avatar;
+    return () => {
+      if (avatar?.startsWith("blob:")) {
+        URL.revokeObjectURL(avatar)
+      }
     }
-  }
+  }, [form.avatar])
 
-  const removeAvatar = async () => {
-    try {
+  const uploadAvatar = () => {
+    if (!avatarImg) return;
 
-      await Api.delete("/users/avatar")
+    const formData = new FormData();
+    formData.append("avatar", avatarImg);
 
-      setAvatarImg(null)
-      setPreview(prev => ({
+    updateAvatarMutation.mutate(formData, {
+      onSuccess: (data) => {
+        setForm(prev => ({
         ...prev,
-        avatar: null
+        avatar: data.avatar
       }));
+      setAvatarImg(null);
+      }
+    });
+  };
 
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  const removeAvatar = () => {
+    deleteAvatarMutation.mutate(undefined, {
+      onSuccess: () => {
+        setForm(prev => ({
+          ...prev,
+          avatar: null
+        }));
+        setAvatarImg(null);
+      }
+    });
+  };
 
   const hasChanges =
-    preview.fullName !== originalUser.fullName ||
-    preview.email !== originalUser.email
+  form.fullName !== user?.fullName ||
+  form.email !== user?.email;
 
-  const updateProfile = async () => {
-    try {
-      const res = await Api.patch("/users/update-account", {
-        fullName: preview.fullName,
-        email: preview.email
-      });
-
-      const user = res.data.data
-
-      setPreview({
-        avatar: user.avatar,
-        email: user.email,
-        fullName: user.fullName
-      })
-      setOriginalUser({
-        avatar: user.avatar,
-        email: user.email,
-        fullName: user.fullName
-      })
-
-    } catch (error) {
-      console.error(error);
-    }
+  const updateProfile = () => {
+    updateProfileMutation.mutate(
+      {
+        fullName: form.fullName,
+        email: form.email
+      },
+      {
+        onSuccess: (user) => {
+          setForm({
+          avatar: user.avatar,
+          email: user.email,
+          fullName: user.fullName
+        });
+        }
+      }
+    );
   };
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setAvatarImg(file);
-    setPreview(prev => ({
-      ...prev,
-      avatar: URL.createObjectURL(file)
-    }));
+    const previewUrl = URL.createObjectURL(file);
+    setForm(prev => ({
+    ...prev,
+    avatar: previewUrl
+  }));
   };
+  
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await Api.get("/users/current-user")
+  
 
-        const user = res.data.data
-        console.log(user)
-        const formattedUser = {
-          avatar: user.avatar,
-          email: user.email,
-          fullName: user.fullName
-        }
-
-        setPreview(formattedUser)
-        setOriginalUser(formattedUser)
-
-      } catch (err) {
-        console.error(err)
-      }
-    }
-
-    fetchUser()
-
-  }, [])
-  useEffect(() => {
-  return () => {
-    if (preview.avatar?.startsWith("blob:")) {
-      URL.revokeObjectURL(preview.avatar)
-    }
+  if (isLoading) {
+    return <p className="text-white p-6">Loading user...</p>;
   }
-}, [preview.avatar])
   return (
     <div className="min-h-screen text-white p-6">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -161,7 +137,7 @@ export default function Settings() {
                 onClick={() => setShowAvatar(true)}
               >
                 <img
-                  src={preview?.avatar || DEFAULT_AVATAR}
+                  src={form?.avatar || DEFAULT_AVATAR}
                   alt="avatar"
                   className="w-full h-full object-cover"
                 />
@@ -185,9 +161,10 @@ export default function Settings() {
                     Upload
                   </button>
                 )}
-                {preview.avatar && (
+                {form.avatar && (
                   <button
                     onClick={removeAvatar}
+                    disabled={deleteAvatarMutation.isPending}
                     className="text-gray-400 hover:text-gray-300 cursor-pointer"
                   >
                     Remove
@@ -206,9 +183,9 @@ export default function Settings() {
                   type="text"
                   name="fullName"
                   id="fullName"
-                  value={preview.fullName || ""}
+                  value={form.fullName || ""}
                   onChange={(e) =>
-                    setPreview(prev => ({ ...prev, fullName: e.target.value }))
+                    setForm(prev => ({ ...prev, fullName: e.target.value }))
                   }
                   className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
@@ -222,9 +199,9 @@ export default function Settings() {
                   type="email"
                   name="email"
                   id="email"
-                  value={preview.email || ""}
+                  value={form.email || ""}
                   onChange={(e) =>
-                    setPreview(prev => ({ ...prev, email: e.target.value }))
+                    setForm(prev => ({ ...prev, email: e.target.value }))
                   }
                   className="mt-2 w-full bg-[#0b1220] border border-[#1f2937] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
@@ -235,13 +212,13 @@ export default function Settings() {
           <div className="bg-[#0f172a] px-6 py-4 flex justify-end">
             <button
               onClick={updateProfile}
-              disabled={!hasChanges}
+              disabled={!hasChanges || updateProfileMutation.isPending}
               className={`px-6 py-2 rounded-lg text-sm font-medium
                 ${hasChanges
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-gray-600 cursor-not-allowed"}
               `}>
-              Save Changes
+              {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
@@ -324,18 +301,18 @@ export default function Settings() {
 
       </div>
       {showAvatar && (
-  <div
-    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-    onClick={() => setShowAvatar(false)}
-  >
-    <img
-      src={preview?.avatar || DEFAULT_AVATAR}
-      alt="avatar large"
-      className="max-w-[90%] max-h-[90%] rounded-lg shadow-xl"
-      onClick={(e) => e.stopPropagation()}
-    />
-  </div>
-)}
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+          onClick={() => setShowAvatar(false)}
+        >
+          <img
+            src={form?.avatar || DEFAULT_AVATAR}
+            alt="avatar large"
+            className="max-w-[90%] max-h-[90%] rounded-lg shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   )
 }
