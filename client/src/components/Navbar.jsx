@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import logo from "../images/logo.png";
+import { useAuth } from "../hooks/useAuth";
 
 function Navbar() {
+  const { isAuthenticated } = useAuth();
   return (
     <nav className="fixed top-0 z-50 left-0 w-full bg-[#030a2a] border-b-2 border-[#202733]">
       {/* content */}
@@ -21,8 +23,27 @@ function Navbar() {
           </div>
           <div className="text-gray-300 text-2xl font-semibold">|</div>
           <div className="flex gap-6 font-bold items-center">
-            <Link to="/login" className="text-gray-300 hover:text-white">Login</Link>
-            <Link to="/register" className="text-white hover:bg-blue-700 bg-[#2563EB] p-2 rounded-xl">Get Started</Link>
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="text-white hover:bg-blue-700 bg-[#2563EB] px-4 py-2 rounded-xl"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="text-gray-300 hover:text-white">
+                  Login
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="text-white hover:bg-blue-700 bg-[#2563EB] px-4 py-2 rounded-xl"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
 

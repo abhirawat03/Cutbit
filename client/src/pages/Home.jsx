@@ -149,7 +149,7 @@ function Home() {
                         onClick={handleShorten}
                         disabled={createLinkMutation.isPending}
                         className={`font-bold text-white px-6 rounded-lg flex items-center gap-2
-  ${createLinkMutation.isPending
+                        ${createLinkMutation.isPending
                                 ? "bg-gray-600 cursor-not-allowed"
                                 : "bg-[#2563EB] hover:bg-blue-700"
                             }`}

@@ -1,29 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom"
-import { useEffect, useState } from "react"
-import Api from "../api/axios"
+import { useAuth } from "../hooks/useAuth";
 
 function ProtectedRoute() {
-  const [loading, setLoading] = useState(true)
-  const [isAuth, setIsAuth] = useState(false)
+  const { isAuthenticated} = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await Api.get("/users/current-user")
-        setIsAuth(true)
-      } catch {
-        setIsAuth(false)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-  }, [])
-
-  if (loading) return <div>Loading...</div>
-
-  return isAuth ? <Outlet /> : <Navigate to="/login" replace />
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
 }
 
 export default ProtectedRoute
