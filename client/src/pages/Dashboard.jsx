@@ -1,40 +1,28 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { IoLink } from "react-icons/io5";
 import { ChartLine } from '../components/ChartLine';
 import { GiAlliedStar } from "react-icons/gi";
 import { MdAdsClick } from "react-icons/md";
 import { MdOutlinePersonOutline } from "react-icons/md";
-import Api from '../api/axios';
+// import Api from '../api/axios';
 import { Link } from 'react-router-dom';
+import { useDashboard } from "../hooks/queries/useDashboard.js";
 
 
 function Dashboard() {
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // const [dashboard, setDashboard] = useState(null);
+  // const [loading, setLoading] = useState(true);
   const [range, setRange] = useState(7);
+  const { data:dashboard, isLoading, error } = useDashboard(range);
 
-  const fetchDashboard = async (selectedRange) => {
-    setLoading(true)
-    try {
+  
+  if (isLoading) {
+  return <p className="text-white">Loading dashboard...</p>;
+}
 
-      const res = await Api.get(`/dashboard/stats?range=${selectedRange}`);
-
-      setDashboard(res.data.data);
-      console.log(res.data.data)
-
-    } catch (error) {
-      console.error("Dashboard fetch error", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  console.log(dashboard?.chart)
-  useEffect(() => {
-    fetchDashboard(range);
-  }, [range]);
-  if (loading) {
-    return <p className="text-white">Loading dashboard...</p>;
-  }
+if (error) {
+  return <p className="text-red-500">Failed to load dashboard</p>;
+}
   return (
     <section className='text-white'>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>

@@ -8,36 +8,18 @@ import { RiDeleteBin6Fill } from "react-icons/ri";
 import { IoCopySharp } from "react-icons/io5";
 import { RiEdit2Fill } from "react-icons/ri";
 import EditLink from '../components/EditLink';
-import Api from '../api/axios';
+// import Api from '../api/axios';.js
+import { useLinks } from '../hooks/queries/useLinks.js';
+import {useLinkStats} from '../hooks/queries/useLinkStats.js';
+import { useDeleteLink } from "../hooks/mutations/useDeleteLink.js";
 
 function Mylinks() {
-    const [links, setLinks] = useState([]);
-    const [stats, setStats] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [pagination, setPagination] = useState(null);
+    
     const [page, setPage] = useState(1);
-
-    const fetchLinks = async () => {
-        try {
-            setLoading(true);
-
-            const res = await Api.get("/links?page=${currentPage}");
-            const res1 = await Api.get("/stats")
-            setStats(res1.data.data)
-            console.log(res1.data.data);
-            setLinks(res.data.data.links);
-            setPagination(res.data.data.pagination);
-            setPage(res.data.data.pagination.page);
-            console.log(res.data.data);
-        } catch (error) {
-            console.error("Failed to fetch links", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    useEffect(() => {
-        fetchLinks(page);
-    }, [page]);
+    const deleteMutation = useDeleteLink();
+    const { data:links, isLoading } = useLinks(page);
+    const { data: stats } = useLinkStats();
+    const pagination = links?.pagination;
 
     const copyToClipboard = (shortUrl) => {
         navigator.clipboard.writeText(
@@ -46,14 +28,8 @@ function Mylinks() {
         alert("Copied!");
     };
 
-    const deleteLink = async (id) => {
-        try {
-            await Api.delete(`/link/${id}`);
-
-            setLinks((prev) => prev.filter((link) => link._id !== id));
-        } catch (error) {
-            console.error("Delete failed", error);
-        }
+    const deleteLink = (id) => {
+        deleteMutation.mutate(id);
     };
 
     const [editOpen, setEditOpen] = useState(false);
@@ -70,7 +46,7 @@ function Mylinks() {
         };
     }, [editOpen]);
 
-    if (loading) {
+    if (isLoading) {
         return <p className="text-white">Loading links...</p>;
     }
     return (
@@ -116,7 +92,7 @@ function Mylinks() {
                                 <th className="px-6 py-4 text-left">Created</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
-                        </thead>
+                        </thead>    
 
                         <tbody className="divide-y divide-[#1e293b]">
                             {links.length > 0 ? (
@@ -233,11 +209,10 @@ function Mylinks() {
                     <EditLink
                         link={selectedLink}
                         onClose={() => setEditOpen(false)}
-                        onUpdated={fetchLinks}
                     />
                 )}
                 <div className="flex flex-col md:flex-row justify-between items-center p-4 border-t border-[#1e293b] bg-[#0f172a] text-sm text-gray-400 gap-4">
-                    <span>Showing {links.length} of {pagination?.totalLinks} links</span>
+                    <span>Showing {links.length} of {pagination?.totalLinks || 0} links</span>
 
                     <div className="flex items-center gap-2">
                         <button
