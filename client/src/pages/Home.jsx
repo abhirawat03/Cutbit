@@ -38,6 +38,7 @@ function Home() {
 
     const [url, setUrl] = useState("");
     const [alias, setAlias] = useState("");
+    const [name, setName] = useState("");
     const [shortUrl, setShortUrl] = useState("");
     const [showQR, setShowQR] = useState(false);
 
@@ -48,7 +49,8 @@ function Home() {
         createLinkMutation.mutate(
             {
                 originalUrl: url,
-                customAlias: alias
+                customAlias: alias,
+                name
             },
             {
                 onSuccess: (data) => {
@@ -63,7 +65,8 @@ function Home() {
                             "pendingLink",
                             JSON.stringify({
                                 originalUrl: url,
-                                customAlias: alias
+                                customAlias: alias,
+                                name
                             })
                         );
 
@@ -123,8 +126,17 @@ function Home() {
 
                 <p className="text-xl text-gray-400 mt-6 max-w-[48rem] text-center mb-12">The professional-grade link management platform for modern marketers. Create, track, and optimize your customer touchpoints with ease.</p>
 
-                <div className="flex gap-2 z-10 bg-[#111827] w-[900px] outline-2 outline-[#1E293B] rounded-xl p-2 shadow-lg">
-                    <div className="flex flex-1/4 p-3 rounded-lg bg-[#26324bbd] items-center gap-2">
+                <div className="flex gap-2 z-10 bg-[#111827] w-[1000px] outline-2 outline-[#1E293B] rounded-xl p-2 shadow-lg">
+                    <div className="flex p-3 items-center gap-2 rounded-lg bg-[#26324bbd]">
+                        <input
+                            type="text"
+                            placeholder="Link Name"
+                            className="w-full border-0 outline-0"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex flex-1 p-3 rounded-lg bg-[#26324bbd] items-center gap-2">
                         <MdOutlineLink size={20} />
                         <input
                             type="text"
@@ -134,7 +146,7 @@ function Home() {
                             onChange={(e) => setUrl(e.target.value)}
                         />
                     </div>
-                    <div className="flex flex-1 p-3 items-center gap-2 rounded-lg bg-[#26324bbd]">
+                    <div className="flex p-3 items-center gap-2 rounded-lg bg-[#26324bbd]">
                         <PiTagSimpleFill size={20} />
                         <input
                             type="text"

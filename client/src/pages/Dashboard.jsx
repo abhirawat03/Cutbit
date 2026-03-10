@@ -26,7 +26,7 @@ function Dashboard() {
     
     localStorage.removeItem("pendingLink");
     
-  });
+  },[]);
   
   if (isLoading) {
     return <p className="text-white">Loading dashboard...</p>;

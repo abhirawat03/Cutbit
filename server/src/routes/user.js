@@ -11,7 +11,7 @@ router.route("/login").post(loginUser)
 
 router.route("/logout").post(verifyJwt ,logoutUser)
 
-router.route("/refresh-token").post(refreshAccessToken)
+router.route("/refresh-token").post(verifyJwt,refreshAccessToken)
 
 router.route("/current-user").get(verifyJwt,getCurrentUser)
 

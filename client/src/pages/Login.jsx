@@ -33,14 +33,10 @@ function Login() {
 
       // cookie already stored by backend
       if (res.status === 200) {
+        // force React Query to refetch current user
+        // const pendingLink = localStorage.getItem("pendingLink");
 
-        const pendingLink = localStorage.getItem("pendingLink");
-
-        if (pendingLink) {
-          navigate("/dashboard?createLink=true");
-        } else {
-          navigate("/dashboard");
-        }
+        navigate("/dashboard");
 
       }
 

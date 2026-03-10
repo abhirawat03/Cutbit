@@ -9,6 +9,7 @@ import { Visitor } from "../models/visitor.js";
 
 const createShortUrl = async (req, res) => {
     const userId = req.user?._id;
+    if(!userId) throw new ApiError(401,"unauthorized")
     const { name, originalUrl, customAlias, expiryDate } = req.body;
 
         if (!originalUrl) throw new ApiError(400, "Url required");
