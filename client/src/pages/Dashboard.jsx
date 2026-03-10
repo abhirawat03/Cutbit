@@ -14,26 +14,35 @@ function Dashboard() {
   // const [dashboard, setDashboard] = useState(null);
   // const [loading, setLoading] = useState(true);
   const [range, setRange] = useState(7);
-  const { data:dashboard, isLoading, error } = useDashboard(range);
+  const [ready, setReady] = useState(false);
+  const { data:dashboard, isLoading, error } = useDashboard(ready,range);
   const createLinkMutation = useCreateLink();
 
   useEffect(() => {
+  const init = async () => {
     const pending = localStorage.getItem("pendingLink");
-    if (!pending) return;
-    const data = JSON.parse(pending);
-    
-    createLinkMutation.mutate(data);
-    
-    localStorage.removeItem("pendingLink");
-    
-  },[]);
-  
-  if (isLoading) {
-    return <p className="text-white">Loading dashboard...</p>;
-  }
+
+    if (pending) {
+      try {
+        await createLinkMutation.mutateAsync(JSON.parse(pending));
+      } catch (e) {
+        console.error(e);
+      }
+
+      localStorage.removeItem("pendingLink");
+    }
+
+    setReady(true); // allow dashboard query now
+  };
+
+  init();
+}, []);
 
 if (error) {
   return <p className="text-red-500">Failed to load dashboard</p>;
+}
+if (!ready || isLoading) {
+  return <p className="text-white">Preparing dashboard...</p>;
 }
   return (
     <section className='text-white'>

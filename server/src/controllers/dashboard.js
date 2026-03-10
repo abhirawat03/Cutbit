@@ -8,7 +8,7 @@ export const getDashboardData = async (req, res) => {
   try {
     const userId = req.user._id;
     const allowedRanges = [7, 30];
-    const range = parseInt(req.query.range);
+    let range = parseInt(req.query.range) || 7;
     if (!allowedRanges.includes(range)) {
       range = 7;
     }
