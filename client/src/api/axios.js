@@ -1,5 +1,5 @@
 import axios from "axios";
-import { queryClient } from "../lib/queryClient";
+// import { queryClient } from "../lib/queryClient";
 
 const Api = axios.create({
     baseURL: "http://localhost:8000/api/v1",
@@ -59,7 +59,7 @@ Api.interceptors.response.use(
                 processQueue(err);
 
                 // clear cached user data
-                queryClient.clear();
+                // queryClient.clear();
 
                 return Promise.reject(err);
             } finally {

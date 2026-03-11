@@ -14,7 +14,7 @@ import Settings from "./pages/Settings.jsx";
 // import Link from "./pages/Link.jsx";
 import LinkView from "./pages/Link.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
-import ProtectedRoute from "./components/PrivateRoute.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -35,13 +35,17 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
-          {/* DASHBOARD */}
-          <Route element={<DashLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/links" element={<Mylinks />} />
-            <Route path="/dashboard/links/:id" element={<LinkView />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
-            <Route path="/dashboard/analytics" element={<LinkBrief />} />
+          <Route path="/dashboard" element={<DashLayout />}>
+
+            <Route index element={<Dashboard />} />
+
+            <Route path="links" element={<Mylinks />} />
+            <Route path="links/:id" element={<LinkView />} />
+
+            <Route path="settings" element={<Settings />} />
+
+            <Route path="analytics" element={<LinkBrief />} />
+
           </Route>
         </Route>
       </Routes>
