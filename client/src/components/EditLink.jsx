@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
-import Api from "../api/axios";
 import { useUpdateLink } from "../hooks/mutations/useUpdateLink";
 
 export default function EditLink({ link, onClose}) {
