@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import Api from "../api/axios";
+import { useUpdateLink } from "../hooks/mutations/useUpdateLink";
 
-export default function EditLink({ link, onClose, onUpdated }) {
+export default function EditLink({ link, onClose}) {
+  const updateMutation = useUpdateLink();
   const formattedExpiry = link?.expiryDate
     ? new Date(link.expiryDate).toISOString().split("T")[0]
     : "";
@@ -21,16 +23,17 @@ export default function EditLink({ link, onClose, onUpdated }) {
   form.expiryDate !== formattedExpiry;
 
   const updateLink = async () => {
-  try {
-
-    await Api.patch(`/link/${link._id}`,form);
-
-    onUpdated();   // refetch links
-    onClose();     // close modal
-
-  } catch (error) {
-    console.error("Update failed", error);
-  }
+  updateMutation.mutate(
+    {
+      id: link._id,
+      data: form
+    },
+    {
+      onSuccess: () => {
+        onClose();
+      }
+    }
+  );
 };
 
   return (
@@ -130,7 +133,7 @@ export default function EditLink({ link, onClose, onUpdated }) {
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row gap-4 pt-4">
-            <button className={`flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition 
+            <button className={`flex-1 text-white font-semibold py-3 rounded-lg 
             ${hasChanges
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-gray-600 cursor-not-allowed"}
@@ -142,13 +145,7 @@ export default function EditLink({ link, onClose, onUpdated }) {
             </button>
             <button
               onClick={onClose}
-              className={`flex-1 bg-[#1e293b] hover:bg-[#334155] text-gray-300 font-semibold py-3 rounded-lg transition
-                ${
-                hasChanges
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-gray-600 cursor-not-allowed"
-              }
-                `}
+              className="flex-1 bg-red-600 cursor-pointer hover:bg-red-800 text-gray-300 font-semibold py-3 rounded-lg"
             >
               Cancel
             </button>

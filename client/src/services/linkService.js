@@ -1,7 +1,7 @@
 import Api from "../api/axios";
 
 const getLinks = async (currentPage) => {
-  const res = await Api.get(`/links?page=${currentPage}`);
+  const res = await Api.get(`/links?page=${currentPage}&limit=10`);
   return res.data.data;
 };
 

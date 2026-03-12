@@ -10,6 +10,7 @@ export const useCreateLink = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dashboardStats"]});
       queryClient.invalidateQueries({ queryKey: ["links"]});
+      queryClient.invalidateQueries({ queryKey: ["linkStats"]});
     }
   });
 };

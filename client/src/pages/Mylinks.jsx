@@ -118,7 +118,10 @@ function Mylinks() {
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <span className="px-3 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400">
+                                            <span className={`px-3 py-1 text-xs rounded-full ${link.status === "active"
+                                                    ? "bg-emerald-500/20 text-emerald-400"
+                                                    : "bg-red-500/20 text-red-400"
+                                                }`}>
                                                 {link.status.toUpperCase()}
                                             </span>
                                         </td>
@@ -185,7 +188,10 @@ function Mylinks() {
                                     <span>{link.totalUniqueVisitors}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="px-3 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400">
+                                    <span className={`px-3 py-1 text-xs rounded-full ${link.status === "active"
+                                            ? "bg-emerald-500/20 text-emerald-400"
+                                            : "bg-red-500/20 text-red-400"
+                                        }`}>
                                         {link.status.toUpperCase()}
                                     </span>
                                     <div className="space-x-2 text-lg flex flex-row">
