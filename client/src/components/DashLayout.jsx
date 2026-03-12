@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import logo from "../images/logo.png"
+import logo from "../assets/images/logo.png"
 import { MdDashboard } from "react-icons/md";
 import { IoLinkSharp } from "react-icons/io5";
 import { FaChartSimple } from "react-icons/fa6";

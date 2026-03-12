@@ -5,6 +5,12 @@ const getLinks = async (currentPage) => {
   return res.data.data;
 };
 
+const getLink = async (id) => {
+  const res = await Api.get(`/link/${id}`);
+  console.log(res.data.data)
+  return res.data.data;
+};
+
 const createLink = async (data) => {
   const res = await Api.post("/link", data);
   return res.data.data;
@@ -12,9 +18,7 @@ const createLink = async (data) => {
 
 const getStats = async () => {
   const res = await Api.get("/stats");
-  console.log(res.data.data)
   return res.data.data; 
-
 };
 
 const updateLink = async ({ id, data }) => {
@@ -27,4 +31,4 @@ const deleteLink = async (id) => {
   return res.data.data;
 };
 
-export {getLinks, createLink, getStats, updateLink, deleteLink};
+export {getLinks, getLink, createLink, getStats, updateLink, deleteLink};

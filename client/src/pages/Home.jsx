@@ -12,7 +12,7 @@ import { PiDevicesFill } from "react-icons/pi";
 import { HiFolder } from "react-icons/hi2";
 import { FaStopwatch } from "react-icons/fa6";
 import { IoQrCodeSharp } from "react-icons/io5";
-import graph from "../images/graph-i.png"
+import graph from "../assets/images/graph-i.png"
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCreateLink } from "../hooks/mutations/useCreateLink";
 

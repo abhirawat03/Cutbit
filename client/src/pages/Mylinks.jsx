@@ -8,17 +8,19 @@ import { RiDeleteBin6Fill } from "react-icons/ri";
 import { IoCopySharp } from "react-icons/io5";
 import { RiEdit2Fill } from "react-icons/ri";
 import EditLink from '../components/EditLink';
-// import Api from '../api/axios';.js
 import { useLinks } from '../hooks/queries/useLinks.js';
-import {useLinkStats} from '../hooks/queries/useLinkStats.js';
+import { useLinkStats } from '../hooks/queries/useLinkStats.js';
 import { useDeleteLink } from "../hooks/mutations/useDeleteLink.js";
+import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 function Mylinks() {
-    
-    const [page, setPage] = useState(1);
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const page = Number(searchParams.get("page")) || 1;
     const deleteMutation = useDeleteLink();
     const { data, isLoading } = useLinks(page);
-    const { data: stats,isLoading: statsLoading } = useLinkStats();
+    const { data: stats, isLoading: statsLoading } = useLinkStats();
     const links = data?.links || [];
     const pagination = data?.pagination;
 
@@ -26,7 +28,12 @@ function Mylinks() {
         navigator.clipboard.writeText(
             `${import.meta.env.VITE_BACKEND_URL_ID}/${shortUrl}`
         );
-        alert("Copied!");
+    };
+
+    const changePage = (newPage) => {
+        const params = new URLSearchParams(searchParams);
+        params.set("page", newPage);
+        setSearchParams(params);
     };
 
     const deleteLink = (id) => {
@@ -93,12 +100,16 @@ function Mylinks() {
                                 <th className="px-6 py-4 text-left">Created</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
-                        </thead>    
+                        </thead>
 
                         <tbody className="divide-y divide-[#1e293b]">
                             {links.length > 0 ? (
                                 links.map((link) => (
-                                    <tr key={link._id} className="hover:bg-[#0b1220] transition">
+                                    <tr
+                                        key={link._id}
+                                        onClick={() => navigate(`/dashboard/links/${link._id}`)}
+                                        className="hover:bg-[#0b1220] transition"
+                                    >
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className="text-blue-400 font-medium flex gap-2.5">
@@ -109,7 +120,12 @@ function Mylinks() {
                                                     >
                                                         {link.shortUrl}
                                                     </a>
-                                                    <IoCopySharp onClick={() => copyToClipboard(link.shortUrl)} className='text-gray-300 hover:text-blue-300' />
+                                                    <IoCopySharp
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            copyToClipboard(link.shortUrl)
+                                                        }}
+                                                        className='text-gray-300 hover:text-blue-300' />
                                                 </span>
                                                 <span className="text-gray-500 text-xs truncate max-w-[280px]">
                                                     {link.originalUrl}
@@ -119,8 +135,8 @@ function Mylinks() {
 
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 text-xs rounded-full ${link.status === "active"
-                                                    ? "bg-emerald-500/20 text-emerald-400"
-                                                    : "bg-red-500/20 text-red-400"
+                                                ? "bg-emerald-500/20 text-emerald-400"
+                                                : "bg-red-500/20 text-red-400"
                                                 }`}>
                                                 {link.status.toUpperCase()}
                                             </span>
@@ -133,13 +149,17 @@ function Mylinks() {
                                         <td className="flex items-center py-5">
                                             <MdQrCode2 className="text-gray-400 hover:text-blue-400" size={28} />
                                             <RiEdit2Fill className="text-gray-400 hover:text-green-400" size={28}
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
                                                     setSelectedLink(link);
                                                     setEditOpen(true);
                                                 }} />
                                             <MdAnalytics className="text-gray-400 hover:text-yellow-400" size={28} />
                                             <RiDeleteBin6Fill className="text-gray-400 hover:text-red-400" size={28}
-                                                onClick={() => deleteLink(link._id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteLink(link._id)
+                                                }}
                                             />
                                         </td>
                                     </tr>
@@ -160,6 +180,7 @@ function Mylinks() {
                         links.map((link) => (
                             <div
                                 key={link._id}
+                                onClick={() => navigate(`/dashboard /links/${link._id}`)}
                                 className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] space-y-3">
                                 <div>
                                     <p className="text-blue-400 font-medium flex flex-row gap-2">
@@ -171,7 +192,10 @@ function Mylinks() {
                                             {link.shortUrl}
                                         </a>
                                         <IoCopySharp
-                                            onClick={() => copyToClipboard(link.shortUrl)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                copyToClipboard(link.shortUrl)
+                                            }}
                                             className="text-gray-300 hover:text-blue-300 cursor-pointer"
                                         />
                                     </p>
@@ -189,21 +213,25 @@ function Mylinks() {
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className={`px-3 py-1 text-xs rounded-full ${link.status === "active"
-                                            ? "bg-emerald-500/20 text-emerald-400"
-                                            : "bg-red-500/20 text-red-400"
+                                        ? "bg-emerald-500/20 text-emerald-400"
+                                        : "bg-red-500/20 text-red-400"
                                         }`}>
                                         {link.status.toUpperCase()}
                                     </span>
                                     <div className="space-x-2 text-lg flex flex-row">
                                         <MdQrCode2 className=" text-blue-400" size={28} />
-                                        <RiEdit2Fill className=" text-green-400" size={28} onClick={() => {
+                                        <RiEdit2Fill className=" text-green-400" size={28} onClick={(e) => {
+                                            e.stopPropagation();
                                             setSelectedLink(link);
                                             setEditOpen(true);
 
                                         }} />
                                         <MdAnalytics className="text-yellow-400" size={28} />
                                         <RiDeleteBin6Fill className="text-red-400" size={28}
-                                            onClick={() => deleteLink(link._id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteLink(link._id)
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -224,7 +252,7 @@ function Mylinks() {
                     <div className="flex items-center gap-2">
                         <button
                             disabled={page === 1}
-                            onClick={() => setPage(page - 1)}
+                            onClick={() => changePage(page - 1)}
                             className="px-3 py-1 rounded-md bg-[#1e293b] hover:bg-[#334155]">
                             {"<"}
                         </button>
@@ -235,7 +263,7 @@ function Mylinks() {
                             return (
                                 <button
                                     key={pageNumber}
-                                    onClick={() => setPage(pageNumber)}
+                                    onClick={() => changePage(pageNumber)}
                                     className={`px-3 py-1 rounded-md ${page === pageNumber
                                         ? "bg-blue-600 text-white"
                                         : "hover:bg-[#1e293b]"
@@ -248,7 +276,7 @@ function Mylinks() {
 
                         <button
                             disabled={page === pagination?.totalPages}
-                            onClick={() => setPage(page + 1)}
+                            onClick={() => changePage(page + 1)}
                             className="px-3 py-1 rounded-md bg-[#1e293b] hover:bg-[#334155]">
                             {">"}
                         </button>

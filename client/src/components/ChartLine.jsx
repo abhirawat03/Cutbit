@@ -96,6 +96,7 @@ export function ChartLine({ data = [], range }) {
                             stroke={`${chartConfig.clicks.color}`}
                             strokeWidth={2}
                             dot={false}
+                            activeDot={{ r: 6 }}
                             connectNulls
                         />
                         <Line
@@ -103,7 +104,9 @@ export function ChartLine({ data = [], range }) {
                             type="natural"
                             stroke={`${chartConfig.uniqueVisitors.color}`}
                             strokeWidth={2}
+                            strokeDasharray="5 5"
                             dot={false}
+                            activeDot={{ r: 6 }}
                             connectNulls
                         />
                     </LineChart>

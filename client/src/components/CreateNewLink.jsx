@@ -42,7 +42,7 @@ export default function CreateNewLink({ onClose }) {
 
     const link = document.createElement("a");
     link.href = pngUrl;
-    link.download = "qr-code.png";
+    link.download = `${formData.customAlias}-qr-code.png` ;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -160,7 +160,7 @@ export default function CreateNewLink({ onClose }) {
                   <QRCodeCanvas
                     id="big-qr"
                     size={150}
-                    value={`${window.location.origin}/${generatedLink}`}
+                    value={`${import.meta.env.VITE_BACKEND_URL_ID}/${generatedLink}`}
                   />
                 </div>
 
@@ -171,7 +171,7 @@ export default function CreateNewLink({ onClose }) {
                   <button className="text-sm bg-blue-600 px-3 py-1 rounded"
                     onClick={() =>
                       navigator.clipboard.writeText(
-                        `${window.location.origin}/${generatedLink}`
+                        `${import.meta.env.VITE_BACKEND_URL_ID}/${generatedLink}`
                       )
                     }
                   >

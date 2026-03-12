@@ -92,6 +92,28 @@ const getalllinks = async (req, res) => {
   );
 };
 
+const getlink = async(req,res) =>{
+  const userId = req.user?._id;
+  if(!userId) throw new ApiError(401,"unauthorized");
+  const {linkId} = req.params
+  if (!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400, "Invalid id");
+  const link = await Url.findOne({
+    userId,
+    _id:linkId,
+  })
+
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(
+      200,
+      link,
+      "Link fetched successfully"
+    )
+  )
+
+}
+
 const updateLink = async (req, res) => {
   const { linkId } = req.params;
   const userId = req.user._id;
@@ -204,7 +226,9 @@ const getstats = async (req, res) => {
 export {
   createShortUrl,
   getalllinks,
+  getlink,
   getstats,
   updateLink,
   deleteLink,
+
 };

@@ -1,6 +1,6 @@
 import React from 'react'
 import { FcGoogle } from "react-icons/fc";
-import logo from "../images/logo.png"
+import logo from "../assets/images/logo.png"
 import { Link, Outlet } from 'react-router-dom';
 
 function Signup() {

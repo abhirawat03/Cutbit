@@ -4,15 +4,12 @@ import { ChartLine } from '../components/ChartLine';
 import { GiAlliedStar } from "react-icons/gi";
 import { MdAdsClick } from "react-icons/md";
 import { MdOutlinePersonOutline } from "react-icons/md";
-// import Api from '../api/axios';
 import { Link } from 'react-router-dom';
 import { useDashboard } from "../hooks/queries/useDashboard.js";
 import { useCreateLink } from "../hooks/mutations/useCreateLink";
 
 
 function Dashboard() {
-  // const [dashboard, setDashboard] = useState(null);
-  // const [loading, setLoading] = useState(true);
   const [range, setRange] = useState(7);
   const [ready, setReady] = useState(false);
   const { data:dashboard, isLoading, error } = useDashboard(ready,range);
@@ -32,7 +29,7 @@ function Dashboard() {
       localStorage.removeItem("pendingLink");
     }
 
-    setReady(true); // allow dashboard query now
+    setReady(true); 
   };
 
   init();
@@ -189,7 +186,10 @@ if (!ready || isLoading) {
                       </td>
 
                       <td className="px-6 py-4 text-right">
-                        <span className="px-3 py-1 text-xs rounded-md bg-emerald-500/20 text-emerald-400">
+                        <span className={`px-3 py-1 text-xs rounded-md ${link.status === "active"
+                                                    ? "bg-emerald-500/20 text-emerald-400"
+                                                    : "bg-red-500/20 text-red-400"
+                                                }`}>
                           {link.status.toUpperCase()}
                         </span>
                       </td>
