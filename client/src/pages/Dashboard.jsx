@@ -7,7 +7,29 @@ import { MdOutlinePersonOutline } from "react-icons/md";
 import { Link, useNavigate } from 'react-router-dom';
 import { useDashboard } from "../hooks/queries/useDashboard.js";
 import { useCreateLink } from "../hooks/mutations/useCreateLink";
+import { TrendingUp, TrendingDown } from "lucide-react"
 
+function GrowthBadge({ value = 0, range }) {
+  const isPositive = value > 0
+  const isNegative = value < 0
+
+  const color = isPositive
+    ? "text-green-400 bg-green-400/10"
+    : isNegative
+    ? "text-red-400 bg-red-400/10"
+    : "text-gray-400 bg-gray-400/10"
+
+  const formatted =
+    value > 0 ? `+${value.toFixed(1)}%` : `${value.toFixed(1)}%`
+
+  return (
+    <span className={`flex w-fit items-center gap-1 text-sm px-2 py-1 rounded-md ${color}`}>
+      {isPositive && <TrendingUp size={14} />}
+      {isNegative && <TrendingDown size={14} />}
+      {formatted} vs {range}D
+    </span>
+  )
+}
 
 function Dashboard() {
   const [range, setRange] = useState(7);
@@ -64,9 +86,9 @@ if (!ready || isLoading) {
             </div>
           </div>
           <div>
-            <h1 className='text-5xl font-extrabold mb-2'>{dashboard.stats.lifetimeClicks}</h1>
+            <h1 className='text-5xl font-extrabold mb-2'>{dashboard.stats.lifetimeClicks.toLocaleString()}</h1>
             <span>
-              {dashboard.growth.clicks}% vs {range}D
+              <GrowthBadge value={dashboard.growth.clicks ?? 0} range={range} />
             </span>
           </div>
           <MdAdsClick className='absolute bottom-0 -right-4 text-gray-700' size={120} />
@@ -79,9 +101,9 @@ if (!ready || isLoading) {
             </div>
           </div>
           <div>
-            <h1 className='text-5xl font-extrabold mb-2'>{dashboard.stats.lifetimeUnique}</h1>
+            <h1 className='text-5xl font-extrabold mb-2'>{dashboard.stats.lifetimeUnique.toLocaleString()}</h1>
             <span>
-              {dashboard.growth.unique}% vs {range}D
+              <GrowthBadge value={dashboard.growth.unique ?? 0} range={range} />
             </span>
           </div>
           <MdOutlinePersonOutline className='absolute bottom-0 -right-4 text-gray-700' size={120} />
@@ -131,7 +153,9 @@ if (!ready || isLoading) {
                   <p className='text-2xl font-bold'>{dashboard.topLink.uniqueVisitors}</p>
                 </div>
               </div>
-              <button className='bg-[#40444a6d] text-xl font-bold py-2 px-4 rounded-xl mt-8 md:mt-20 hover:bg-[#33383ea4]'>View Full Report</button>
+              <button 
+              onClick={() => navigate(`/dashboard/links/${dashboard.topLink._id}/analytics`)}
+              className='bg-[#40444a6d] cursor-pointer text-xl font-bold py-2 px-4 rounded-xl mt-8 md:mt-20 hover:bg-[#364455a4]'>View Full Report</button>
             </>
           ) : (
             <p className='text-center mt-25 text-2xl font-bold'>No Data</p>
@@ -143,7 +167,7 @@ if (!ready || isLoading) {
         <div className='flex flex-row justify-between items-center p-6'>
           <h2 className='text-2xl font-medium'>Recent Links</h2>
           <Link to="/dashboard/links">
-            <button className="text-blue-500 hover:text-blue-300 text-base">View All</button>
+            <button className="text-blue-500 hover:text-blue-300 text-base cursor-pointerx  ">View All Links</button>
           </Link>
         </div>
         <div className='overflow-x-auto'>

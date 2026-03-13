@@ -8,27 +8,27 @@ import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
 
 const createShortUrl = async (req, res) => {
-    const userId = req.user?._id;
-    if(!userId) throw new ApiError(401,"unauthorized")
-    const { name, originalUrl, customAlias, expiryDate } = req.body;
+  const userId = req.user?._id;
+  if (!userId) throw new ApiError(401, "unauthorized");
+  const { name, originalUrl, customAlias, expiryDate } = req.body;
 
-        if (!originalUrl) throw new ApiError(400, "Url required");
+  if (!originalUrl) throw new ApiError(400, "Url required");
 
-        // let shortUrl = customAlias ? customAlias.trim().toLowerCase() : nanoid(6);
-    let shortUrl;
+  // let shortUrl = customAlias ? customAlias.trim().toLowerCase() : nanoid(6);
+  let shortUrl;
 
-        // If user provided alias
-    if (customAlias) {
-        shortUrl = validateAlias(customAlias);
+  // If user provided alias
+  if (customAlias) {
+    shortUrl = validateAlias(customAlias);
 
-        const existing = await Url.findOne({ shortUrl });
+    const existing = await Url.findOne({ shortUrl });
 
-        if (existing) {
-            throw new ApiError(400, "Custom alias already exists");
-        }
-    } else {
-      shortUrl = nanoid(6);
+    if (existing) {
+      throw new ApiError(400, "Custom alias already exists");
     }
+  } else {
+    shortUrl = nanoid(6);
+  }
 
   // const shortUrl = nanoid(6);
   const newUrl = await Url.create({
@@ -36,18 +36,14 @@ const createShortUrl = async (req, res) => {
     name,
     originalUrl,
     shortUrl,
-    ...(expiryDate && { expiryDate })    //optional
+    ...(expiryDate && { expiryDate }), //optional
   });
 
   if (!newUrl) throw new ApiError(404, "custom alias already exist");
 
-  return res.status(201).json(
-    new ApiResponse(
-      201,
-      newUrl,
-      "Shorturl created successfully",
-    ),
-  );
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newUrl, "Shorturl created successfully"));
 };
 
 const getalllinks = async (req, res) => {
@@ -92,27 +88,21 @@ const getalllinks = async (req, res) => {
   );
 };
 
-const getlink = async(req,res) =>{
+const getlink = async (req, res) => {
   const userId = req.user?._id;
-  if(!userId) throw new ApiError(401,"unauthorized");
-  const {linkId} = req.params
-  if (!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400, "Invalid id");
+  if (!userId) throw new ApiError(401, "unauthorized");
+  const { linkId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(linkId))
+    throw new ApiError(400, "Invalid id");
   const link = await Url.findOne({
     userId,
-    _id:linkId,
-  })
+    _id: linkId,
+  });
 
   return res
-  .status(200)
-  .json(
-    new ApiResponse(
-      200,
-      link,
-      "Link fetched successfully"
-    )
-  )
-
-}
+    .status(200)
+    .json(new ApiResponse(200, link, "Link fetched successfully"));
+};
 
 const updateLink = async (req, res) => {
   const { linkId } = req.params;
@@ -172,14 +162,15 @@ const deleteLink = async (req, res) => {
     throw new ApiError(401, "Unauthorized");
   }
   const { linkId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400, "Invalid id");
+  if (!mongoose.Types.ObjectId.isValid(linkId))
+    throw new ApiError(400, "Invalid id");
 
   const link = await Url.findOneAndDelete({
     _id: linkId,
     userId,
   });
   if (!link) throw new ApiError(404, "Link not found");
-   // delete related analytics
+  // delete related analytics
   await Analytics.deleteMany({ urlId: linkId });
 
   // delete visitor records
@@ -223,95 +214,133 @@ const getstats = async (req, res) => {
     .json(new ApiResponse(200, data, "Links stats fetched successfully"));
 };
 
-const getLinkAnalytics = async(req, res)=>{
-  const {linkId} = req.params;
-  if (!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400, "Invalid id");
+const getLinkAnalytics = async (req, res) => {
+  const { linkId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(linkId))
+    throw new ApiError(400, "Invalid id");
   const userId = req.user?._id;
-  if(!userId) throw new ApiError(401,"unauthorized")
+  if (!userId) throw new ApiError(401, "unauthorized");
   const allowedRanges = [7, 30];
   let range = parseInt(req.query.range) || 7;
   if (!allowedRanges.includes(range)) {
     range = 7;
   }
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - range);
   startDate.setHours(0, 0, 0, 0);
-  console.log(startDate)
+  startDate.setDate(startDate.getDate() - (range - 1));
+
+  const previousStart = new Date(startDate);
+  previousStart.setDate(previousStart.getDate() - range);
+
+  const previousEnd = new Date(startDate);
+  previousEnd.setDate(previousEnd.getDate() - 1);
 
   //fetch link
   const link = await Url.findOne({
     _id: linkId,
-    userId
+    userId,
   })
-  .select("shortUrl originalUrl totalClicks totalUniqueVisitors status")
-  .lean();
+    .select("shortUrl originalUrl totalClicks totalUniqueVisitors")
+    .lean();
   if (!link) throw new ApiError(404, "Link not found");
 
   //Fetch analytics data
   const analytics = await Analytics.find({
-    urlId:linkId,
+    urlId: linkId,
     userId,
-    date: { $gte: startDate }
+    date: { $gte: startDate },
   }).lean();
+
+  const previousAnalytics = await Analytics.find({
+    urlId: linkId,
+    userId,
+    date: { $gte: previousStart, $lte: previousEnd },
+  }).lean();
+
+  const currentClicks = analytics.reduce((sum, a) => sum + (a.clicks || 0), 0);
+  const currentUnique = analytics.reduce(
+    (sum, a) => sum + (a.uniqueVisitors || 0),
+    0,
+  );
+
+  const previousClicks = previousAnalytics.reduce(
+    (sum, a) => sum + (a.clicks || 0),
+    0,
+  );
+  const previousUnique = previousAnalytics.reduce(
+    (sum, a) => sum + (a.uniqueVisitors || 0),
+    0,
+  );
+
+  const clickGrowth = previousClicks
+    ? Number(
+        (((currentClicks - previousClicks) / previousClicks) * 100).toFixed(1),
+      )
+    : 0;
+
+  const uniqueGrowth = previousUnique
+    ? Number(
+        (((currentUnique - previousUnique) / previousUnique) * 100).toFixed(1),
+      )
+    : 0;
 
   //fill missing days
   const analyticsMap = new Map(
-    analytics.map(a => [
-      a.date.toISOString().slice(0,10),
-      a
-    ])
+    analytics.map((a) => [a.date.toISOString().slice(0, 10), a]),
   );
 
   const chartData = [];
 
   for (let i = range - 1; i >= 0; i--) {
     const d = new Date();
+    d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
 
-    const key = d.toISOString().slice(0,10);
+    const key = d.toISOString().slice(0, 10);
 
     const day = analyticsMap.get(key);
 
     chartData.push({
       date: key,
       clicks: day?.clicks || 0,
-      uniqueVisitors: day?.uniqueVisitors || 0
+      uniqueVisitors: day?.uniqueVisitors || 0,
     });
   }
   const deviceStats = {};
   const countryStats = {};
   const referrerStats = {};
-  analytics.forEach(a => {
-    Object.entries(a.deviceStats || {}).forEach(([k,v]) => {
+  for (const a of analytics) {
+    for (const [k, v] of Object.entries(a.deviceStats || {})) {
       deviceStats[k] = (deviceStats[k] || 0) + v;
-    });
+    }
 
-    Object.entries(a.countryStats || {}).forEach(([k,v]) => {
+    for (const [k, v] of Object.entries(a.countryStats || {})) {
       countryStats[k] = (countryStats[k] || 0) + v;
-    });
+    }
 
-    Object.entries(a.referrerStats || {}).forEach(([k,v]) => {
+    for (const [k, v] of Object.entries(a.referrerStats || {})) {
       referrerStats[k] = (referrerStats[k] || 0) + v;
-    });
-  });
+    }
+  }
   return res.status(200).json(
     new ApiResponse(
-      200, 
+      200,
       {
         shortUrl: link.shortUrl,
         originalUrl: link.originalUrl,
         totalClicks: link.totalClicks,
-        status:link.status,
         totalUniqueVisitors: link.totalUniqueVisitors,
+        clickGrowth,
+        uniqueGrowth,
         chartData,
         deviceStats,
         countryStats,
         referrerStats,
       },
-      "Link analytics fetched successfully"
+      "Link analytics fetched successfully",
     ),
   );
-}; 
+};
 
 export {
   createShortUrl,
@@ -320,5 +349,5 @@ export {
   getstats,
   updateLink,
   deleteLink,
-  getLinkAnalytics
+  getLinkAnalytics,
 };

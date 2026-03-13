@@ -39,7 +39,6 @@ function DashLayout() {
   const navItems = [
     { name: "Dashboard", icon: MdDashboard, path: "/dashboard" },
     { name: "My Links", icon: IoLinkSharp, path: "/dashboard/links" },
-    { name: "Analytics", icon: FaChartSimple, path: "/dashboard/analytics" },
     { name: "Settings", icon: BsGearFill, path: "/dashboard/settings" },
   ]
   return (

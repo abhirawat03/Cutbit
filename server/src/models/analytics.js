@@ -46,7 +46,7 @@ const analyticsSchema = new Schema({
 },{timestamps:true});
 
 analyticsSchema.index(
-    {urlId:1, date:1},
+    {urlId:1, userId:1, date:1},
     {unique:true}
 );
 analyticsSchema.index(
