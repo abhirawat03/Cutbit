@@ -219,9 +219,14 @@ export const getDashboardData = async (req, res) => {
     ]);
 
     // RECENT LINKS
-    const recentLinks = await Url.find({ userId })
+    const recentLinks = await Url.find({
+        userId,
+        createdAt: {
+          $gte: today,
+          $lte: endOfToday,
+        },
+      })
       .sort({ createdAt: -1 })
-      .limit(5)
       .select("shortUrl originalUrl name totalClicks status");
 
     return res.status(200).json({

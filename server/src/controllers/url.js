@@ -223,6 +223,96 @@ const getstats = async (req, res) => {
     .json(new ApiResponse(200, data, "Links stats fetched successfully"));
 };
 
+const getLinkAnalytics = async(req, res)=>{
+  const {linkId} = req.params;
+  if (!mongoose.Types.ObjectId.isValid(linkId)) throw new ApiError(400, "Invalid id");
+  const userId = req.user?._id;
+  if(!userId) throw new ApiError(401,"unauthorized")
+  const allowedRanges = [7, 30];
+  let range = parseInt(req.query.range) || 7;
+  if (!allowedRanges.includes(range)) {
+    range = 7;
+  }
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - range);
+  startDate.setHours(0, 0, 0, 0);
+  console.log(startDate)
+
+  //fetch link
+  const link = await Url.findOne({
+    _id: linkId,
+    userId
+  })
+  .select("shortUrl originalUrl totalClicks totalUniqueVisitors status")
+  .lean();
+  if (!link) throw new ApiError(404, "Link not found");
+
+  //Fetch analytics data
+  const analytics = await Analytics.find({
+    urlId:linkId,
+    userId,
+    date: { $gte: startDate }
+  }).lean();
+
+  //fill missing days
+  const analyticsMap = new Map(
+    analytics.map(a => [
+      a.date.toISOString().slice(0,10),
+      a
+    ])
+  );
+
+  const chartData = [];
+
+  for (let i = range - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+
+    const key = d.toISOString().slice(0,10);
+
+    const day = analyticsMap.get(key);
+
+    chartData.push({
+      date: key,
+      clicks: day?.clicks || 0,
+      uniqueVisitors: day?.uniqueVisitors || 0
+    });
+  }
+  const deviceStats = {};
+  const countryStats = {};
+  const referrerStats = {};
+  analytics.forEach(a => {
+    Object.entries(a.deviceStats || {}).forEach(([k,v]) => {
+      deviceStats[k] = (deviceStats[k] || 0) + v;
+    });
+
+    Object.entries(a.countryStats || {}).forEach(([k,v]) => {
+      countryStats[k] = (countryStats[k] || 0) + v;
+    });
+
+    Object.entries(a.referrerStats || {}).forEach(([k,v]) => {
+      referrerStats[k] = (referrerStats[k] || 0) + v;
+    });
+  });
+  return res.status(200).json(
+    new ApiResponse(
+      200, 
+      {
+        shortUrl: link.shortUrl,
+        originalUrl: link.originalUrl,
+        totalClicks: link.totalClicks,
+        status:link.status,
+        totalUniqueVisitors: link.totalUniqueVisitors,
+        chartData,
+        deviceStats,
+        countryStats,
+        referrerStats,
+      },
+      "Link analytics fetched successfully"
+    ),
+  );
+}; 
+
 export {
   createShortUrl,
   getalllinks,
@@ -230,5 +320,5 @@ export {
   getstats,
   updateLink,
   deleteLink,
-
+  getLinkAnalytics
 };

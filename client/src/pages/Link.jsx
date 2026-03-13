@@ -105,47 +105,46 @@ export default function LinkView() {
 
                     {/* Metadata */}
                     <div className="bg-[#111827] p-6 rounded-xl border border-[#1f2937]">
-  <h3 className="text-lg font-semibold mb-5">Metadata</h3>
+                        <h3 className="text-lg font-semibold mb-5">Metadata</h3>
 
-  <div className="space-y-4 text-sm">
+                        <div className="space-y-4 text-sm">
 
-    <div className="flex items-center justify-between border-b border-[#1f2937] pb-3">
-      <span className="text-gray-400">Expires</span>
-      <span className="text-white font-medium">
-        {link?.expiryDate
-          ? new Date(link.expiryDate).toLocaleDateString()
-          : "Never"}
-      </span>
-    </div>
+                            <div className="flex items-center justify-between border-b border-[#1f2937] pb-3">
+                                <span className="text-gray-400">Expires</span>
+                                <span className="text-white font-medium">
+                                    {link?.expiryDate
+                                        ? new Date(link.expiryDate).toLocaleDateString()
+                                        : "Never"}
+                                </span>
+                            </div>
 
-    <div className="flex items-center justify-between border-b border-[#1f2937] pb-3">
-      <span className="text-gray-400">Destination</span>
-      <span className="text-white font-medium truncate max-w-[160px]">
-        {new URL(link?.originalUrl).hostname}
-      </span>
-    </div>
+                            <div className="flex items-center justify-between border-b border-[#1f2937] pb-3">
+                                <span className="text-gray-400">Destination</span>
+                                <span className="text-white font-medium truncate max-w-[160px]">
+                                    {new URL(link?.originalUrl).hostname}
+                                </span>
+                            </div>
 
-    <div className="flex items-center justify-between">
-      <span className="text-gray-400">Status</span>
+                            <div className="flex items-center justify-between">
+                                <span className="text-gray-400">Status</span>
 
-      <span
-        className={`px-2.5 py-1 text-xs rounded-full font-medium
-        ${
-          link?.status === "active"
-            ? "bg-green-500/20 text-green-400"
-            : "bg-red-500/20 text-red-400"
-        }`}
-      >
-        {link?.status?.toUpperCase()}
-      </span>
+                                <span
+                                    className={`px-2.5 py-1 text-xs rounded-full font-medium
+                                        ${link?.status === "active"
+                                            ? "bg-green-500/20 text-green-400"
+                                            : "bg-red-500/20 text-red-400"
+                                        }`}
+                                >
+                                    {link?.status?.toUpperCase()}
+                                </span>
 
-    </div>
+                            </div>
 
-  </div>
-</div>
+                        </div>
+                    </div>
 
                     {/* Analytics Button */}
-                    <Link to="/dashboard/analytics">
+                    <Link to={`/dashboard/links/${id}/analytics`}>
                         <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-semibold">
                             View Detailed Analytics
                         </button>

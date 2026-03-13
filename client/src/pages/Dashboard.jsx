@@ -4,7 +4,7 @@ import { ChartLine } from '../components/ChartLine';
 import { GiAlliedStar } from "react-icons/gi";
 import { MdAdsClick } from "react-icons/md";
 import { MdOutlinePersonOutline } from "react-icons/md";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDashboard } from "../hooks/queries/useDashboard.js";
 import { useCreateLink } from "../hooks/mutations/useCreateLink";
 
@@ -14,7 +14,7 @@ function Dashboard() {
   const [ready, setReady] = useState(false);
   const { data:dashboard, isLoading, error } = useDashboard(ready,range);
   const createLinkMutation = useCreateLink();
-
+  const navigate = useNavigate();
   useEffect(() => {
   const init = async () => {
     const pending = localStorage.getItem("pendingLink");
@@ -139,9 +139,9 @@ if (!ready || isLoading) {
           }
         </div>
       </div>
-      <div className='grid mt-6 bg-[#33373d55] rounded-xl border border-[#334155]'>
+      <div className='grid mt-6 bg-[#33373d55] rounded-t-xl  border border-[#334155]'>
         <div className='flex flex-row justify-between items-center p-6'>
-          <h2 className='text-2xl font-medium'>Recent 5 Links</h2>
+          <h2 className='text-2xl font-medium'>Recent Links</h2>
           <Link to="/dashboard/links">
             <button className="text-blue-500 hover:text-blue-300 text-base">View All</button>
           </Link>
@@ -161,7 +161,8 @@ if (!ready || isLoading) {
                 <>
                   {dashboard.recentLinks.map((link) => (
                     <tr
-                      className="hover:bg-[#0f172a]/40 transition"
+                      className="hover:bg-[#050f24] transition"
+                      onClick={() => navigate(`/dashboard/links/${link._id}`)}
                       key={link._id}
                     >
                       <td className="px-6 py-4">
@@ -198,7 +199,7 @@ if (!ready || isLoading) {
                 </>
               ) : (
                 <tr>
-                  <td colSpan="4" className="text-center text-xl py-6 text-gray-400">
+                  <td colSpan="4" className="text-center text-lg py-6 text-gray-300">
                     No Links Yet
                   </td>
                 </tr>

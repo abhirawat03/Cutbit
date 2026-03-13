@@ -37,6 +37,11 @@ const analyticsSchema = new Schema({
         of: Number,
         default: {},
     },
+    referrerStats: {
+        type: Map,
+        of: Number,
+        default: {}
+    }
 
 },{timestamps:true});
 

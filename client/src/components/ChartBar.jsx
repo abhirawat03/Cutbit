@@ -1,11 +1,9 @@
-import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, XAxis} from "recharts"
 
 import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
@@ -17,23 +15,18 @@ import {
 
 export const description = "A bar chart"
 
-const chartData = [
-    { month: "January", desktop: 186 },
-    { month: "February", desktop: 305 },
-    { month: "March", desktop: 237 },
-    { month: "April", desktop: 73 },
-    { month: "May", desktop: 209 },
-    { month: "June", desktop: 214 },
-]
-
 const chartConfig = {
-    desktop: {
-        label: "Desktop",
+    clicks: {
+        label: "Clicks",
         color: "var(--chart-2)",
+    },
+    uniqueVisitors: {
+        label: "Unique Visitors",
+        color: "var(--chart-4)",
     },
 }
 
-export function ChartBar() {
+export function ChartBar({ chartData = [] }) {
     return (
         <Card className="bg-[#0f172a] border border-[#1e293b] text-white">
             <CardHeader>
@@ -45,18 +38,34 @@ export function ChartBar() {
                     <BarChart accessibilityLayer data={chartData} className="text-lg">
                         {/* <CartesianGrid vertical={false} /> */}
                         <XAxis
-                            className="text-gray-400"
-                            dataKey="month"
+                            dataKey="date"
                             tickLine={false}
-                            tickMargin={10}
                             axisLine={false}
-                            tickFormatter={(value) => value.slice(0, 3)}
+                            tickMargin={10}
+                            className="text-gray-400"
+                            tickFormatter={(value) => {
+                                const d = new Date(value)
+                                return d.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                })
+                            }}
                         />
                         <ChartTooltip
                             cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
+                            content={<ChartTooltipContent 
+                                className="w-[150px] text-black"
+                                    labelFormatter={(value) => {
+                                        return new Date(value).toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                            year: "numeric",
+                                        })
+                                    }}
+                            />}
                         />
-                        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={8} />
+                        <Bar dataKey="clicks" fill="var(--chart-2)" radius={8} minPointSize={4}/>
+                        <Bar dataKey="uniqueVisitors" fill="var(--chart-1)" radius={8} minPointSize={4}/>
                     </BarChart>
                 </ChartContainer>
             </CardContent>

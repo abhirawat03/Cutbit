@@ -8,7 +8,6 @@ import Signup from "./pages/Signup.jsx";
 import DashLayout from "./components/DashLayout.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Mylinks from "./pages/Mylinks.jsx";
-import Analytics from "./pages/Analytics.jsx";
 import LinkBrief from "./pages/LinkBrief.jsx";
 import Settings from "./pages/Settings.jsx";
 // import Link from "./pages/Link.jsx";
@@ -36,16 +35,11 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashLayout />}>
-
             <Route index element={<Dashboard />} />
-
             <Route path="links" element={<Mylinks />} />
             <Route path="links/:id" element={<LinkView />} />
-
+            <Route path="links/:id/analytics" element={<LinkBrief />} />
             <Route path="settings" element={<Settings />} />
-
-            <Route path="analytics" element={<LinkBrief />} />
-
           </Route>
         </Route>
       </Routes>

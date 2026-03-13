@@ -180,7 +180,7 @@ function Mylinks() {
                         links.map((link) => (
                             <div
                                 key={link._id}
-                                onClick={() => navigate(`/dashboard /links/${link._id}`)}
+                                onClick={() => navigate(`/dashboard/links/${link._id}`)}
                                 className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] space-y-3">
                                 <div>
                                     <p className="text-blue-400 font-medium flex flex-row gap-2">
