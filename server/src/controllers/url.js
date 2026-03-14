@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { validateAlias } from "../utils/validateAlias.js";
 import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
+import { calculateGrowth } from "../utils/growth.js";
 
 const createShortUrl = async (req, res) => {
   const userId = req.user?._id;
@@ -126,7 +127,7 @@ const updateLink = async (req, res) => {
     updateFields.shortUrl = normalizedAlias;
   }
 
-  if (expiryDate && new Date(expiryDate) < new Date()) {
+  if (expiryDate && new Date(expiryDate) <= new Date()) {
     throw new ApiError(400, "Expiry date must be in the future");
   }
   updateFields.expiryDate = expiryDate;
@@ -196,7 +197,21 @@ const getstats = async (req, res) => {
         },
         totalActive: {
           $sum: {
-            $cond: [{ $eq: ["$status", "active"] }, 1, 0],
+            $cond: [
+              {
+                $and: [
+                  { $eq: ["$status", "active"] },
+                  {
+                    $or: [
+                      { $eq: ["$expiryDate", null] },
+                      { $gt: ["$expiryDate", new Date()] },
+                    ],
+                  },
+                ],
+              },
+              1,
+              0,
+            ],
           },
         },
       },
@@ -216,18 +231,23 @@ const getstats = async (req, res) => {
 
 const getLinkAnalytics = async (req, res) => {
   const { linkId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(linkId))
     throw new ApiError(400, "Invalid id");
+
   const userId = req.user?._id;
-  if (!userId) throw new ApiError(401, "unauthorized");
+  if (!userId) throw new ApiError(401, "Unauthorized");
+
   const allowedRanges = [7, 30];
   let range = parseInt(req.query.range) || 7;
-  if (!allowedRanges.includes(range)) {
-    range = 7;
-  }
-  const startDate = new Date();
-  startDate.setHours(0, 0, 0, 0);
-  startDate.setDate(startDate.getDate() - (range - 1));
+
+  if (!allowedRanges.includes(range)) range = 7;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - (range - 1));
 
   const previousStart = new Date(startDate);
   previousStart.setDate(previousStart.getDate() - range);
@@ -235,60 +255,82 @@ const getLinkAnalytics = async (req, res) => {
   const previousEnd = new Date(startDate);
   previousEnd.setDate(previousEnd.getDate() - 1);
 
-  //fetch link
+  const objectUserId = new mongoose.Types.ObjectId(userId);
+  const objectLinkId = new mongoose.Types.ObjectId(linkId);
+
+  // Fetch link
   const link = await Url.findOne({
     _id: linkId,
     userId,
   })
     .select("shortUrl originalUrl totalClicks totalUniqueVisitors")
     .lean();
+
   if (!link) throw new ApiError(404, "Link not found");
 
-  //Fetch analytics data
-  const analytics = await Analytics.find({
-    urlId: linkId,
-    userId,
-    date: { $gte: startDate },
-  }).lean();
+  // DAILY ANALYTICS (aggregation)
+  const analytics = await Analytics.aggregate([
+    {
+      $match: {
+        urlId: objectLinkId,
+        userId: objectUserId,
+        date: { $gte: startDate }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: "$date",
+            timezone: "Asia/Kolkata"
+          }
+        },
+        clicks: { $sum: "$clicks" },
+        uniqueVisitors: { $sum: "$uniqueVisitors" }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ]);
 
-  const previousAnalytics = await Analytics.find({
-    urlId: linkId,
-    userId,
-    date: { $gte: previousStart, $lte: previousEnd },
-  }).lean();
+  // Previous period analytics
+  const previousStats = await Analytics.aggregate([
+    {
+      $match: {
+        urlId: objectLinkId,
+        userId: objectUserId,
+        date: { $gte: previousStart, $lte: previousEnd }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        clicks: { $sum: "$clicks" },
+        uniqueVisitors: { $sum: "$uniqueVisitors" }
+      }
+    }
+  ]);
 
-  const currentClicks = analytics.reduce((sum, a) => sum + (a.clicks || 0), 0);
-  const currentUnique = analytics.reduce(
-    (sum, a) => sum + (a.uniqueVisitors || 0),
-    0,
-  );
+  const previousClicks = previousStats[0]?.clicks || 0;
+  const previousUnique = previousStats[0]?.uniqueVisitors || 0;
 
-  const previousClicks = previousAnalytics.reduce(
-    (sum, a) => sum + (a.clicks || 0),
-    0,
-  );
-  const previousUnique = previousAnalytics.reduce(
-    (sum, a) => sum + (a.uniqueVisitors || 0),
-    0,
-  );
+  const currentClicks = analytics.reduce((sum, a) => sum + a.clicks, 0);
+  const currentUnique = analytics.reduce((sum, a) => sum + a.uniqueVisitors, 0);
 
-  const clickGrowth = previousClicks
-    ? Number(
-        (((currentClicks - previousClicks) / previousClicks) * 100).toFixed(1),
-      )
-    : 0;
+  const clickGrowth = calculateGrowth(currentClicks, previousClicks) || 0;
+  const uniqueGrowth = calculateGrowth(currentUnique, previousUnique) || 0;
 
-  const uniqueGrowth = previousUnique
-    ? Number(
-        (((currentUnique - previousUnique) / previousUnique) * 100).toFixed(1),
-      )
-    : 0;
+  // Convert analytics to map
+  const analyticsMap = new Map();
 
-  //fill missing days
-  const analyticsMap = new Map(
-    analytics.map((a) => [a.date.toISOString().slice(0, 10), a]),
-  );
+  analytics.forEach((item) => {
+    analyticsMap.set(item._id, {
+      clicks: item.clicks,
+      uniqueVisitors: item.uniqueVisitors
+    });
+  });
 
+  // Fill missing days
   const chartData = [];
 
   for (let i = range - 1; i >= 0; i--) {
@@ -296,20 +338,27 @@ const getLinkAnalytics = async (req, res) => {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
 
-    const key = d.toISOString().slice(0, 10);
-
-    const day = analyticsMap.get(key);
+    const key = d.toLocaleDateString("en-CA");
 
     chartData.push({
       date: key,
-      clicks: day?.clicks || 0,
-      uniqueVisitors: day?.uniqueVisitors || 0,
+      clicks: analyticsMap.get(key)?.clicks || 0,
+      uniqueVisitors: analyticsMap.get(key)?.uniqueVisitors || 0
     });
   }
+
+  // Device / Country / Referrer stats
+  const rawStats = await Analytics.find({
+    urlId: linkId,
+    userId,
+    date: { $gte: startDate }
+  }).lean();
+
   const deviceStats = {};
   const countryStats = {};
   const referrerStats = {};
-  for (const a of analytics) {
+
+  for (const a of rawStats) {
     for (const [k, v] of Object.entries(a.deviceStats || {})) {
       deviceStats[k] = (deviceStats[k] || 0) + v;
     }
@@ -322,6 +371,7 @@ const getLinkAnalytics = async (req, res) => {
       referrerStats[k] = (referrerStats[k] || 0) + v;
     }
   }
+
   return res.status(200).json(
     new ApiResponse(
       200,
@@ -335,10 +385,10 @@ const getLinkAnalytics = async (req, res) => {
         chartData,
         deviceStats,
         countryStats,
-        referrerStats,
+        referrerStats
       },
-      "Link analytics fetched successfully",
-    ),
+      "Link analytics fetched successfully"
+    )
   );
 };
 

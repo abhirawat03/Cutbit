@@ -14,17 +14,19 @@ const redirectUrl = async (req, res) => {
   // find link
   const url = await Url.findOne({ shortUrl }).lean();
 
-  if (!url) throw new ApiError(404, "short url not found");
+  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-  // status check
+  if (!url) {
+    return res.redirect(`${FRONTEND_URL}/link-error/invalid`);
+  }
+  
   if (url.status === "paused") {
-    throw new ApiError(403, "Link is paused");
+    return res.redirect(`${FRONTEND_URL}/link-error/paused`);
   }
-
-  // expiry check
+  
   if (url.expiryDate && url.expiryDate < new Date()) {
-    throw new ApiError(410, "Link expired");
-  }
+    return res.redirect(`${FRONTEND_URL}/link-error/expired`);
+}
 
   //check visitor
   let visitorId = req.cookies?.visitorId;

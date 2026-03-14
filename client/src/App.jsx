@@ -14,6 +14,9 @@ import Settings from "./pages/Settings.jsx";
 import LinkView from "./pages/Link.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Privacy from "./pages/Privacy.jsx";
+import Terms from "./pages/Terms.jsx";
+import RedirectError from "./pages/RedirectError.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -24,6 +27,9 @@ function App() {
         {/* layout wrapper */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/link-error/:type" element={<RedirectError />} />
         </Route>
         <Route element={<PublicRoute />}>
           {/* AUTH PAGES */}

@@ -113,7 +113,7 @@ if (!ready || isLoading) {
 
         <button
           onClick={() => setRange(7)}
-          className={`px-4 py-2 rounded-lg ${range === 7 ? "bg-blue-600" : "bg-[#40444a6d]"
+          className={`px-4 py-2 rounded-lg cursor-pointer ${range === 7 ? "bg-blue-600" : "bg-[#40444a6d]"
             }`}
         >
           7D
@@ -121,7 +121,7 @@ if (!ready || isLoading) {
 
         <button
           onClick={() => setRange(30)}
-          className={`px-4 py-2 rounded-lg ${range === 30 ? "bg-blue-600" : "bg-[#40444a6d]"
+          className={`px-4 py-2 rounded-lg cursor-pointer ${range === 30 ? "bg-blue-600" : "bg-[#40444a6d]"
             }`}
         >
           30D
@@ -167,7 +167,7 @@ if (!ready || isLoading) {
         <div className='flex flex-row justify-between items-center p-6'>
           <h2 className='text-2xl font-medium'>Recent Links</h2>
           <Link to="/dashboard/links">
-            <button className="text-blue-500 hover:text-blue-300 text-base cursor-pointerx  ">View All Links</button>
+            <button className="text-blue-500 hover:text-blue-300 text-base cursor-pointer">View All Links</button>
           </Link>
         </div>
         <div className='overflow-x-auto'>
@@ -185,7 +185,7 @@ if (!ready || isLoading) {
                 <>
                   {dashboard.recentLinks.map((link) => (
                     <tr
-                      className="hover:bg-[#050f24] transition"
+                      className="hover:bg-[#050f24] transition cursor-pointer"
                       onClick={() => navigate(`/dashboard/links/${link._id}`)}
                       key={link._id}
                     >

@@ -68,14 +68,14 @@ export default function LinkView() {
 
                     {/* Header */}
                     <div className="bg-[#111827] p-6 rounded-xl">
-                        <h1 className="text-2xl font-semibold text-blue-400">
+                        <h1 className="text-2xl font-bold mt-3">
                             <a
                                 href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link?.shortUrl}`}
                                 target="_blank"
-                                //   rel="noopener noreferrer"
-                                className=" hover:underline"
+                                className="hover:underline"
                             >
-                                {import.meta.env.VITE_BACKEND_URL_ID}/{link?.shortUrl}
+                                {import.meta.env.VITE_BACKEND_URL_ID}/
+                                <span className="text-teal-400">{link?.shortUrl}</span>
                             </a>
                         </h1>
 

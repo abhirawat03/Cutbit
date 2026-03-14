@@ -113,15 +113,6 @@ export const getDashboardData = async (req, res) => {
       unique: calculateGrowth(currentUnique, prevUnique) || 0,
     };
 
-    //chart data
-    // const analytics = await Analytics.find({
-    //   userId: new mongoose.Types.ObjectId(userId),
-    //   date: { $gte: startDate, $lte: endOfToday },
-    // })
-    //   .sort({ date: 1 })
-    //   .select("date clicks uniqueVisitors -_id");
-    // console.log("Analytics docs:", analytics);
-    // console.log(await Analytics.find());
 
     const analytics = await Analytics.aggregate([
   {

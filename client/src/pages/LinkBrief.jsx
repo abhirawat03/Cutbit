@@ -42,10 +42,10 @@ export default function LinkBrief() {
         </Link>
 
         <span>/</span>
-
-        <span className="text-white font-medium">
+        
+        <Link to={`/dashboard/links/${id}`} className="hover:text-white font-medium">
           {linkdetails?.shortUrl}
-        </span>
+        </Link>
 
         <span>/</span>
 

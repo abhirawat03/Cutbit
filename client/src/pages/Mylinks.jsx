@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { IoLink } from "react-icons/io5";
-import { MdAnalytics } from "react-icons/md";
 import { MdQrCode2 } from "react-icons/md";
 import { MdAdsClick } from "react-icons/md";
 import { MdOutlinePersonOutline } from "react-icons/md";
@@ -13,6 +12,18 @@ import { useLinkStats } from '../hooks/queries/useLinkStats.js';
 import { useDeleteLink } from "../hooks/mutations/useDeleteLink.js";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import { QRCodeCanvas } from "qrcode.react";
+import { IoClose } from "react-icons/io5";
+
+const getLinkStatus = (link) => {
+    if (link.status === "paused") return "paused";
+
+    if (link.expiryDate && new Date(link.expiryDate) < new Date()) {
+        return "expired";
+    }
+
+    return "active";
+};
 
 function Mylinks() {
     const navigate = useNavigate();
@@ -23,6 +34,8 @@ function Mylinks() {
     const { data: stats, isLoading: statsLoading } = useLinkStats();
     const links = data?.links || [];
     const pagination = data?.pagination;
+    const [qrOpen, setQrOpen] = useState(false);
+    const [qrUrl, setQrUrl] = useState("");
 
     const copyToClipboard = (shortUrl) => {
         navigator.clipboard.writeText(
@@ -104,66 +117,81 @@ function Mylinks() {
 
                         <tbody className="divide-y divide-[#1e293b]">
                             {links.length > 0 ? (
-                                links.map((link) => (
-                                    <tr
-                                        key={link._id}
-                                        onClick={() => navigate(`/dashboard/links/${link._id}`)}
-                                        className="hover:bg-[#0b1220] transition"
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-blue-400 font-medium flex gap-2.5">
-                                                    <a
-                                                        href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}
-                                                        target="_blank"
-                                                        className="text-blue-400 cursor-pointer"
-                                                    >
-                                                        {link.shortUrl}
-                                                    </a>
-                                                    <IoCopySharp
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            copyToClipboard(link.shortUrl)
-                                                        }}
-                                                        className='text-gray-300 hover:text-blue-300' />
+                                links.map((link) => {
+                                    const computedStatus = getLinkStatus(link);
+                                    return (
+                                        <tr
+                                            className={`transition hover:bg-[#0b1220] cursor-pointer ${computedStatus === "expired" ? "opacity-60" : ""
+                                                }`}
+                                            key={link._id}
+                                            onClick={() => navigate(`/dashboard/links/${link._id}`)}
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-blue-400 font-medium flex gap-2.5">
+                                                        <a
+                                                            href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}
+                                                            target="_blank"
+                                                            className="text-blue-400 cursor-pointer"
+                                                        >
+                                                            {link.shortUrl}
+                                                        </a>
+                                                        <IoCopySharp
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                copyToClipboard(link.shortUrl)
+                                                            }}
+                                                            className='text-gray-300 hover:text-blue-300' />
+                                                    </span>
+                                                    <span className="text-gray-500 text-xs truncate max-w-[280px]">
+                                                        {link.originalUrl}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-6 py-4">
+                                                <span
+                                                    className={`px-3 py-1 text-xs rounded-full ${computedStatus === "active"
+                                                        ? "bg-emerald-500/20 text-emerald-400"
+                                                        : computedStatus === "paused"
+                                                            ? "bg-yellow-500/20 text-yellow-400"
+                                                            : "bg-red-500/20 text-red-400"
+                                                        }`}
+                                                >
+                                                    {computedStatus.toUpperCase()}
                                                 </span>
-                                                <span className="text-gray-500 text-xs truncate max-w-[280px]">
-                                                    {link.originalUrl}
-                                                </span>
-                                            </div>
-                                        </td>
+                                            </td>
 
-                                        <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 text-xs rounded-full ${link.status === "active"
-                                                ? "bg-emerald-500/20 text-emerald-400"
-                                                : "bg-red-500/20 text-red-400"
-                                                }`}>
-                                                {link.status.toUpperCase()}
-                                            </span>
-                                        </td>
+                                            <td className="px-6 py-4 font-semibold">{link.totalClicks}</td>
+                                            <td className="px-6 py-4 text-gray-400">{link.totalUniqueVisitors}</td>
+                                            <td className="px-6 py-4 text-gray-400">{new Date(link.createdAt).toLocaleDateString()}</td>
 
-                                        <td className="px-6 py-4 font-semibold">{link.totalClicks}</td>
-                                        <td className="px-6 py-4 text-gray-400">{link.totalUniqueVisitors}</td>
-                                        <td className="px-6 py-4 text-gray-400">{new Date(link.createdAt).toLocaleDateString()}</td>
-
-                                        <td className="flex items-center py-5">
-                                            <MdQrCode2 className="text-gray-400 hover:text-blue-400" size={28} />
-                                            <RiEdit2Fill className="text-gray-400 hover:text-green-400" size={28}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedLink(link);
-                                                    setEditOpen(true);
-                                                }} />
-                                            <MdAnalytics className="text-gray-400 hover:text-yellow-400" size={28} />
-                                            <RiDeleteBin6Fill className="text-gray-400 hover:text-red-400" size={28}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    deleteLink(link._id)
-                                                }}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))
+                                            <td className="flex my-5 gap-2 justify-center">
+                                                <MdQrCode2
+                                                    className="text-gray-400 hover:text-blue-400 cursor-pointer"
+                                                    size={28}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setQrUrl(`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`);
+                                                        setQrOpen(true);
+                                                    }}
+                                                />
+                                                <RiEdit2Fill className="text-gray-400 hover:text-green-400" size={28}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedLink(link);
+                                                        setEditOpen(true);
+                                                    }} />
+                                                <RiDeleteBin6Fill className="text-gray-400 hover:text-red-400" size={28}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deleteLink(link._id)
+                                                    }}
+                                                />
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan="6" className="text-center py-6 text-gray-400">
@@ -219,14 +247,20 @@ function Mylinks() {
                                         {link.status.toUpperCase()}
                                     </span>
                                     <div className="space-x-2 text-lg flex flex-row">
-                                        <MdQrCode2 className=" text-blue-400" size={28} />
+                                        <MdQrCode2
+                                            className="text-blue-400 cursor-pointer"
+                                            size={28}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setQrUrl(`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`);
+                                                setQrOpen(true);
+                                            }}
+                                        />
                                         <RiEdit2Fill className=" text-green-400" size={28} onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedLink(link);
                                             setEditOpen(true);
-
                                         }} />
-                                        <MdAnalytics className="text-yellow-400" size={28} />
                                         <RiDeleteBin6Fill className="text-red-400" size={28}
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -245,6 +279,53 @@ function Mylinks() {
                         link={selectedLink}
                         onClose={() => setEditOpen(false)}
                     />
+                )}
+                {qrOpen && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <div className="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 text-center w-[320px]">
+
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-white font-semibold">QR Code</h2>
+                                <IoClose
+                                    className="text-gray-400 hover:text-white cursor-pointer"
+                                    size={22}
+                                    onClick={() => setQrOpen(false)}
+                                />
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg inline-block">
+                                <QRCodeCanvas
+                                    id="qr-code"
+                                    value={qrUrl}
+                                    size={200}
+                                    level="H"
+                                />
+                            </div>
+
+                            <p className="text-gray-400 text-xs mt-3 break-all">
+                                {qrUrl}
+                            </p>
+
+                            <button
+                                onClick={() => {
+                                    const canvas = document.getElementById("qr-code");
+                                    const pngUrl = canvas
+                                        .toDataURL("image/png")
+                                        .replace("image/png", "image/octet-stream");
+
+                                    const downloadLink = document.createElement("a");
+                                    downloadLink.href = pngUrl;
+                                    downloadLink.download = "qr-code.png";
+                                    document.body.appendChild(downloadLink);
+                                    downloadLink.click();
+                                    document.body.removeChild(downloadLink);
+                                }}
+                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+                            >
+                                Download QR
+                            </button>
+                        </div>
+                    </div>
                 )}
                 <div className="flex flex-col md:flex-row justify-between items-center p-4 border-t border-[#1e293b] bg-[#0f172a] text-sm text-gray-400 gap-4">
                     <span>Showing {links.length} of {pagination?.totalLinks || 0} links</span>

@@ -132,7 +132,7 @@ export default function EditLink({ link, onClose}) {
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row gap-4 pt-4">
-            <button className={`flex-1 text-white font-semibold py-3 rounded-lg 
+            <button className={`flex-1 text-white font-semibold py-3 rounded-lg cursor-pointer
             ${hasChanges
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-gray-600 cursor-not-allowed"}

@@ -135,7 +135,7 @@ export default function CreateNewLink({ onClose }) {
               <button
                 type="submit"
                 disabled={!canGenerate || createLinkMutation.isPending}
-                className={`w-full py-3 rounded-lg font-semibold transition
+                className={`w-full py-3 rounded-lg font-semibold transition cursor-pointer
                 ${createLinkMutation.isPending
                     ? "bg-gray-600 cursor-not-allowed"
                     : "bg-blue-600 hover:bg-blue-700"

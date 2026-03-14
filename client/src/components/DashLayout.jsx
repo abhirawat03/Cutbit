@@ -6,7 +6,7 @@ import { FaChartSimple } from "react-icons/fa6";
 import { BsGearFill } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { IoSearchSharp } from "react-icons/io5";
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom"
 import CreateNewLink from './CreateNewLink';
 import { useAuth } from "../hooks/useAuth";
@@ -50,15 +50,17 @@ function DashLayout() {
     md:translate-x-0
   `}>
         <div className='flex flex-col gap-6'>
-          <div className='flex flex-row items-center gap-2'>
-            <div>
-              <img src={logo} alt="" className='w-12 h-12' />
+          <Link to="/dashboard">
+            <div className='flex flex-row items-center gap-2'>
+              <div>
+                <img src={logo} alt="" className='w-12 h-12'/>
+              </div>
+              <div>
+                <h1 className='text-lg font-bold'>Cutbit</h1>
+                <p className='uppercase text-xs tracking-widest'>Analytics Hub</p>
+              </div>
             </div>
-            <div>
-              <h1 className='text-lg font-bold'>Cutbit</h1>
-              <p className='uppercase text-xs tracking-widest'>Analytics Hub</p>
-            </div>
-          </div>
+          </Link>
           <ul className="flex flex-col ml-1 space-y-2 z-10">
             {navItems.map(({ name, icon, path }) => {
               const Icon = icon;
