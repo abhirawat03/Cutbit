@@ -32,7 +32,7 @@ export default function LinkBrief() {
 
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 hover:text-white"
+          className="flex items-center gap-1 hover:text-white cursor-pointer"
         >
           <IoArrowBack size={18} />
         </button>
@@ -86,7 +86,7 @@ export default function LinkBrief() {
 
             <button
               onClick={() => setRange(7)}
-              className={`px-4 py-2 rounded-lg text-sm border
+              className={`px-4 py-2 rounded-lg text-sm border cursor-pointer
                 ${range === 7
                   ? "bg-teal-500/20 text-teal-400 border-teal-500"
                   : "bg-[#1f2937] border-[#334155] hover:bg-[#273244]"
@@ -97,7 +97,7 @@ export default function LinkBrief() {
 
             <button
               onClick={() => setRange(30)}
-              className={`px-4 py-2 rounded-lg text-sm border
+              className={`px-4 py-2 rounded-lg text-sm border cursor-pointer
                 ${range === 30
                   ? "bg-teal-500/20 text-teal-400 border-teal-500"
                   : "bg-[#1f2937] border-[#334155] hover:bg-[#273244]"

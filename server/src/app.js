@@ -1,9 +1,12 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-
+import helmet from "helmet"
 
 const app = express()
+
+// security headers
+app.use(helmet())
 
 app.use(
     cors({

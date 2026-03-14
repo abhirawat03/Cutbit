@@ -27,6 +27,8 @@ const getLinkStatus = (link) => {
 
 function Mylinks() {
     const navigate = useNavigate();
+    const [deleteId, setDeleteId] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const page = Number(searchParams.get("page")) || 1;
     const deleteMutation = useDeleteLink();
@@ -185,7 +187,8 @@ function Mylinks() {
                                                 <RiDeleteBin6Fill className="text-gray-400 hover:text-red-400" size={28}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        deleteLink(link._id)
+                                                        setDeleteId(link._id);
+                                                        setConfirmDelete(true);
                                                     }}
                                                 />
                                             </td>
@@ -247,8 +250,7 @@ function Mylinks() {
                                         {link.status.toUpperCase()}
                                     </span>
                                     <div className="space-x-2 text-lg flex flex-row">
-                                        <MdQrCode2
-                                            className="text-blue-400 cursor-pointer"
+                                        <MdQrCode2                                            className="text-blue-400 cursor-pointer"
                                             size={28}
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -256,15 +258,16 @@ function Mylinks() {
                                                 setQrOpen(true);
                                             }}
                                         />
-                                        <RiEdit2Fill className=" text-green-400" size={28} onClick={(e) => {
+                                        <RiEdit2Fill className="text-green-400 cursor-pointer" size={28} onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedLink(link);
                                             setEditOpen(true);
                                         }} />
-                                        <RiDeleteBin6Fill className="text-red-400" size={28}
+                                        <RiDeleteBin6Fill className="text-red-400 cursor-pointer" size={28}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                deleteLink(link._id)
+                                                setDeleteId(link._id);
+                                                setConfirmDelete(true)
                                             }}
                                         />
                                     </div>
@@ -320,10 +323,47 @@ function Mylinks() {
                                     downloadLink.click();
                                     document.body.removeChild(downloadLink);
                                 }}
-                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg cursor-pointer"
                             >
                                 Download QR
                             </button>
+                        </div>
+                    </div>
+                )}
+                {confirmDelete && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+
+                        <div className="bg-[#111827] p-6 rounded-xl w-[350px] text-center">
+
+                            <h2 className="text-lg font-semibold mb-2">
+                                Delete Link
+                            </h2>
+
+                            <p className="text-gray-400 text-sm mb-6">
+                                Are you sure you want to delete this link?
+                            </p>
+
+                            <div className="flex justify-center gap-4">
+
+                                <button
+                                    onClick={() => setConfirmDelete(false)}
+                                    className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        deleteLink(deleteId)
+                                        setConfirmDelete(false);
+                                    }}
+                                    className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700"
+                                >
+                                    Confirm
+                                </button>
+
+                            </div>
+
                         </div>
                     </div>
                 )}
@@ -334,7 +374,7 @@ function Mylinks() {
                         <button
                             disabled={page === 1}
                             onClick={() => changePage(page - 1)}
-                            className="px-3 py-1 rounded-md bg-[#1e293b] hover:bg-[#334155]">
+                            className="px-3 py-1 rounded-md bg-[#1e293b] hover:bg-[#334155] cursor-pointer">
                             {"<"}
                         </button>
                         {/* Page Numbers */}
@@ -345,7 +385,7 @@ function Mylinks() {
                                 <button
                                     key={pageNumber}
                                     onClick={() => changePage(pageNumber)}
-                                    className={`px-3 py-1 rounded-md ${page === pageNumber
+                                    className={`px-3 py-1 rounded-md cursor-pointer ${page === pageNumber
                                         ? "bg-blue-600 text-white"
                                         : "hover:bg-[#1e293b]"
                                         }`}
@@ -358,7 +398,7 @@ function Mylinks() {
                         <button
                             disabled={page === pagination?.totalPages}
                             onClick={() => changePage(page + 1)}
-                            className="px-3 py-1 rounded-md bg-[#1e293b] hover:bg-[#334155]">
+                            className="px-3 py-1 rounded-md bg-[#1e293b] hover:bg-[#334155] cursor-pointer">
                             {">"}
                         </button>
                     </div>

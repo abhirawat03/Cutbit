@@ -78,6 +78,16 @@ const loginUser = async (req, res) => {
     throw new ApiError(400, "Email and password are required");
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  if (password.length < 8 || password.length > 64) {
+    throw new ApiError(400, "Password must be between 8 and 64 characters");
+  }
+
   const user = await User.findOne({
     email,
   });
@@ -172,8 +182,9 @@ const refreshAccessToken = async (req, res) => {
       sameSite: "strict",
     };
 
-    const { accessToken, refreshToken } =
-      await generateAccessAndRefreshTokens(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user._id,
+    );
 
     return res
       .status(200)
@@ -290,25 +301,25 @@ const deleteUserAvatar = async (req, res) => {
   const oldAvatar = user.avatar;
 
   if (!oldAvatar) {
-        throw new ApiError(400, "No avatar to delete")
-    }
-    // extract publicId from cloudinary url
-    const publicId = oldAvatar.split('/').pop().split('.')[0]   
-    await cloudinary.uploader.destroy(publicId).catch(() => {})
+    throw new ApiError(400, "No avatar to delete");
+  }
+  // extract publicId from cloudinary url
+  const publicId = oldAvatar.split("/").pop().split(".")[0];
+  await cloudinary.uploader.destroy(publicId).catch(() => {});
 
-    await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set: {
-                avatar: null
-            }
-        },
-        { returnDocument: "after" }
-    ).select("-password")
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: null,
+      },
+    },
+    { returnDocument: "after" },
+  ).select("-password");
 
   return res
     .status(204)
-    .json(new ApiResponse(204,{}, "Avatar removed successfully"));
+    .json(new ApiResponse(204, {}, "Avatar removed successfully"));
 };
 
 export {
@@ -321,5 +332,5 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateUserAvatar,
-  deleteUserAvatar
+  deleteUserAvatar,
 };

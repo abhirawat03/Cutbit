@@ -100,16 +100,21 @@ function Home() {
         document.body.removeChild(link);
     };
     const handleShare = async () => {
-        const shareUrl = `https://wcrfjq87-8000.inc1.devtunnels.ms/${shortUrl}`;
-        console.log("Sharing:", shareUrl);
-        try {
-            await navigator.share({
-                title: "Short Link",
-                text: "Check this link",
-                url: shareUrl,
-            });
-        } catch (err) {
-            console.log("Share cancelled", err);
+        const url = `${import.meta.env.VITE_BACKEND_URL_ID}/${shortUrl}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: "Check out this link",
+                    text: "Here is a shortened link",
+                    url
+                });
+            } catch (e) {
+                console.log("Share cancelled", e);
+            }
+        } else {
+            navigator.clipboard.writeText(url);
+            alert("Link copied to clipboard");
         }
     };
 

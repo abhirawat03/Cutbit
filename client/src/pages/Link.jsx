@@ -5,8 +5,13 @@ import { IoArrowBack } from "react-icons/io5";
 import { useLink } from "../hooks/queries/useLink";
 import { QRCodeCanvas } from 'qrcode.react';
 import { useDeleteLink } from "../hooks/mutations/useDeleteLink";
+import { FiEdit } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
+import { FiCopy } from "react-icons/fi";
+import { FiShare2 } from "react-icons/fi";
 
 export default function LinkView() {
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
     const deleteMutation = useDeleteLink();
@@ -35,6 +40,24 @@ export default function LinkView() {
         link.click();
         document.body.removeChild(link);
     };
+    const shareLink = async () => {
+        const url = `${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: "Check out this link",
+                    text: "Here is a shortened link",
+                    url
+                });
+            } catch (e) {
+                console.log("Share cancelled", e);
+            }
+        } else {
+            navigator.clipboard.writeText(url);
+            alert("Link copied to clipboard");
+        }
+    };
 
     if (isLoading) {
         return <p className="text-white">Loading...</p>;
@@ -45,7 +68,7 @@ export default function LinkView() {
 
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-1 hover:text-white"
+                    className="flex items-center gap-1 hover:text-white cursor-pointer"
                 >
                     <IoArrowBack size={18} />
                 </button>
@@ -84,9 +107,11 @@ export default function LinkView() {
                         </p>
 
                         <button
-                            onClick={() => { copyToClipboard(link.shortUrl) }}
-                            className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
-                            Copy Link
+                            title="Copy Link"
+                            onClick={() => copyToClipboard(link.shortUrl)}
+                            className="mt-4 bg-blue-600 hover:bg-blue-700 p-2 rounded-lg transition hover:scale-110 cursor-pointer"
+                        >
+                            <FiCopy size={18} />
                         </button>
                     </div>
 
@@ -118,13 +143,6 @@ export default function LinkView() {
                                 </span>
                             </div>
 
-                            <div className="flex items-center justify-between border-b border-[#1f2937] pb-3">
-                                <span className="text-gray-400">Destination</span>
-                                <span className="text-white font-medium truncate max-w-[160px]">
-                                    {new URL(link?.originalUrl).hostname}
-                                </span>
-                            </div>
-
                             <div className="flex items-center justify-between">
                                 <span className="text-gray-400">Status</span>
 
@@ -145,7 +163,7 @@ export default function LinkView() {
 
                     {/* Analytics Button */}
                     <Link to={`/dashboard/links/${id}/analytics`}>
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-semibold">
+                        <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-semibold cursor-pointer">
                             View Detailed Analytics
                         </button>
                     </Link>
@@ -169,7 +187,7 @@ export default function LinkView() {
 
                         <button
                             onClick={downloadQR}
-                            className="mt-4 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg">
+                            className="mt-4 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg cursor-pointer">
                             Download
                         </button>
                     </div>
@@ -178,20 +196,36 @@ export default function LinkView() {
                     <div className="bg-[#111827] p-6 rounded-xl">
                         <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
 
-                        <button className="w-full bg-green-700 hover:bg-green-600 py-2 rounded-lg mb-3"
-                            onClick={() => {
-                                setSelectedLink(link);
-                                setEditOpen(true);
-                            }}
-                        >
-                            Edit
-                        </button>
+                        <div className="flex justify-center gap-4">
 
-                        <button
-                            onClick={() => { deleteLink(link._id) }}
-                            className="w-full bg-red-600 hover:bg-red-700 py-2 rounded-lg">
-                            Delete Link
-                        </button>
+                            <button
+                                title="Edit"
+                                onClick={() => {
+                                    setSelectedLink(link);
+                                    setEditOpen(true);
+                                }}
+                                className="bg-[#1f2937] hover:bg-blue-600 p-2 rounded-lg transition hover:scale-110 cursor-pointer"
+                            >
+                                <FiEdit size={18} />
+                            </button>
+
+                            <button
+                                title="Delete"
+                                onClick={() => setConfirmDelete(true)}
+                                className="bg-red-600 hover:bg-red-700 p-2 rounded-lg transition hover:scale-110 cursor-pointer"
+                            >
+                                <FiTrash2 size={18} />
+                            </button>
+
+                            <button
+                                title="Share"
+                                onClick={shareLink}
+                                className="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg transition hover:scale-110 cursor-pointer"
+                            >
+                                <FiShare2 size={18} />
+                            </button>
+
+                        </div>
                     </div>
 
                 </div>
@@ -200,6 +234,43 @@ export default function LinkView() {
                         link={selectedLink}
                         onClose={() => setEditOpen(false)}
                     />
+                )}
+                {confirmDelete && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+
+                        <div className="bg-[#111827] p-6 rounded-xl w-[350px] text-center">
+
+                            <h2 className="text-lg font-semibold mb-2">
+                                Delete Link
+                            </h2>
+
+                            <p className="text-gray-400 text-sm mb-6">
+                                Are you sure you want to delete this link?
+                            </p>
+
+                            <div className="flex justify-center gap-4">
+
+                                <button
+                                    onClick={() => setConfirmDelete(false)}
+                                    className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        deleteLink(link._id);
+                                        setConfirmDelete(false);
+                                    }}
+                                    className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700"
+                                >
+                                    Confirm
+                                </button>
+
+                            </div>
+
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
