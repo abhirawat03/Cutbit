@@ -64,6 +64,10 @@ function Signup() {
     } finally {
       setLoading(false)
     }
+
+  }
+  const handleGoogleLogin = () => {
+    window.location.href =`${import.meta.env.VITE_BACKEND_URL_ID}/api/v1/auth/google`
   }
 
   return (
@@ -73,7 +77,8 @@ function Signup() {
         Start shortening and tracking your links today. <br /> No credit card required
       </p>
 
-      <div className='flex items-center justify-center bg-[#63686c5e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 border border-[#7d83885e]'>
+      <div onClick={handleGoogleLogin}
+      className='flex items-center justify-center bg-[#63686c5e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 border border-[#7d83885e]'>
         <FcGoogle />
         <h3 className='text-gray-300'>Continue with Google</h3>
       </div>

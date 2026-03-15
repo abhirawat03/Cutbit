@@ -28,6 +28,8 @@
     "mongoose": "^9.2.1",
     "multer": "^2.1.1",
     "nanoid": "^5.1.6",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "ua-parser-js": "^2.0.9"
   }
 }
