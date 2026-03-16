@@ -16,13 +16,21 @@ const userSchema = new Schema({
     },
     password:{
         type:String,
-        required:true,
+        required:false,
         // select: false,
     },
     avatar:{
         type:String,//cloudinary url
         // required:true,
         default:null,
+    },
+    googleId:{
+        type:String,
+    },
+    provider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local"
     },
     refreshToken:{
         type:String
@@ -43,7 +51,7 @@ userSchema.methods.generateAccessToken = function(){
     return jwt.sign(
         {
             _id:this._id,
-            emial:this.email,
+            email:this.email,
             fullName:this.fullName
         },
         process.env.ACCESS_TOKEN_SECRET,

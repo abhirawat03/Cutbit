@@ -2,11 +2,12 @@ import React, { useState } from 'react'
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from 'react-router-dom';
 import Api from '../api/axios';
+import { useLogin } from '../hooks/mutations/useLogin';
 
 function Login() {
   const navigate = useNavigate()
+  const loginMutation = useLogin();
   const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -22,10 +23,10 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (loading) return
+
     const { email, password } = formData
 
-    if (!email || !password) {
+    if (!email.trim() || !password.trim()) {
       setError("All fields are required")
       return
     }
@@ -41,35 +42,31 @@ function Login() {
       setError("Password must be between 8 and 64 characters")
       return
     }
-    try {
-      setLoading(true)
-      const res = await Api.post("/users/login", formData)
-
-      // cookie already stored by backend
-      if (res.status === 200) {
-
+    loginMutation.mutate(formData, {
+      onSuccess: () => {
         navigate("/dashboard");
-
+      },
+      onError: (error) => {
+        setError(error.response?.data?.message || "Login failed");
       }
-
-    } catch (error) {
-      const message = error.response?.data?.message || "Login failed. Please try again.";
-      setError(message)
-      setTimeout(() => {
-        setError("")
-      }, 3000)
-    } finally {
-      setLoading(false)
-    }
+    });
+  }
+  const handleGoogleLogin = () => {
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`
   }
   return (
     <>
       <h1 className='text-2xl font-bold'>Welcome back</h1>
       <p className='text-sm text-gray-400 mb-2'>The modern way to manage your links.</p>
-      <div className='flex items-center justify-center bg-[#63686c5e] border border-[#7d83885e] w-full gap-2 rounded-md p-2 hover:bg-gray-800'>
+      <button
+        type="button"
+        disabled={loginMutation.isPending}
+        onClick={handleGoogleLogin}
+        className="flex items-center justify-center bg-[#63686c5e] border border-[#7d83885e] w-full gap-2 rounded-md p-2 hover:bg-gray-800"
+      >
         <FcGoogle />
-        <h3 className='text-gray-300'>Continue with Google</h3>
-      </div>
+        <span className="text-gray-300">Continue with Google</span>
+      </button>
       <div className='flex flex-row items-center w-full gap-1'>
         <div className='border-b-2 w-18 border-[#63686c5e]'></div>
         <h1 className='uppercase text-xs text-gray-400'>Or Continue With Email</h1>
@@ -105,12 +102,12 @@ function Login() {
         </div>
         <button
           type='submit'
-          disabled={loading}
-          className={`p-2 rounded-md mt-3 ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-[#2563EB] hover:bg-blue-700"
+          disabled={loginMutation.isPending}
+          className={`p-2 rounded-md mt-3 ${loginMutation.isPending ? "bg-blue-400 cursor-not-allowed" : "bg-[#2563EB] hover:bg-blue-700"
             }`}
         >
-          {loading ? "Logging in..." : "Login"}</button>
-        
+          {loginMutation.isPending ? "Logging in..." : "Login"}</button>
+
       </form>
       <div>
         <p className='text-gray-400 text-sm'>Don't have a account?

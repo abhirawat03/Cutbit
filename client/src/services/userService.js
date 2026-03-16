@@ -1,5 +1,15 @@
 import Api from "../api/axios";
 
+export const signupUser = async (data) => {
+  const res = await Api.post("/users/register", data);
+  return res.data.data;
+};
+
+export const loginUser = async (data) => {
+  const res = await Api.post("/users/login", data);
+  return res.data.data;
+};
+
 const getCurrentUser = async () => {
   const res = await Api.get("/users/current-user");
   return res.data.data;

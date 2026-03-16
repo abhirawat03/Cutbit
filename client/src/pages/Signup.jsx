@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { FcGoogle } from "react-icons/fc"
 import { Link, useNavigate } from 'react-router-dom'
-import Api from "../api/axios.js"
+import { useSignup } from "../hooks/mutations/useSignup"
 
 function Signup() {
   const navigate = useNavigate()
+  const signupMutation = useSignup()
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -13,7 +14,6 @@ function Signup() {
   })
 
   const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     setError("")
@@ -23,14 +23,12 @@ function Signup() {
     })
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-
-    if (loading) return
 
     const { fullName, email, password } = formData
 
-    if (!fullName || !email || !password) {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
       setError("All fields are required")
       return
     }
@@ -47,27 +45,26 @@ function Signup() {
       return
     }
 
-    try {
-      setLoading(true)
-
-      const res = await Api.post("/users/register", formData)
-
-      if (res.status === 201) {
+    signupMutation.mutate(formData, {
+      onSuccess: () => {
+        setFormData({
+          fullName: "",
+          email: "",
+          password: ""
+        })
         navigate("/dashboard")
+      },
+
+      onError: (error) => {
+        const message =
+          error.response?.data?.message || "Signup failed"
+        setError(message)
       }
-
-    } catch (error) {
-      const message =
-        error.response?.data?.message || "Signup failed. Try again."
-
-      setError(message)
-    } finally {
-      setLoading(false)
-    }
+    })
 
   }
   const handleGoogleLogin = () => {
-    window.location.href =`${import.meta.env.VITE_BACKEND_URL_ID}/api/v1/auth/google`
+    window.location.href =`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`
   }
 
   return (
@@ -77,11 +74,15 @@ function Signup() {
         Start shortening and tracking your links today. <br /> No credit card required
       </p>
 
-      <div onClick={handleGoogleLogin}
-      className='flex items-center justify-center bg-[#63686c5e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 border border-[#7d83885e]'>
+      <button
+        type="button"
+        disabled={signupMutation.isPending}
+        onClick={handleGoogleLogin}
+        className="flex items-center justify-center bg-[#63686c5e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 border border-[#7d83885e]"
+      >
         <FcGoogle />
-        <h3 className='text-gray-300'>Continue with Google</h3>
-      </div>
+        <span className="text-gray-300">Continue with Google</span>
+      </button>
 
       <div className='flex flex-row items-center w-full gap-1'>
         <div className='border-b-2 w-18 border-[#63686c5e]'></div>
@@ -103,6 +104,7 @@ function Signup() {
             type="text"
             id='fullName'
             name='fullName'
+            required
             value={formData.fullName}
             onChange={handleChange}
             placeholder='yourname'
@@ -114,6 +116,7 @@ function Signup() {
             type="email"
             id="email"
             name="email"
+            required
             value={formData.email}
             onChange={handleChange}
             placeholder='name@gmail.com'
@@ -125,6 +128,7 @@ function Signup() {
             type="password"
             id='password'
             name="password"
+            required
             value={formData.password}
             onChange={handleChange}
             placeholder='••••••••'
@@ -136,14 +140,14 @@ function Signup() {
 
         <button
           type='submit'
-          disabled={loading}
+          disabled={signupMutation.isPending}
           className={`p-2 rounded-md mt-3 ${
-            loading
+            signupMutation.isPending
               ? "bg-blue-400 cursor-not-allowed"
               : "bg-[#2563EB] hover:bg-blue-700"
           }`}
         >
-          {loading ? "Creating Account..." : "Create Account"}
+          {signupMutation.isPending ? "Creating Account..." : "Create Account"}
         </button>
       </form>
 

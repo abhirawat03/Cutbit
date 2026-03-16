@@ -61,7 +61,8 @@ const registerUser = async (req, res) => {
   );
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
   };
 
   return res
@@ -108,7 +109,8 @@ const loginUser = async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
   };
 
   return res
@@ -118,12 +120,37 @@ const loginUser = async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        {
-          user: loggedInUser,
-        },
+        {},
         "User logged in successfully",
       ),
     );
+};
+
+const googleAuthCallback = async (req, res) => {
+
+  const user = req.user;
+
+  if (!user) {
+    throw new ApiError(401, "Google authentication failed");
+  }
+
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshTokens(user._id);
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
+  };
+
+  // const loggedInUser = await User.findById(user._id).select(
+  //   "-password -refreshToken"
+  // );
+
+  return res
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .redirect(`${process.env.FRONTEND_URL}/dashboard`);
 };
 
 const logoutUser = async (req, res) => {
@@ -140,7 +167,8 @@ const logoutUser = async (req, res) => {
   );
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
   };
 
   return res
@@ -178,8 +206,8 @@ const refreshAccessToken = async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax"
     };
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -333,4 +361,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   deleteUserAvatar,
+  googleAuthCallback
 };
