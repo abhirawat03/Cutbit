@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getCurrentUser, logoutUser } from "../services/userService";
@@ -11,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 run ONLY once on app load
+  // run ONLY once on app load
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -29,16 +28,14 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await logoutUser(); // backend clears cookie
+      await logoutUser(); 
     } catch {
-      // ignore logout error
+      // ignore logout error  
     }
 
     setUser(null);
     queryClient.clear();
   };
-  console.log("USER:", user);
-  console.log("AUTH:", !!user);
 
   return (
     <AuthContext.Provider

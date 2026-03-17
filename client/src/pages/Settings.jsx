@@ -4,15 +4,21 @@ import { useUpdateProfile } from "../hooks/mutations/useUpdateProfile";
 import { useUpdateAvatar } from "../hooks/mutations/useUpdateAvatar";
 import { useDeleteAvatar } from "../hooks/mutations/useDeleteAvatar";
 import { useChangePassword } from "../hooks/mutations/useChangePassword";
+import { useDeleteAccount } from "../hooks/mutations/useDeleteAccount";
+import {useNavigate } from 'react-router-dom';
+import DeleteAccountConfirm from "../components/DeleteAccountConfirm"
 
 export default function Settings() {
-  const { user, loading: isLoading,setUser } = useAuth();
+  const { user, loading: isLoading,setUser, logout } = useAuth();
   const updateProfileMutation = useUpdateProfile();
   const updateAvatarMutation = useUpdateAvatar();
   const deleteAvatarMutation = useDeleteAvatar();
+  const deleteAccountMutation = useDeleteAccount();
+  const navigate = useNavigate();
   const changePasswordMutation = useChangePassword();
   const [avatarImg, setAvatarImg] = useState(null);
   const [showAvatar, setShowAvatar] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [form, setForm] = useState({
     avatar: null,
     email: "",
@@ -147,11 +153,18 @@ export default function Settings() {
             confirmPassword: ""
           });
 
-          alert("Password updated successfully");
         }
       }
     );
   };
+  const handleDeleteAccount = (confirmText) => {
+  deleteAccountMutation.mutate(confirmText, {
+    onSuccess: async () => {
+      await logout();
+      navigate("/");
+    },
+  });
+};
 
   const canUpdatePassword =
     Boolean(passwordForm.currentPassword) &&
@@ -210,18 +223,27 @@ export default function Settings() {
                 ) : (
                   <button
                     onClick={uploadAvatar}
-                    className="text-green-400 hover:text-green-300 cursor-pointer"
+                    disabled={updateAvatarMutation.isPending || deleteAvatarMutation.isPending}
+                    className={`flex items-center gap-2
+                    ${updateAvatarMutation.isPending
+                      ? "text-gray-500 cursor-not-allowed"
+                      : "text-green-400 hover:text-green-300 cursor-pointer"
+                    }`}
                   >
-                    Upload
+                    {updateAvatarMutation.isPending ? "Uploading..." : "Upload"}
                   </button>
                 )}
                 {form.avatar && (
                   <button
                     onClick={removeAvatar}
-                    disabled={deleteAvatarMutation.isPending}
-                    className="text-gray-400 hover:text-gray-300 cursor-pointer"
+                    disabled={updateAvatarMutation.isPending || deleteAvatarMutation.isPending}
+                    className={`flex items-center gap-2
+                    ${deleteAvatarMutation.isPending
+                      ? "text-gray-500 cursor-not-allowed"
+                      : "text-gray-400 hover:text-gray-300 cursor-pointer"
+                    }`}
                   >
-                    Remove
+                    {deleteAvatarMutation.isPending ? "Removing..." : "Remove"}
                   </button>
                 )}
               </div>
@@ -269,7 +291,7 @@ export default function Settings() {
               disabled={!hasChanges || updateProfileMutation.isPending}
               className={`px-6 py-2 rounded-lg text-sm font-medium
                 ${hasChanges
-                  ? "bg-blue-600 hover:bg-blue-700"
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
                   : "bg-gray-600 cursor-not-allowed"}
               `}>
               {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
@@ -347,7 +369,7 @@ export default function Settings() {
               onClick={updatePassword}
               disabled={!canUpdatePassword || changePasswordMutation.isPending}
               className={`px-6 py-2 rounded-lg text-sm font-medium
-    ${canUpdatePassword
+              ${canUpdatePassword
                   ? "bg-blue-600 hover:bg-blue-700"
                   : "bg-gray-600 cursor-not-allowed"
                 }`}>
@@ -375,7 +397,9 @@ export default function Settings() {
               </p>
             </div>
 
-            <button className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-sm font-medium">
+            <button 
+              onClick={()=> setShowDeleteModal(true)}
+              className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-sm font-medium cursor-pointer">
               Delete Permanently
             </button>
           </div>
@@ -394,6 +418,13 @@ export default function Settings() {
             onClick={(e) => e.stopPropagation()}
           />
         </div>
+      )}
+      {showDeleteModal && (
+        <DeleteAccountConfirm
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+          loading={deleteAccountMutation.isPending}
+        />
       )}
     </div>
   )

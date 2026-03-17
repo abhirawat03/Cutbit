@@ -5,6 +5,10 @@ import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { v2 as cloudinary } from "cloudinary";
+import { Url } from "../models/url.js";
+import mongoose from "mongoose";
+import { Analytics } from "../models/analytics.js";
+import { Visitor } from "../models/visitor.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -345,6 +349,67 @@ const deleteUserAvatar = async (req, res) => {
     .status(204)
     .json(new ApiResponse(204, {}, "Avatar removed successfully"));
 };
+const deleteUserProfile = async (req, res) => {
+  const userId = req.user?._id;
+
+  if (!userId) throw new ApiError(401, "Unauthorized");
+
+  // 🔥 Confirmation check (IMPORTANT)
+  if (req.body.confirm !== "DELETE") {
+    throw new ApiError(400, "Please type DELETE to confirm");
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1️⃣ Get user
+    const user = await User.findById(userId).session(session);
+    if (!user) throw new ApiError(404, "User not found");
+
+    // 2️⃣ Get all user URLs
+    const urls = await Url.find({ userId }).select("_id").session(session);
+    const urlIds = urls.map((u) => u._id);
+
+    // 3️⃣ Delete related data
+    await Promise.all([
+      Url.deleteMany({ userId }).session(session),
+      Analytics.deleteMany({ urlId: { $in: urlIds } }).session(session),
+      Visitor.deleteMany({ urlId: { $in: urlIds } }).session(session),
+    ]);
+
+    // 4️⃣ Delete avatar (if exists)
+    if (user.avatar) {
+      const publicId = user.avatar.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(publicId).catch(() => {});
+    }
+
+    // 5️⃣ Delete user
+    await User.findByIdAndDelete(userId).session(session);
+
+    // 6️⃣ Commit
+    await session.commitTransaction();
+    session.endSession();
+
+    // 7️⃣ Clear cookies
+    const options = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    };
+
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json(new ApiResponse(200, {}, "Account deleted successfully"));
+
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
+};
 
 export {
   generateAccessAndRefreshTokens,
@@ -357,5 +422,6 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   deleteUserAvatar,
-  googleAuthCallback
+  googleAuthCallback,
+  deleteUserProfile
 };

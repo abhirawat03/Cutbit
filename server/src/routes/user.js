@@ -1,7 +1,7 @@
 import {Router} from "express"
 import { verifyJwt } from "../middleware/auth.js";
 import {upload} from "../middleware/multer.js"
-import { changeCurrentPassword, deleteUserAvatar, getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, updateAccountDetails, updateUserAvatar } from "../controllers/user.js";
+import { changeCurrentPassword, deleteUserAvatar, deleteUserProfile, getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, updateAccountDetails, updateUserAvatar } from "../controllers/user.js";
 
 const router = Router()
 
@@ -10,6 +10,8 @@ router.route("/register").post(registerUser)
 router.route("/login").post(loginUser)
 
 router.route("/logout").post(verifyJwt ,logoutUser)
+
+router.route('/delete-account').delete(verifyJwt,deleteUserProfile)
 
 router.route("/refresh-token").post(verifyJwt,refreshAccessToken)
 

@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import passport from "passport";
 import helmet from "helmet"
+import {errorHandler} from "./middleware/errorHandler.js"
 import "./config/passport.js"
 const app = express()
 
@@ -37,5 +38,8 @@ app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 app.get("/:shortUrl",redirectUrl) 
+
+
+app.use(errorHandler);
 
 export {app}

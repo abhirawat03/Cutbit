@@ -19,14 +19,18 @@ const redirectUrl = async (req, res) => {
   if (!url) {
     return res.redirect(`${FRONTEND_URL}/link-error/invalid`);
   }
-  
+
+  if (!url.userId) {
+    throw new ApiError(500, "Corrupted URL data");
+  }
+
   if (url.status === "paused") {
     return res.redirect(`${FRONTEND_URL}/link-error/paused`);
   }
-  
+
   if (url.expiryDate && url.expiryDate < new Date()) {
     return res.redirect(`${FRONTEND_URL}/link-error/expired`);
-}
+  }
 
   //check visitor
   let visitorId = req.cookies?.visitorId;
@@ -66,7 +70,8 @@ const redirectUrl = async (req, res) => {
   const ip =
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.socket.remoteAddress ||
-    req.ip;
+    req.ip||
+    "0.0.0.0";
 
   const geo = geoip.lookup(ip);
 
@@ -76,27 +81,32 @@ const redirectUrl = async (req, res) => {
   const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
 
   // UNIQUE VISITOR CHECK
-  let isUnique = false;
   let referrer = "Direct";
 
   try {
     if (req.headers.referer) {
       referrer = new URL(req.headers.referer).hostname;
     }
-  } catch {
-    referrer = "Direct";
-  }
+  } catch {}
+
+   // ⚡ redirect FIRST (fast UX)
+  res.redirect(url.originalUrl);
+
+  // 🚫 skip bots from analytics
+  if (isBot) return;
+
+  let isUnique = false;
 
   try {
     await Visitor.create({
-        urlId: url._id,
-        userId: url.userId,
-        visitorId,
-        ipHash,
-        date: today,
-        device,
-        country,
-        referrer: referrer,
+      urlId: url._id,
+      userId: url.userId,
+      visitorId,
+      ipHash,
+      date: today,
+      device,
+      country,
+      referrer,
     });
 
     isUnique = true;
@@ -110,33 +120,33 @@ const redirectUrl = async (req, res) => {
   }
 
   //update counters
-  Promise.all([
-    Url.updateOne(
-      { _id: url._id },
-      {
-        $inc: {
-          totalClicks: 1,
-          totalUniqueVisitors: isUnique ? 1 : 0,
+    await Promise.all([
+      Url.updateOne(
+        { _id: url._id },
+        {
+          $inc: {
+            totalClicks: 1,
+            totalUniqueVisitors: isUnique ? 1 : 0,
+          },
         },
-      },
-    ),
+      ),
 
-    Analytics.updateOne(
-      { urlId: url._id, userId: url.userId, date: today },
-      {
-        $inc: {
-          clicks: 1,
-          uniqueVisitors: isUnique ? 1 : 0,
-          [`deviceStats.${device}`]: 1,
-          [`countryStats.${country}`]: 1,
-          [`referrerStats.${referrer}`]: 1
+      Analytics.updateOne(
+        { urlId: url._id, userId: url.userId, date: today },
+        {
+          $inc: {
+            clicks: 1,
+            uniqueVisitors: isUnique ? 1 : 0,
+            [`deviceStats.${device}`]: 1,
+            [`countryStats.${country}`]: 1,
+            [`referrerStats.${referrer}`]: 1,
+          },
         },
-      },
-      { upsert: true },
-    ),
-  ]).catch(console.error);
-
-  return res.redirect(url.originalUrl);
+        { upsert: true },
+      ),
+    ]).catch ((err) => {
+    console.error("Analytics update failed:", err);
+  });
 };
 
 export { redirectUrl };

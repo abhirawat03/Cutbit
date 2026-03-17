@@ -31,7 +31,8 @@ Api.interceptors.response.use(
         const isAuthRoute =
             originalRequest.url.includes("/refresh-token") ||
             originalRequest.url.includes("/login") ||
-            originalRequest.url.includes("/register");
+            originalRequest.url.includes("/register")||
+            originalRequest.url.includes("/current-user");
         // avoid infinite loop
         if (
             error.response?.status === 401 &&
@@ -61,7 +62,10 @@ Api.interceptors.response.use(
                 return Api(originalRequest);
             } catch (err) {
                 processQueue(err);
-                return Promise.reject(err);
+                if (err.response?.status === 401) {
+                  // means no refresh token → user is logged out
+                  return Promise.reject(err); // just stop here
+                }
             } finally {
                 isRefreshing = false;
             }

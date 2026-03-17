@@ -8,6 +8,43 @@ import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
 import { calculateGrowth } from "../utils/growth.js";
 
+const validateProductionUrl = async (url) => {
+  let parsed;
+
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new ApiError(400, "Invalid URL format");
+  }
+
+  // ✅ protocol check
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new ApiError(400, "Only HTTP/HTTPS URLs allowed");
+  }
+
+  const hostname = parsed.hostname;
+
+  // ❌ block internal/private hosts
+  const isLocal =
+    hostname === "localhost" ||
+    hostname.startsWith("127.") ||
+    hostname.startsWith("10.") ||
+    hostname.startsWith("192.168.");
+
+  if (isLocal) {
+    throw new ApiError(400, "Invalid target URL");
+  }
+
+  // ⚡ optional DNS check
+  try {
+    await dns.lookup(hostname);
+  } catch {
+    throw new ApiError(400, "Domain does not exist");
+  }
+
+  return parsed.href;
+};
+
 const createShortUrl = async (req, res) => {
   const userId = req.user?._id;
   if (!userId) throw new ApiError(401, "unauthorized");
@@ -15,44 +52,48 @@ const createShortUrl = async (req, res) => {
 
   if (!originalUrl) throw new ApiError(400, "Url required");
 
-  // let shortUrl = customAlias ? customAlias.trim().toLowerCase() : nanoid(6);
+  // ✅ URL validation
+  try {
+    await validateProductionUrl(originalUrl)
+  } catch {
+    throw new ApiError(400, "Invalid URL format");
+  }
+
   let shortUrl;
 
   // If user provided alias
   if (customAlias) {
     shortUrl = validateAlias(customAlias);
-
-    const existing = await Url.findOne({ shortUrl });
-
-    if (existing) {
-      throw new ApiError(400, "Custom alias already exists");
-    }
   } else {
     shortUrl = nanoid(6);
   }
 
-  // const shortUrl = nanoid(6);
-  const newUrl = await Url.create({
-    userId,
-    name,
-    originalUrl,
-    shortUrl,
-    ...(expiryDate && { expiryDate }), //optional
-  });
-
-  if (!newUrl) throw new ApiError(404, "custom alias already exist");
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, newUrl, "Shorturl created successfully"));
+  try {
+    const newUrl = await Url.create({
+      userId,
+      name,
+      originalUrl,
+      shortUrl,
+      ...(expiryDate && { expiryDate }), //optional
+    });
+    return res
+      .status(201)
+      .json(new ApiResponse(201, newUrl, "Shorturl created successfully"));
+  } catch (err) {
+    if (err.code === 11000) {
+      throw new ApiError(400, "Custom alias already exists");
+    }
+    throw err;
+  }
+  
 };
 
 const getalllinks = async (req, res) => {
   const userId = req.user._id;
   if (!userId) throw new ApiError(401, "unauthorized");
 
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const limit = Math.min(parseInt(req.query.limit) || 10, 50);
   const skip = (page - 1) * limit;
 
   const result = await Url.aggregate([
@@ -114,7 +155,12 @@ const updateLink = async (req, res) => {
   const updateFields = {};
   // original url
   if (originalUrl) {
-    updateFields.originalUrl = originalUrl;
+    // ✅ URL validation
+    try {
+      await validateProductionUrl(originalUrl)
+    } catch {
+      throw new ApiError(400, "Invalid URL format");
+    }
   }
 
   if (shortUrl) {
@@ -127,10 +173,12 @@ const updateLink = async (req, res) => {
     updateFields.shortUrl = normalizedAlias;
   }
 
-  if (expiryDate && new Date(expiryDate) <= new Date()) {
-    throw new ApiError(400, "Expiry date must be in the future");
+  if (expiryDate !== undefined) {
+    if (new Date(expiryDate) <= new Date()) {
+      throw new ApiError(400, "Expiry date must be in the future");
+    }
+    updateFields.expiryDate = expiryDate;
   }
-  updateFields.expiryDate = expiryDate;
 
   // status validation
   if (status) {
@@ -166,19 +214,32 @@ const deleteLink = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(linkId))
     throw new ApiError(400, "Invalid id");
 
-  const link = await Url.findOneAndDelete({
-    _id: linkId,
-    userId,
-  });
-  if (!link) throw new ApiError(404, "Link not found");
-  // delete related analytics
-  await Analytics.deleteMany({ urlId: linkId });
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // delete visitor records
-  await Visitor.deleteMany({ urlId: linkId });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Link deleted successfully"));
+  try {
+    const link = await Url.findOneAndDelete({
+      _id: linkId,
+      userId,
+    },{ session });
+    if (!link) throw new ApiError(404, "Link not found");
+    // delete related analytics
+    await Analytics.deleteMany({ urlId: linkId }).session(session);
+  
+    // delete visitor records
+    await Visitor.deleteMany({ urlId: linkId }).session(session);
+  
+    await session.commitTransaction();
+    session.endSession();
+    
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Link deleted successfully"));
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
 };
 
 const getstats = async (req, res) => {

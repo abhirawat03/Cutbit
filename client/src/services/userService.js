@@ -1,11 +1,11 @@
 import Api from "../api/axios";
 
-export const signupUser = async (data) => {
+const signupUser = async (data) => {
   const res = await Api.post("/users/register", data);
   return res.data.data;
 };
 
-export const loginUser = async (data) => {
+const loginUser = async (data) => {
   const res = await Api.post("/users/login", data);
   return res.data.data;
 };
@@ -15,12 +15,19 @@ const getCurrentUser = async () => {
   return res.data.data;
 };
 
+const deleteAccount = async (confirmText) => {
+  const res = await Api.delete("/users/delete-account", {
+    data: { confirm: confirmText },
+  });
+  return res.data;
+};
+
 const updateProfile = async (data) => {
   const res = await Api.patch("/users/update-account", data);
   return res.data.data;
 };
 
-export const changePassword = async (data) => {
+const changePassword = async (data) => {
   const res = await Api.patch("/users/change-password", data);
   return res.data.data;
 };
@@ -39,4 +46,4 @@ const deleteAvatar = async () => {
   await Api.delete("/users/avatar");
 };
 
-export {getCurrentUser, updateProfile, logoutUser, updateAvatar, deleteAvatar}
+export {signupUser, loginUser,getCurrentUser, updateProfile, changePassword, logoutUser, updateAvatar, deleteAvatar, deleteAccount}
