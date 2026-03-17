@@ -120,7 +120,7 @@ const loginUser = async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        {},
+        loggedInUser,
         "User logged in successfully",
       ),
     );
@@ -142,10 +142,6 @@ const googleAuthCallback = async (req, res) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax"
   };
-
-  // const loggedInUser = await User.findById(user._id).select(
-  //   "-password -refreshToken"
-  // );
 
   return res
     .cookie("accessToken", accessToken, options)

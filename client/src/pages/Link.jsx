@@ -23,7 +23,7 @@ export default function LinkView() {
     };
     const copyToClipboard = (shortUrl) => {
         navigator.clipboard.writeText(
-            `${import.meta.env.VITE_BACKEND_URL_ID}/${shortUrl}`
+            `${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`
         );
     };
     const downloadQR = () => {
@@ -41,7 +41,7 @@ export default function LinkView() {
         document.body.removeChild(link);
     };
     const shareLink = async () => {
-        const url = `${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`;
+        const url = `${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`;
 
         if (navigator.share) {
             try {
@@ -93,11 +93,11 @@ export default function LinkView() {
                     <div className="bg-[#111827] p-6 rounded-xl">
                         <h1 className="text-2xl font-bold mt-3">
                             <a
-                                href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link?.shortUrl}`}
+                                href={`${import.meta.env.VITE_BACKEND_URL}/${link?.shortUrl}`}
                                 target="_blank"
                                 className="hover:underline"
                             >
-                                {import.meta.env.VITE_BACKEND_URL_ID}/
+                                {import.meta.env.VITE_BACKEND_URL}/
                                 <span className="text-teal-400">{link?.shortUrl}</span>
                             </a>
                         </h1>
@@ -181,7 +181,7 @@ export default function LinkView() {
                             <QRCodeCanvas
                                 id="big-qr"
                                 size={170}
-                                value={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}
+                                value={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
                             />
                         </div>
 

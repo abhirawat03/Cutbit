@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react"
-import { useCurrentUser } from "../hooks/queries/useCurrentUser";
+import { useAuth } from "../context/AuthContext";
 import { useUpdateProfile } from "../hooks/mutations/useUpdateProfile";
 import { useUpdateAvatar } from "../hooks/mutations/useUpdateAvatar";
 import { useDeleteAvatar } from "../hooks/mutations/useDeleteAvatar";
 import { useChangePassword } from "../hooks/mutations/useChangePassword";
 
 export default function Settings() {
-  const { data: user, isLoading } = useCurrentUser();
+  const { user, loading: isLoading,setUser } = useAuth();
   const updateProfileMutation = useUpdateProfile();
   const updateAvatarMutation = useUpdateAvatar();
   const deleteAvatarMutation = useDeleteAvatar();
@@ -55,6 +55,8 @@ export default function Settings() {
 
     updateAvatarMutation.mutate(formData, {
       onSuccess: (data) => {
+        const updatedUser = { ...user, avatar: data.avatar };
+        setUser(updatedUser);
         setForm(prev => ({
           ...prev,
           avatar: data.avatar
@@ -66,7 +68,10 @@ export default function Settings() {
 
   const removeAvatar = () => {
     deleteAvatarMutation.mutate(undefined, {
+      
       onSuccess: () => {
+        const updatedUser = { ...user, avatar: null };
+        setUser(updatedUser);
         setForm(prev => ({
           ...prev,
           avatar: null
@@ -88,6 +93,7 @@ export default function Settings() {
       },
       {
         onSuccess: (user) => {
+          setUser(user);
           setForm({
             avatar: user.avatar,
             email: user.email,

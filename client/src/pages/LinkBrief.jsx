@@ -67,11 +67,11 @@ export default function LinkBrief() {
 
             <h1 className="text-2xl font-bold mt-3">
               <a
-                href={`${import.meta.env.VITE_BACKEND_URL_ID}/${linkdetails?.shortUrl}`}
+                href={`${import.meta.env.VITE_BACKEND_URL}/${linkdetails?.shortUrl}`}
                 target="_blank"
                 className="hover:underline"
               >
-                {import.meta.env.VITE_BACKEND_URL_ID}/
+                {import.meta.env.VITE_BACKEND_URL}/
                 <span className="text-teal-400">{linkdetails?.shortUrl}</span>
               </a>
             </h1>

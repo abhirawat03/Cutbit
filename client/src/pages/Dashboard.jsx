@@ -142,7 +142,9 @@ if (!ready || isLoading) {
           {dashboard?.topLink ? (
             <>
               <p>{dashboard.topLink.name}</p>
-              <h3 className='text-2xl text-blue-500 font-bold'>{dashboard.topLink.shortUrl}</h3>
+              <h3 className='text-2xl text-blue-500 font-bold hover:underline'>
+                <a target='_blank' href={`${import.meta.env.VITE_BACKEND_URL}/${dashboard.topLink.shortUrl}`}>{dashboard.topLink.shortUrl}</a>
+              </h3>
               <div className='grid grid-cols-2 mt-7 gap-5'>
                 <div className='bg-[#40444a6d] py-3 px-4 rounded-xl space-y-2'>
                   <h3 className='text-xs tracking-widest font-bold text-gray-400'>Total Clicks</h3>

@@ -25,14 +25,18 @@ Api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-
+        if (!error.response) {
+            return Promise.reject(error);
+        }
+        const isAuthRoute =
+            originalRequest.url.includes("/refresh-token") ||
+            originalRequest.url.includes("/login") ||
+            originalRequest.url.includes("/register");
         // avoid infinite loop
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            !originalRequest.url.includes("/refresh-token") &&
-            !originalRequest.url.includes("/login") &&
-            !originalRequest.url.includes("/register")
+            !isAuthRoute
         ) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
@@ -52,15 +56,11 @@ Api.interceptors.response.use(
             try {
                 await Api.post("/users/refresh-token");
 
-                processQueue();
+                processQueue(null);
 
                 return Api(originalRequest);
             } catch (err) {
                 processQueue(err);
-
-                // clear cached user data
-                // queryClient.clear();
-
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;

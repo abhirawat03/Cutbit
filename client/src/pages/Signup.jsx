@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { FcGoogle } from "react-icons/fc"
 import { Link, useNavigate } from 'react-router-dom'
 import { useSignup } from "../hooks/mutations/useSignup"
+import { useAuth } from "../context/AuthContext";
 
 function Signup() {
   const navigate = useNavigate()
+  const { setUser } = useAuth();
   const signupMutation = useSignup()
 
   const [formData, setFormData] = useState({
@@ -46,7 +48,8 @@ function Signup() {
     }
 
     signupMutation.mutate(formData, {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        setUser(data.user || data);
         setFormData({
           fullName: "",
           email: "",
@@ -78,7 +81,7 @@ function Signup() {
         type="button"
         disabled={signupMutation.isPending}
         onClick={handleGoogleLogin}
-        className="flex items-center justify-center bg-[#63686c5e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 border border-[#7d83885e]"
+        className="flex items-center justify-center bg-[#63686c5e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 border border-[#7d83885e] cursor-pointer"
       >
         <FcGoogle />
         <span className="text-gray-300">Continue with Google</span>
@@ -141,7 +144,7 @@ function Signup() {
         <button
           type='submit'
           disabled={signupMutation.isPending}
-          className={`p-2 rounded-md mt-3 ${
+          className={`p-2 rounded-md mt-3 cursor-pointer ${
             signupMutation.isPending
               ? "bg-blue-400 cursor-not-allowed"
               : "bg-[#2563EB] hover:bg-blue-700"
@@ -152,7 +155,7 @@ function Signup() {
       </form>
 
       <div>
-        <p className='text-gray-400 text-sm'>
+        <p className='text-gray-400 text-sm cursor-pointer'>
           Already have an account?
           <Link to="/login">
             <span className='text-[#2563EB] hover:text-blue-400'> Sign In</span>

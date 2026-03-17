@@ -9,12 +9,11 @@ import { IoSearchSharp } from "react-icons/io5";
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom"
 import CreateNewLink from './CreateNewLink';
-import { useAuth } from "../hooks/useAuth";
-import { useLogout } from "../hooks/mutations/useLogout";
+import { useAuth } from "../context/AuthContext";
 
 function DashLayout() {
-  const { user } = useAuth();
-  const logoutMutation = useLogout();
+  const { user, logout } = useAuth(); 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation()
   const contentRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -29,12 +28,18 @@ function DashLayout() {
     })
   }, [location.pathname])
   const [isOpen, setIsOpen] = useState(false);
-  const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        navigate("/");
-      }
-    });
+  const handleLogout = async() => {
+    try {
+    setIsLoggingOut(true);
+    await logout(); // clears cookie + context
+
+    navigate("/", { replace: true }); // 🔥 important
+
+  } catch (err) {
+    console.error("Logout failed", err);
+  } finally {
+    setIsLoggingOut(false);
+  }
   }
   const navItems = [
     { name: "Dashboard", icon: MdDashboard, path: "/dashboard" },
@@ -112,14 +117,14 @@ function DashLayout() {
           </button>
           <button
             className={`p-2 rounded-md cursor-pointer
-              ${logoutMutation.isPending
+              ${isLoggingOut
                 ? "bg-gray-600 cursor-not-allowed"
                 : "bg-red-600 hover:bg-red-700"
               }`}
-            disabled={logoutMutation.isPending}
-            onClick={() => handleLogout()}
+            disabled={isLoggingOut}
+            onClick={handleLogout}
           >
-            {logoutMutation.isPending ? "Logging out..." : "Logout"}
+            {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
           <div className='flex flex-row items-center gap-4'>
             <img

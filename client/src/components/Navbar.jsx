@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.png";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const { isAuthenticated } = useAuth();

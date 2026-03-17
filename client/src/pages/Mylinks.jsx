@@ -41,7 +41,7 @@ function Mylinks() {
 
     const copyToClipboard = (shortUrl) => {
         navigator.clipboard.writeText(
-            `${import.meta.env.VITE_BACKEND_URL_ID}/${shortUrl}`
+            `${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`
         );
     };
 
@@ -132,7 +132,7 @@ function Mylinks() {
                                                 <div className="flex flex-col">
                                                     <span className="text-blue-400 font-medium flex gap-2.5">
                                                         <a
-                                                            href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}
+                                                            href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
                                                             target="_blank"
                                                             className="text-blue-400 cursor-pointer"
                                                         >
@@ -174,7 +174,7 @@ function Mylinks() {
                                                     size={28}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        setQrUrl(`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`);
+                                                        setQrUrl(`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`);
                                                         setQrOpen(true);
                                                     }}
                                                 />
@@ -216,7 +216,7 @@ function Mylinks() {
                                 <div>
                                     <p className="text-blue-400 font-medium flex flex-row gap-2">
                                         <a
-                                            href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}
+                                            href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
                                             target="_blank"
                                             className="text-blue-400 cursor-pointer"
                                         >
@@ -254,7 +254,7 @@ function Mylinks() {
                                             size={28}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setQrUrl(`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`);
+                                                setQrUrl(`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`);
                                                 setQrOpen(true);
                                             }}
                                         />

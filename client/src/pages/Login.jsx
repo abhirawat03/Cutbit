@@ -3,9 +3,11 @@ import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from 'react-router-dom';
 import Api from '../api/axios';
 import { useLogin } from '../hooks/mutations/useLogin';
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate()
+  const { setUser } = useAuth();
   const loginMutation = useLogin();
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
@@ -43,7 +45,8 @@ function Login() {
       return
     }
     loginMutation.mutate(formData, {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        setUser(data.user || data)
         navigate("/dashboard");
       },
       onError: (error) => {
@@ -62,7 +65,7 @@ function Login() {
         type="button"
         disabled={loginMutation.isPending}
         onClick={handleGoogleLogin}
-        className="flex items-center justify-center bg-[#63686c5e] border border-[#7d83885e] w-full gap-2 rounded-md p-2 hover:bg-gray-800"
+        className="flex items-center justify-center bg-[#63686c5e] border border-[#7d83885e] w-full gap-2 rounded-md p-2 hover:bg-gray-800 cursor-pointer"
       >
         <FcGoogle />
         <span className="text-gray-300">Continue with Google</span>
@@ -103,14 +106,14 @@ function Login() {
         <button
           type='submit'
           disabled={loginMutation.isPending}
-          className={`p-2 rounded-md mt-3 ${loginMutation.isPending ? "bg-blue-400 cursor-not-allowed" : "bg-[#2563EB] hover:bg-blue-700"
+          className={`p-2 rounded-md mt-3 cursor-pointer ${loginMutation.isPending ? "bg-blue-400 cursor-not-allowed" : "bg-[#2563EB] hover:bg-blue-700"
             }`}
         >
           {loginMutation.isPending ? "Logging in..." : "Login"}</button>
 
       </form>
       <div>
-        <p className='text-gray-400 text-sm'>Don't have a account?
+        <p className='text-gray-400 text-sm cursor-pointer'>Don't have a account?
           <Link to="/register"><span className='text-[#2563EB] hover:text-blue-400'> Create an account</span></Link>
         </p>
       </div>
