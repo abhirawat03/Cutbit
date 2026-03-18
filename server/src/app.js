@@ -26,6 +26,14 @@ app.use(cookieParser())
 app.use(passport.initialize())
 // app.use(globalLimiter)
 
+app.get("/healthz", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        uptime: process.uptime(),
+        timestamp: Date.now()
+    });
+});
+
 //route import
 import urlRoutes from "./routes/url.js"
 import userRouter from "./routes/user.js"
