@@ -266,7 +266,7 @@ const updateAccountDetails = async (req, res) => {
     {
       $set: {
         fullName,
-        email: email,
+        email,
       },
     },
     { new: true },

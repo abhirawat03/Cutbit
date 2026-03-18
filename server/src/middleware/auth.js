@@ -12,15 +12,17 @@ export const verifyJwt = async(req,res,next)=>{
     try {
     
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+        if (!decodedToken?._id) {
+            throw new ApiError(401, "Invalid token payload");
+        }
     
-        // const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
     
-        // if(!user){
-        //     //TODO: discuss about frontend
-        //     throw new ApiError(401,"Invalid Access Token")
-        // }
+        if(!user){
+            throw new ApiError(401,"Invalid Access Token")
+        }
     
-        req.user = decodedToken;
+        req.user = user;
         next()
     } catch (error) {
         throw new ApiError(401, "Invalid or expired token")
