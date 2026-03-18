@@ -1,15 +1,16 @@
 import {Router} from "express"
 import { createShortUrl, deleteLink, getalllinks, getstats, updateLink, getlink, getLinkAnalytics} from "../controllers/url.js"
 import { verifyJwt } from "../middleware/auth.js"
+import { sensitiveLimiter, urlLimiter } from "../middleware/rateLimiter.js"
 
 const router = Router()
 
-router.route("/link").post(verifyJwt, createShortUrl)
+router.route("/link").post(verifyJwt, urlLimiter, createShortUrl)
 router.route("/link/:linkId").get(verifyJwt, getlink)
 router.route("/links/:linkId/analytics").get(verifyJwt, getLinkAnalytics)
 router.route("/links").get(verifyJwt,getalllinks)
 router.route("/stats").get(verifyJwt,getstats)
-router.route("/links/:linkId").delete(verifyJwt,deleteLink)
-router.route("/links/:linkId").patch(verifyJwt,updateLink)
+router.route("/links/:linkId").delete(verifyJwt, sensitiveLimiter, deleteLink)
+router.route("/links/:linkId").patch(verifyJwt, urlLimiter, updateLink)
 
 export default router;

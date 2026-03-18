@@ -5,6 +5,7 @@ import passport from "passport";
 import helmet from "helmet"
 import {errorHandler} from "./middleware/errorHandler.js"
 import "./config/passport.js"
+import { globalLimiter } from "./middleware/rateLimiter.js";
 const app = express()
 
 // security headers
@@ -23,6 +24,7 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.use(passport.initialize())
+app.use(globalLimiter)
 
 //route import
 import urlRoutes from "./routes/url.js"
@@ -30,7 +32,6 @@ import userRouter from "./routes/user.js"
 import dashboardRouter from "./routes/dashboard.js"
 import { redirectUrl } from "../src/controllers/redirect.js"
 import authRoutes from "./routes/auth.js"
-
 
 //routes declaration
 app.use("/api/v1/",urlRoutes)
