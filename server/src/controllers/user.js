@@ -65,8 +65,8 @@ const registerUser = async (req, res) => {
   );
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax"
+    secure: true,
+    sameSite: "None"
   };
 
   return res
@@ -113,8 +113,8 @@ const loginUser = async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax"
+    secure: true,
+    sameSite: "None"
   };
 
   return res
@@ -143,8 +143,8 @@ const googleAuthCallback = async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax"
+    secure: true,
+    sameSite: "None"
   };
 
   return res
@@ -167,8 +167,8 @@ const logoutUser = async (req, res) => {
   );
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax"
+    secure: true,
+    sameSite: "None"
   };
 
   return res
@@ -206,8 +206,8 @@ const refreshAccessToken = async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax"
+      secure: true,
+      sameSite: "None"
     };
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -394,8 +394,8 @@ const deleteUserProfile = async (req, res) => {
     // 7️⃣ Clear cookies
     const options = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "None"
     };
 
     return res
