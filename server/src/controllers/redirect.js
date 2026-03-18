@@ -53,9 +53,11 @@ const redirectUrl = async (req, res) => {
   const botRegex =
     /bot|crawl|spider|slurp|facebookexternalhit|twitterbot|slackbot|discordbot/i;
 
+  const isBot = botRegex.test(userAgent);
+
   let device = "other";
 
-  if (botRegex.test(userAgent)) {
+  if (isBot) {
     device = "bot";
   } else {
     const parser = new UAParser(userAgent);
@@ -89,10 +91,12 @@ const redirectUrl = async (req, res) => {
     }
   } catch {}
 
+  if (isBot) {
+    return res.redirect(url.originalUrl);
+  }
+
   res.redirect(url.originalUrl);
-
-  if (isBot) return;
-
+  
   let isUnique = false;
 
   try {
