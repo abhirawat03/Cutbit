@@ -98,7 +98,7 @@ const getalllinks = async (req, res) => {
 
   const result = await Url.aggregate([
     {
-      $match: { userId },
+      $match: { userId:new mongoose.Types.ObjectId(userId) },
     },
     {
       $sort: { createdAt: -1 },
@@ -247,7 +247,7 @@ const getstats = async (req, res) => {
 
   const stats = await Url.aggregate([
     {
-      $match: { userId },
+      $match: { userId:new mongoose.Types.ObjectId(userId) },
     },
     {
       $group: {
