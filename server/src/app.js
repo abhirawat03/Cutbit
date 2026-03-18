@@ -24,7 +24,7 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 app.use(passport.initialize())
-app.use(globalLimiter)
+// app.use(globalLimiter)
 
 //route import
 import urlRoutes from "./routes/url.js"

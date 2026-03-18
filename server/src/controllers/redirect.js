@@ -89,10 +89,8 @@ const redirectUrl = async (req, res) => {
     }
   } catch {}
 
-   // ⚡ redirect FIRST (fast UX)
   res.redirect(url.originalUrl);
 
-  // 🚫 skip bots from analytics
   if (isBot) return;
 
   let isUnique = false;
