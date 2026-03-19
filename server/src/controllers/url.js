@@ -7,6 +7,7 @@ import { validateAlias } from "../utils/validateAlias.js";
 import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
 import { calculateGrowth } from "../utils/growth.js";
+import dns from "dns/promises";
 
 const validateProductionUrl = async (url) => {
   let parsed;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FcGoogle } from "react-icons/fc"
 import { Link, useNavigate } from 'react-router-dom'
 import { useSignup } from "../hooks/mutations/useSignup"
@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 
 function Signup() {
   const navigate = useNavigate()
-  const { setUser } = useAuth();
+  const { user, loading } = useAuth();
   const signupMutation = useSignup()
 
   const [formData, setFormData] = useState({
@@ -48,16 +48,6 @@ function Signup() {
     }
 
     signupMutation.mutate(formData, {
-      onSuccess: (data) => {
-        setUser(data.user || data);
-        setFormData({
-          fullName: "",
-          email: "",
-          password: ""
-        })
-        navigate("/dashboard")
-      },
-
       onError: (error) => {
         const message =
           error.response?.data?.message || "Signup failed"
@@ -69,6 +59,11 @@ function Signup() {
   const handleGoogleLogin = () => {
     window.location.href =`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`
   }
+  useEffect(() => {
+  if (!loading && user) {
+    navigate("/dashboard");
+  }
+}, [user, loading, navigate]);
 
   return (
     <>

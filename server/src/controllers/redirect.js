@@ -120,6 +120,7 @@ const redirectUrl = async (req, res) => {
       throw err;
     }
   }
+  const safeReferrer = referrer.replace(/\./g, "_");
 
   //update counters
     await Promise.all([
@@ -141,7 +142,7 @@ const redirectUrl = async (req, res) => {
             uniqueVisitors: isUnique ? 1 : 0,
             [`deviceStats.${device}`]: 1,
             [`countryStats.${country}`]: 1,
-            [`referrerStats.${referrer}`]: 1,
+            [`referrerStats.${safeReferrer}`]: 1,
           },
         },
         { upsert: true },

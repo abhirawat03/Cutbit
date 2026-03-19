@@ -1,12 +1,25 @@
-import { Navigate, Outlet } from "react-router-dom"
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute() {
-  const { isAuthenticated, loading} = useAuth();
+  const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  // ⛔ wait until auth is resolved
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Checking authentication...
+      </div>
+    );
+  }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  // ⛔ not logged in
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // ✅ allowed
+  return <Outlet />;
 }
 
-export default ProtectedRoute
+export default ProtectedRoute;

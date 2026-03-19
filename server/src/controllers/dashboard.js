@@ -20,7 +20,9 @@ export const getDashboardData = async (req, res) => {
       return res.status(200).json(cache.get(cacheKey));
     }
 
-    const today = new Date();
+    const today = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
+    );
     today.setHours(0, 0, 0, 0);
 
     const endOfToday = new Date(today);
@@ -29,8 +31,8 @@ export const getDashboardData = async (req, res) => {
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - (range - 1));
 
-    const prevStartDate = new Date();
-    prevStartDate.setDate(startDate.getDate() - range);
+    const prevStartDate = new Date(startDate);
+    prevStartDate.setDate(prevStartDate.getDate() - range);
 
     const objectUserId = new mongoose.Types.ObjectId(userId);
 
@@ -149,11 +151,9 @@ export const getDashboardData = async (req, res) => {
         },
       ]),
 
-      Url.find({
-        userId,
-        createdAt: { $gte: today, $lte: endOfToday },
-      })
+      Url.find({userId})
         .sort({ createdAt: -1 })
+        .limit(5)
         .select("shortUrl originalUrl name totalClicks status")
         .lean(),
     ]);
@@ -174,11 +174,11 @@ export const getDashboardData = async (req, res) => {
     const growth = {
       clicks: calculateGrowth(
         currentStats.clicks || 0,
-        previousStats.clicks || 0
+        previousStats.clicks || 0,
       ),
       unique: calculateGrowth(
         currentStats.unique || 0,
-        previousStats.unique || 0
+        previousStats.unique || 0,
       ),
     };
 
@@ -201,8 +201,7 @@ export const getDashboardData = async (req, res) => {
       return {
         date: key,
         clicks: analyticsMap.get(key)?.clicks || 0,
-        uniqueVisitors:
-          analyticsMap.get(key)?.uniqueVisitors || 0,
+        uniqueVisitors: analyticsMap.get(key)?.uniqueVisitors || 0,
       };
     });
 

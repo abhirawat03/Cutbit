@@ -2,24 +2,23 @@ import React, { useState, useEffect, useRef } from 'react'
 import logo from "../assets/images/logo.png"
 import { MdDashboard } from "react-icons/md";
 import { IoLinkSharp } from "react-icons/io5";
-import { FaChartSimple } from "react-icons/fa6";
 import { BsGearFill } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { IoSearchSharp } from "react-icons/io5";
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useLocation } from "react-router-dom"
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import CreateNewLink from './CreateNewLink';
 import { useAuth } from "../context/AuthContext";
 
 function DashLayout() {
-  const { user, logout } = useAuth(); 
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { user, loading, logout } = useAuth(); 
   const location = useLocation()
   const contentRef = useRef(null)
-  const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const DEFAULT_AVATAR =
     "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-  const navigate = useNavigate();
 
   useEffect(() => {
     contentRef.current?.scrollTo({
@@ -27,13 +26,14 @@ function DashLayout() {
       behavior: "smooth"
     })
   }, [location.pathname])
-  const [isOpen, setIsOpen] = useState(false);
+
+  if (loading) return null;
+  if (!user) return null;
   const handleLogout = async() => {
     try {
     setIsLoggingOut(true);
-    await logout(); // clears cookie + context
-
-    navigate("/", { replace: true }); // 🔥 important
+    await logout();
+    navigate('/')
 
   } catch (err) {
     console.error("Logout failed", err);
@@ -51,14 +51,14 @@ function DashLayout() {
       <div className="-z-10 fixed top-10 -left-15 -translate-x-1/2 w-[700px] h-[700px] bg-[radial-gradient(circle,#2563EB,transparent_60%)] opacity-15 blur-xl"></div>
       <aside className={`fixed md:static top-0 left-0 h-full w-[260px] bg-[#030d3993] border-r border-[#63686c5e]
     flex flex-col justify-between p-4 z-40 transform transition-transform duration-300 
-    ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
     md:translate-x-0
   `}>
         <div className='flex flex-col gap-6'>
           <Link to="/dashboard">
             <div className='flex flex-row items-center gap-2'>
               <div>
-                <img src={logo} alt="" className='w-12 h-12'/>
+                <img src={logo} alt="Logo" className='w-12 h-12'/>
               </div>
               <div>
                 <h1 className='text-lg font-bold'>Cutbit</h1>
@@ -111,7 +111,7 @@ function DashLayout() {
           </ul>
         </div>
         <div className='flex flex-col gap-3'>
-          <button onClick={() => setOpen(true)} className='flex flex-row items-center p-2 rounded-md gap-2 bg-[#2563EB] px-4 hover:bg-blue-700 cursor-pointer '>
+          <button onClick={() => setIsCreateModalOpen(true)} className='flex flex-row items-center p-2 rounded-md gap-2 bg-[#2563EB] px-4 hover:bg-blue-700 cursor-pointer '>
             <FaPlus />
             Create New Link
           </button>
@@ -129,7 +129,7 @@ function DashLayout() {
           <div className='flex flex-row items-center gap-4'>
             <img
               src={user?.avatar || DEFAULT_AVATAR}
-              alt="avatar"
+              alt="User avatar"
               className="w-10 h-10 rounded-full object-cover"
             />
             <div>
@@ -138,17 +138,17 @@ function DashLayout() {
           </div>
         </div>
       </aside>
-      {isOpen && (
+      {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setIsSidebarOpen(false)}
         />)}
 
       <div className='flex flex-col min-h-screen md:h-screen'>
         <div className=' flex justify-between items-center p-4 fixed top-0 right-0 left-0 md:left-[260px] z-30 backdrop-blur-md bg-[#030a2a]/40 border-b border-[#63686c5e]'>
           <button
             className="md:hidden text-white z-80"
-            onClick={() => setIsOpen(true)}
+            onClick={() => setIsSidebarOpen(true)}
           >
             ☰
           </button>
@@ -162,7 +162,7 @@ function DashLayout() {
 
           </div>
         </div>
-        {open && <CreateNewLink onClose={() => setOpen(false)} />}
+        {isCreateModalOpen && <CreateNewLink onClose={() => setIsCreateModalOpen(false)} />}
         <div ref={contentRef} className='flex-1 overflow-y-auto pt-[98px] p-5'>
           <Outlet />
         </div>

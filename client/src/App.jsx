@@ -17,12 +17,14 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
 import RedirectError from "./pages/RedirectError.jsx";
+import GlobalFetchingIndicator from "./components/GlobalFetchingIndicator.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
 
   return (
     <BrowserRouter>
+      <GlobalFetchingIndicator/>
       <Routes>
         {/* layout wrapper */}
         <Route element={<Layout />}>

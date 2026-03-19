@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from 'react-router-dom';
-import Api from '../api/axios';
+// import Api from '../api/axios';
 import { useLogin } from '../hooks/mutations/useLogin';
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
+  const { user, loading } = useAuth();
   const navigate = useNavigate()
-  const { setUser } = useAuth();
   const loginMutation = useLogin();
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
@@ -45,10 +45,6 @@ function Login() {
       return
     }
     loginMutation.mutate(formData, {
-      onSuccess: (data) => {
-        setUser(data.user || data)
-        navigate("/dashboard");
-      },
       onError: (error) => {
         setError(error.response?.data?.message || "Login failed");
       }
@@ -57,6 +53,11 @@ function Login() {
   const handleGoogleLogin = () => {
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`
   }
+  useEffect(() => {
+  if (!loading && user) {
+    navigate("/dashboard");
+  }
+}, [user, loading, navigate]);
   return (
     <>
       <h1 className='text-2xl font-bold'>Welcome back</h1>
@@ -87,6 +88,7 @@ function Login() {
             type="text"
             id="email"
             name="email"
+            disabled={loginMutation.isPending}
             value={formData.email}
             onChange={handleChange}
             placeholder='name@gmail.com'
@@ -98,6 +100,7 @@ function Login() {
             name="password"
             minLength={8}
             maxLength={64}
+            disabled={loginMutation.isPending}
             value={formData.password}
             onChange={handleChange}
             placeholder='••••••••••••••••'

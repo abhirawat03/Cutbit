@@ -9,7 +9,7 @@ import {useNavigate } from 'react-router-dom';
 import DeleteAccountConfirm from "../components/DeleteAccountConfirm"
 
 export default function Settings() {
-  const { user, loading: isLoading,setUser, logout } = useAuth();
+  const { user, loading: isLoading, logout, refetchUser } = useAuth();
   const updateProfileMutation = useUpdateProfile();
   const updateAvatarMutation = useUpdateAvatar();
   const deleteAvatarMutation = useDeleteAvatar();
@@ -60,12 +60,11 @@ export default function Settings() {
     formData.append("avatar", avatarImg);
 
     updateAvatarMutation.mutate(formData, {
-      onSuccess: (data) => {
-        const updatedUser = { ...user, avatar: data.avatar };
-        setUser(updatedUser);
+      onSuccess: async() => {
+        const freshUser = await refetchUser();
         setForm(prev => ({
           ...prev,
-          avatar: data.avatar
+          avatar: freshUser.avatar
         }));
         setAvatarImg(null);
       }
@@ -75,12 +74,11 @@ export default function Settings() {
   const removeAvatar = () => {
     deleteAvatarMutation.mutate(undefined, {
       
-      onSuccess: () => {
-        const updatedUser = { ...user, avatar: null };
-        setUser(updatedUser);
+      onSuccess: async() => {
+        const freshUser = await refetchUser();
         setForm(prev => ({
           ...prev,
-          avatar: null
+          avatar: freshUser.avatar
         }));
         setAvatarImg(null);
       }
@@ -98,12 +96,12 @@ export default function Settings() {
         email: form.email
       },
       {
-        onSuccess: (user) => {
-          setUser(user);
+        onSuccess: async() => {
+          const freshUser = await refetchUser();
           setForm({
-            avatar: user.avatar,
-            email: user.email,
-            fullName: user.fullName
+            avatar: freshUser.avatar,
+            email: freshUser.email,
+            fullName: freshUser.fullName
           });
         }
       }

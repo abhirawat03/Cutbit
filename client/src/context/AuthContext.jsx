@@ -1,49 +1,29 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
+import { useCurrentUser } from "../hooks/queries/useCurrentUser";
 import { useQueryClient } from "@tanstack/react-query";
-import { getCurrentUser, logoutUser } from "../services/userService";
+import { logoutUser } from "../services/userService";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const { data: user, isLoading } = useCurrentUser();
   const queryClient = useQueryClient();
-
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // run ONLY once on app load
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const data = await getCurrentUser();
-        setUser(data.user || data);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, []);
 
   const logout = async () => {
     try {
-      await logoutUser(); 
+      await logoutUser();
     } catch {
-      // ignore logout error  
+      //
     }
 
-    setUser(null);
-    queryClient.clear();
+    queryClient.removeQueries({ queryKey: ["me"] });
   };
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        loading,
-        isAuthenticated: !!user,
-        setUser,
+        user: user ?? null,
+        loading: isLoading,
         logout,
       }}
     >
@@ -51,5 +31,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-// eslint-disable-next-line react-refresh/only-export-components
+
 export const useAuth = () => useContext(AuthContext);

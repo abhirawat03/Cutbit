@@ -16,8 +16,8 @@ function GrowthBadge({ value = 0, range }) {
   const color = isPositive
     ? "text-green-400 bg-green-400/10"
     : isNegative
-    ? "text-red-400 bg-red-400/10"
-    : "text-gray-400 bg-gray-400/10"
+      ? "text-red-400 bg-red-400/10"
+      : "text-gray-400 bg-gray-400/10"
 
   const formatted =
     value > 0 ? `+${value.toFixed(1)}%` : `${value.toFixed(1)}%`
@@ -34,35 +34,35 @@ function GrowthBadge({ value = 0, range }) {
 function Dashboard() {
   const [range, setRange] = useState(7);
   const [ready, setReady] = useState(false);
-  const { data:dashboard, isLoading, error } = useDashboard(ready,range);
+  const { data: dashboard, isLoading, error } = useDashboard(ready, range);
   const createLinkMutation = useCreateLink();
   const navigate = useNavigate();
   useEffect(() => {
-  const init = async () => {
-    const pending = localStorage.getItem("pendingLink");
+    const init = async () => {
+      const pending = localStorage.getItem("pendingLink");
 
-    if (pending) {
-      try {
-        await createLinkMutation.mutateAsync(JSON.parse(pending));
-      } catch (e) {
-        console.error(e);
+      if (pending) {
+        try {
+          await createLinkMutation.mutateAsync(JSON.parse(pending));
+        } catch (e) {
+          console.error(e);
+        }
+
+        localStorage.removeItem("pendingLink");
       }
 
-      localStorage.removeItem("pendingLink");
-    }
+      setReady(true);
+    };
 
-    setReady(true); 
-  };
+    init();
+  }, []);
 
-  init();
-}, []);
-
-if (error) {
-  return <p className="text-red-500">Failed to load dashboard</p>;
-}
-if (!ready || isLoading) {
-  return <p className="text-white">Preparing dashboard...</p>;
-}
+  if (error) {
+    return <p className="text-red-500">Failed to load dashboard</p>;
+  }
+  if (!ready || isLoading) {
+    return <p className="text-white">Preparing dashboard...</p>;
+  }
   return (
     <section className='text-white'>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
@@ -155,9 +155,9 @@ if (!ready || isLoading) {
                   <p className='text-2xl font-bold'>{dashboard.topLink.uniqueVisitors}</p>
                 </div>
               </div>
-              <button 
-              onClick={() => navigate(`/dashboard/links/${dashboard.topLink._id}/analytics`)}
-              className='bg-[#40444a6d] cursor-pointer text-xl font-bold py-2 px-4 rounded-xl mt-8 md:mt-20 hover:bg-[#364455a4]'>View Full Report</button>
+              <button
+                onClick={() => navigate(`/dashboard/links/${dashboard.topLink._id}/analytics`)}
+                className='bg-[#40444a6d] cursor-pointer text-xl font-bold py-2 px-4 rounded-xl mt-8 md:mt-20 hover:bg-[#364455a4]'>View Full Report</button>
             </>
           ) : (
             <p className='text-center mt-25 text-2xl font-bold'>No Data</p>
@@ -197,7 +197,11 @@ if (!ready || isLoading) {
                             {link.name}
                           </span>
                           <span className="text-blue-500 text-sm">
-                            <a href={`${import.meta.env.VITE_BACKEND_URL_ID}/${link.shortUrl}`}>
+                            <a
+                              href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
+                              target="_blank"
+                              className="text-blue-400 cursor-pointer"
+                            >
                               {link.shortUrl}
                             </a>
                           </span>
@@ -214,9 +218,9 @@ if (!ready || isLoading) {
 
                       <td className="px-6 py-4 text-right">
                         <span className={`px-3 py-1 text-xs rounded-md ${link.status === "active"
-                                                    ? "bg-emerald-500/20 text-emerald-400"
-                                                    : "bg-red-500/20 text-red-400"
-                                                }`}>
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-red-500/20 text-red-400"
+                          }`}>
                           {link.status.toUpperCase()}
                         </span>
                       </td>
