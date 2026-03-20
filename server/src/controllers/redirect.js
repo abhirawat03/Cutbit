@@ -83,13 +83,30 @@ const redirectUrl = async (req, res) => {
   const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
 
   // UNIQUE VISITOR CHECK
-  let referrer = "Direct";
+  let referrer = "direct";
 
-  try {
-    if (req.headers.referer) {
-      referrer = new URL(req.headers.referer).hostname;
+try {
+  if (req.headers.referer) {
+    const hostname = new URL(req.headers.referer).hostname.toLowerCase();
+
+    // 🚫 block internal / useless sources
+    if (
+      hostname.includes("localhost") ||
+      hostname.includes("127.0.0.1") ||
+      hostname.includes("vercel.app") ||
+      hostname.includes(process.env.FRONTEND_URL?.replace(/^https?:\/\//, "")) ||
+      hostname.includes("cutbit") // your own domain
+    ) {
+      referrer = "direct";
+    } else {
+      // keep only main domain (no subdomains noise)
+      const parts = hostname.split(".");
+      referrer = parts.slice(-2).join(".");
     }
-  } catch {}
+  }
+} catch {
+  referrer = "direct";
+}
 
   if (isBot) {
     return res.redirect(url.originalUrl);
@@ -120,7 +137,7 @@ const redirectUrl = async (req, res) => {
       throw err;
     }
   }
-  const safeReferrer = referrer.replace(/\./g, "_");
+  // const safeReferrer = referrer.replace(/\./g, "_");
 
   //update counters
     await Promise.all([
@@ -142,7 +159,7 @@ const redirectUrl = async (req, res) => {
             uniqueVisitors: isUnique ? 1 : 0,
             [`deviceStats.${device}`]: 1,
             [`countryStats.${country}`]: 1,
-            [`referrerStats.${safeReferrer}`]: 1,
+            [`referrerStats.${referrer}`]: 1,
           },
         },
         { upsert: true },
