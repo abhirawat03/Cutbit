@@ -17,7 +17,7 @@ passport.use(
         let avatar = profile.photos?.[0]?.value;
         // fix google avatar size
         if (avatar && avatar.includes("googleusercontent")) {
-            avatar = avatar + "=s400-c";
+            avatar = avatar.replace(/=s\d+(-c)?$/, "=s400-c");
         }
 
         let user = await User.findOne({ email });
