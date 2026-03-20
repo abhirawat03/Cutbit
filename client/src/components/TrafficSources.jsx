@@ -23,10 +23,20 @@ function TrafficRow({ name, visits, percent }) {
 export default function TrafficSources({ data = {} }) {
 
   const sources = Object.entries(data)
-    .map(([name, visits]) => ({
-      name: name === "direct" ? "Direct Traffic" : name,
-      visits
-    }))
+    .map(([name, visits]) => {
+  let count = 0;
+
+  if (typeof visits === "number") {
+    count = visits;
+  } else if (typeof visits === "object" && visits !== null) {
+    count = Object.values(visits).reduce((a, b) => a + b, 0);
+  }
+
+  return {
+    name: name === "direct" ? "Direct Traffic" : name,
+    visits: count,
+  };
+})
     .sort((a, b) => b.visits - a.visits)
     .slice(0, 5)
 
@@ -46,7 +56,7 @@ export default function TrafficSources({ data = {} }) {
       ) : (
         <div className="space-y-6">
           {sources.map((source, i) => {
-            const percent = total
+            const percent = total > 0
               ? Math.round((source.visits / total) * 100)
               : 0
 
