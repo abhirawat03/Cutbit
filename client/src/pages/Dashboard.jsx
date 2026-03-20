@@ -8,6 +8,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDashboard } from "../hooks/queries/useDashboard.js";
 import { useCreateLink } from "../hooks/mutations/useCreateLink";
 import { TrendingUp, TrendingDown } from "lucide-react"
+import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
+import useMinimumDelay from "../hooks/useMinimumDelay.js";
 
 function GrowthBadge({ value = 0, range }) {
   const isPositive = value > 0
@@ -35,6 +37,7 @@ function Dashboard() {
   const [range, setRange] = useState(7);
   const [ready, setReady] = useState(false);
   const { data: dashboard, isLoading, error } = useDashboard(ready, range);
+  const showSkeleton = useMinimumDelay(!ready || isLoading, 600);
   const createLinkMutation = useCreateLink();
   const navigate = useNavigate();
   useEffect(() => {
@@ -60,9 +63,9 @@ function Dashboard() {
   if (error) {
     return <p className="text-red-500">Failed to load dashboard</p>;
   }
-  if (!ready || isLoading) {
-    return <p className="text-white">Preparing dashboard...</p>;
-  }
+  if (showSkeleton) {
+    return <DashboardSkeleton />;
+  } 
   return (
     <section className='text-white'>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
@@ -172,7 +175,7 @@ function Dashboard() {
             <button className="text-blue-500 hover:text-blue-300 text-base cursor-pointer">View All Links</button>
           </Link>
         </div>
-        <div className='overflow-x-auto'>
+        <div className='hidden md:block overflow-x-auto'>
           <table className='w-full min-w-[700px] text-sm'>
             <thead className="text-left text-gray-300 uppercase text-xs sm:text-sm bg-[#23293891] tracking-widest">
               <tr>
@@ -199,8 +202,9 @@ function Dashboard() {
                           <span className="text-blue-500 text-sm">
                             <a
                               href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
+                              onClick={(e) => e.stopPropagation()}
                               target="_blank"
-                              className="text-blue-400 cursor-pointer"
+                              className="text-blue-400 cursor-pointer hover:underline"
                             >
                               {link.shortUrl}
                             </a>
@@ -237,6 +241,60 @@ function Dashboard() {
             </tbody>
           </table>
         </div>
+       {/* MOBILE RECENT LINKS */}
+<div className="md:hidden p-4 space-y-3">
+  {dashboard?.recentLinks?.length > 0 ? (
+    dashboard.recentLinks.map((link) => (
+      <div
+        key={link._id}
+        onClick={() => navigate(`/dashboard/links/${link._id}`)}
+        className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] h-[120px] flex flex-col justify-between active:scale-[0.98] transition cursor-pointer"
+      >
+
+        {/* Top */}
+        <div className="space-y-1 overflow-hidden">
+          <p className="text-sm font-medium text-white truncate">
+            {link.name}
+          </p>
+
+          <a
+            href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-400 text-xs truncate block"
+          >
+            {link.shortUrl}
+          </a>
+
+          <p className="text-gray-500 text-xs mt-1 truncate w-70">
+            {link.originalUrl}
+          </p>
+        </div>
+
+        {/* Bottom */}
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-gray-400">
+            {link.totalClicks} clicks
+          </span>
+
+          <span
+            className={`px-2 py-1 text-[10px] rounded-md ${
+              link.status === "active"
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-red-500/20 text-red-400"
+            }`}
+          >
+            {link.status.toUpperCase()}
+          </span>
+        </div>
+
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-400">No Links Yet</p>
+  )}
+</div>
       </div>
     </section>
   )

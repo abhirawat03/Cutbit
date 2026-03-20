@@ -6,7 +6,7 @@ import { useDeleteAvatar } from "../hooks/mutations/useDeleteAvatar";
 import { useChangePassword } from "../hooks/mutations/useChangePassword";
 import { useDeleteAccount } from "../hooks/mutations/useDeleteAccount";
 import {useNavigate } from 'react-router-dom';
-import DeleteAccountConfirm from "../components/DeleteAccountConfirm"
+import DeleteAccountConfirm from "../components/DeleteAccountConfirm";
 
 export default function Settings() {
   const { user, loading: isLoading, logout, refetchUser } = useAuth();

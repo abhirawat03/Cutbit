@@ -9,6 +9,8 @@ import { FiEdit } from "react-icons/fi";
 import { FiTrash2 } from "react-icons/fi";
 import { FiCopy } from "react-icons/fi";
 import { FiShare2 } from "react-icons/fi";
+import LinkViewSkeleton from "../components/skeletons/LinkViewSkeleton";
+import useMinimumDelay from "../hooks/useMinimumDelay";
 
 export default function LinkView() {
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -16,6 +18,7 @@ export default function LinkView() {
     const navigate = useNavigate();
     const deleteMutation = useDeleteLink();
     const { data: link, isLoading } = useLink(id);
+    const showSkeleton = useMinimumDelay(isLoading, 500);
     const [editOpen, setEditOpen] = useState(false);
     const [selectedLink, setSelectedLink] = useState(null);
     const deleteLink = (id) => {
@@ -59,8 +62,8 @@ export default function LinkView() {
         }
     };
 
-    if (isLoading) {
-        return <p className="text-white">Loading...</p>;
+    if (showSkeleton) {
+        return <LinkViewSkeleton />;
     }
     return (
         <div className="h-full text-white">
@@ -84,14 +87,14 @@ export default function LinkView() {
                 </span>
 
             </div>
-            <div className="max-w-7xl mx-auto grid grid-cols-3 gap-6">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
 
                 {/* LEFT SECTION */}
-                <div className="col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-4 md:space-y-6">
 
                     {/* Header */}
                     <div className="bg-[#111827] p-6 rounded-xl">
-                        <h1 className="text-2xl font-bold mt-3">
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold mt-3 break-all">
                             <a
                                 href={`${import.meta.env.VITE_BACKEND_URL}/${link?.shortUrl}`}
                                 target="_blank"
@@ -102,7 +105,7 @@ export default function LinkView() {
                             </a>
                         </h1>
 
-                        <p className="text-gray-400 mt-2 break-all">
+                        <p className="text-gray-400 mt-2 text-sm break-all">
                             {link.originalUrl}
                         </p>
 
@@ -116,7 +119,7 @@ export default function LinkView() {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                         <div className="bg-[#111827] p-6 rounded-xl">
                             <p className="text-gray-400 text-sm">Total Clicks</p>
                             <h2 className="text-3xl font-bold mt-2">{link?.totalClicks}</h2>
@@ -171,7 +174,7 @@ export default function LinkView() {
                 </div>
 
                 {/* RIGHT SIDEBAR */}
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6 order-last lg:order-none">
 
                     {/* QR Code */}
                     <div className="bg-[#111827] p-6 rounded-xl text-center flex flex-col items-center">

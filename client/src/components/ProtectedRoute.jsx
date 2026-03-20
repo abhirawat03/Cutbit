@@ -6,11 +6,7 @@ function ProtectedRoute() {
 
   // ⛔ wait until auth is resolved
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Checking authentication...
-      </div>
-    );
+    return null
   }
 
   // ⛔ not logged in

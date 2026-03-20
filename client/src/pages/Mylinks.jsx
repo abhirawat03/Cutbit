@@ -14,6 +14,8 @@ import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import { IoClose } from "react-icons/io5";
+import useMinimumDelay from "../hooks/useMinimumDelay";
+import LinksSkeleton from "../components/skeletons/LinksSkeleton";
 
 const getLinkStatus = (link) => {
     if (link.status === "paused") return "paused";
@@ -44,6 +46,7 @@ function Mylinks() {
             `${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`
         );
     };
+    const showSkeleton = useMinimumDelay(isLoading || statsLoading, 600);
 
     const changePage = (newPage) => {
         const params = new URLSearchParams(searchParams);
@@ -69,8 +72,8 @@ function Mylinks() {
         };
     }, [editOpen]);
 
-    if (isLoading || statsLoading) {
-        return <p className="text-white">Loading links...</p>;
+    if (showSkeleton) {
+        return <LinksSkeleton />;
     }
     return (
         <section className='text-white'>

@@ -13,6 +13,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
 
+body {
+    margin: 0;
+    background-color: #020617; /* match your app dark bg */
+  }
+
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
