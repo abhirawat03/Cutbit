@@ -7,9 +7,8 @@ import { validateAlias } from "../utils/validateAlias.js";
 import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
 import { calculateGrowth } from "../utils/growth.js";
-import dns from "dns/promises";
 
-const validateProductionUrl = async (url) => {
+const validateProductionUrl = async(url) => {
   let parsed;
 
   try {
@@ -18,76 +17,78 @@ const validateProductionUrl = async (url) => {
     throw new ApiError(400, "Invalid URL format");
   }
 
-  // ✅ protocol check
+  // only allow http/https
   if (!["http:", "https:"].includes(parsed.protocol)) {
     throw new ApiError(400, "Only HTTP/HTTPS URLs allowed");
   }
 
-  const hostname = parsed.hostname;
+  const hostname = parsed.hostname.toLowerCase();
 
-  // ❌ block internal/private hosts
-  const isLocal =
+  // block obvious bad ones
+  if (
     hostname === "localhost" ||
-    hostname.startsWith("127.") ||
-    hostname.startsWith("10.") ||
-    hostname.startsWith("192.168.");
-
-  if (isLocal) {
-    throw new ApiError(400, "Invalid target URL");
+    hostname === "127.0.0.1" ||
+    hostname === "0.0.0.0"
+  ) {
+    throw new ApiError(400, "Local URLs are not allowed");
   }
 
-  // ⚡ optional DNS check
-  try {
-    await dns.lookup(hostname);
-  } catch {
-    throw new ApiError(400, "Domain does not exist");
-  }
-
-  return parsed.href;
+  return parsed.toString();
 };
 
-const createShortUrl = async (req, res) => {
-  const userId = req.user?._id;
-  if (!userId) throw new ApiError(401, "unauthorized");
-  const { name, originalUrl, customAlias, expiryDate } = req.body;
+  const createShortUrl = async (req, res) => {
+    const userId = req.user?._id;
+    if (!userId) throw new ApiError(401, "unauthorized");
+    const { name, originalUrl, customAlias, expiryDate } = req.body;
 
-  if (!originalUrl) throw new ApiError(400, "Url required");
+    if (!originalUrl) throw new ApiError(400, "Url required");
 
-  // ✅ URL validation
-  try {
-    await validateProductionUrl(originalUrl)
-  } catch {
-    throw new ApiError(400, "Invalid URL format");
-  }
+    // ✅ URL validation
+    const normalizedUrl = await validateProductionUrl(originalUrl)
 
-  let shortUrl;
+    let shortUrl;
 
-  // If user provided alias
-  if (customAlias) {
+    // If user provided alias
+    if (customAlias) {
     shortUrl = validateAlias(customAlias);
   } else {
-    shortUrl = nanoid(6);
+    let exists;
+    do {
+      shortUrl = nanoid(6);
+      exists = await Url.findOne({ shortUrl });
+    } while (exists);
   }
 
-  try {
-    const newUrl = await Url.create({
-      userId,
-      name,
-      originalUrl,
-      shortUrl,
-      ...(expiryDate && { expiryDate }), //optional
-    });
-    return res
-      .status(201)
-      .json(new ApiResponse(201, newUrl, "Shorturl created successfully"));
-  } catch (err) {
-    if (err.code === 11000) {
-      throw new ApiError(400, "Custom alias already exists");
-    }
-    throw err;
+  // ✅ expiry validation
+  let validExpiry = null;
+  if (expiryDate) {
+    const date = new Date(expiryDate);
+
+    if (isNaN(date)) throw new ApiError(400, "Invalid expiry date");
+    if (date <= new Date()) throw new ApiError(400, "Expiry must be future");
+
+    validExpiry = date;
   }
-  
-};
+
+    try {
+      const newUrl = await Url.create({
+        userId,
+        name:name?.trim() || "",
+        originalUrl:normalizedUrl,
+        shortUrl,
+        ...(validExpiry && { expiryDate: validExpiry }),
+      });
+      return res
+        .status(201)
+        .json(new ApiResponse(201, newUrl, "Shorturl created successfully"));
+    } catch (err) {
+      if (err.code === 11000) {
+        throw new ApiError(400, "Custom alias already exists");
+      }
+      throw err;
+    }
+    
+  };
 
 const getalllinks = async (req, res) => {
   const userId = req.user._id;
