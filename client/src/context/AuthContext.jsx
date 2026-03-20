@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     } catch {
       //
     }
-
+    queryClient.setQueryData(["me"], null);
     queryClient.removeQueries({ queryKey: ["me"] });
   };
 
