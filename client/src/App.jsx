@@ -18,7 +18,7 @@ import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
 import RedirectError from "./pages/RedirectError.jsx";
 import GlobalFetchingIndicator from "./components/GlobalFetchingIndicator.jsx";
-import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTop from "./components/scrollToTop.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
