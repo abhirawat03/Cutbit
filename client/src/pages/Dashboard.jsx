@@ -58,7 +58,7 @@ function Dashboard() {
     };
 
     init();
-  }, []);
+  }, [createLinkMutation]);
 
   if (error) {
     return <p className="text-red-500">Failed to load dashboard</p>;
@@ -68,6 +68,7 @@ function Dashboard() {
   } 
   return (
     <section className='text-white'>
+      <h1 className="text-4xl font-bold mb-5">Dashboard</h1>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <div className='bg-gradient-to-br from-blue-900/60 to-[#1e293b62] p-8 rounded-2xl border-2 border-blue-900 relative overflow-hidden'>
           <div className='flex items-center mb-5 justify-between'>
@@ -77,7 +78,7 @@ function Dashboard() {
             </div>
           </div>
           <div >
-            <h1 className='text-3xl sm:text-4xl md:text-5xl mb-2 font-extrabold'>{dashboard.stats.totalLinks}</h1>
+            <h1 className='text-3xl sm:text-4xl md:text-5xl mb-2 font-extrabold'>{dashboard?.stats?.totalLinks ?? 0}</h1>
           </div>
           <IoLink className='absolute bottom-0 -right-4 text-gray-700' size={120} />
         </div>
@@ -89,9 +90,9 @@ function Dashboard() {
             </div>
           </div>
           <div>
-            <h1 className='text-5xl font-extrabold mb-2'>{dashboard.stats.lifetimeClicks.toLocaleString()}</h1>
+            <h1 className='text-5xl font-extrabold mb-2'>{dashboard?.stats?.lifetimeClicks?.toLocaleString() ?? 0}</h1>
             <span>
-              <GrowthBadge value={dashboard.growth.clicks ?? 0} range={range} />
+              <GrowthBadge value={dashboard?.growth?.clicks ?? 0} range={range} />
             </span>
           </div>
           <MdAdsClick className='absolute bottom-0 -right-4 text-gray-700' size={120} />
@@ -104,9 +105,9 @@ function Dashboard() {
             </div>
           </div>
           <div>
-            <h1 className='text-5xl font-extrabold mb-2'>{dashboard.stats.lifetimeUnique.toLocaleString()}</h1>
+            <h1 className='text-5xl font-extrabold mb-2'>{dashboard?.stats?.lifetimeUnique?.toLocaleString() ?? 0}</h1>
             <span>
-              <GrowthBadge value={dashboard.growth.unique ?? 0} range={range} />
+              <GrowthBadge value={dashboard?.growth?.unique ?? 0} range={range} />
             </span>
           </div>
           <MdOutlinePersonOutline className='absolute bottom-0 -right-4 text-gray-700' size={120} />

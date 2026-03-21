@@ -77,6 +77,7 @@ function Mylinks() {
     }
     return (
         <section className='text-white'>
+            <h1 className="text-4xl font-bold mb-5">My Links</h1>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
                     <div className='flex flex-col items-center justify-between'>
