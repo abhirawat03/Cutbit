@@ -66,8 +66,8 @@ export default function LinkView() {
         return <LinkViewSkeleton />;
     }
     return (
-        <div className="h-full text-white">
-            <div className="max-w-7xl mx-auto mb-6 flex items-center gap-3 text-sm text-gray-400">
+        <div className="h-full text-white p-4">
+            <div className="max-w-7xl mx-auto mb-6 items-center gap-3 text-sm text-gray-400 hidden md:flex">
 
                 <button
                     onClick={() => navigate(-1)}
@@ -94,7 +94,7 @@ export default function LinkView() {
 
                     {/* Header */}
                     <div className="bg-[#111827] p-6 rounded-xl">
-                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold mt-3 break-all">
+                        <h1 className="text-sm md:text-2xl font-bold mt-3 break-all">
                             <a
                                 href={`${import.meta.env.VITE_BACKEND_URL}/${link?.shortUrl}`}
                                 target="_blank"

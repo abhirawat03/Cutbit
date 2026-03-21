@@ -167,7 +167,7 @@ function Home() {
                         className={`font-bold text-white px-6 rounded-lg flex items-center gap-2
                         ${createLinkMutation.isPending
                                 ? "bg-gray-600 cursor-not-allowed"
-                                : "bg-[#2563EB] hover:bg-blue-700"
+                                : "bg-[#2563EB] hover:bg-blue-700 cursor-pointer"
                             }`}
                     >
                         {createLinkMutation.isPending ? "..." : "Shorten Now"}

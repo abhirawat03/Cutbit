@@ -24,10 +24,10 @@ export default function LinkBrief() {
 }
 
   return (
-  <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 min-h-screen text-white">
+  <div className="p-4 space-y-5 sm:space-y-6 min-h-screen text-white">
 
     {/* Breadcrumb */}
-    <div className="max-w-7xl flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400">
+    <div className="max-w-7xl flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400 hidden md:flex">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1 hover:text-white"
@@ -56,12 +56,12 @@ export default function LinkBrief() {
       <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
 
         {/* Left */}
-        <div className="space-y-2">
-          <span className="text-xs sm:text-sm text-teal-400 bg-teal-400/10 px-3 py-1 rounded-full">
+        <div className="space-y-2 ">
+          <span className="text-xs md:text-sm text-teal-400 bg-teal-400/10 px-3 py-1 rounded-full">
             Link Analytics
           </span>
 
-          <h1 className="text-base sm:text-xl md:text-2xl font-bold break-all">
+          <h1 className="text-sm md:text-xl mt-1 font-bold break-all">
             <a
               href={`${import.meta.env.VITE_BACKEND_URL}/${linkdetails?.shortUrl}`}
               target="_blank"
@@ -73,7 +73,7 @@ export default function LinkBrief() {
           </h1>
 
           <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 break-all">
-            Original: {linkdetails?.originalUrl}
+            {linkdetails?.originalUrl}
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function LinkBrief() {
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm border ${
+              className={`flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs sm:text-sm border cursor-pointer ${
                 range === r
                   ? "bg-teal-500/20 text-teal-400 border-teal-500"
                   : "bg-[#1f2937] border-[#334155]"
@@ -115,11 +115,11 @@ export default function LinkBrief() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
       <div className="lg:col-span-2 bg-[#111827] border border-[#1f2937] rounded-2xl p-4 sm:p-6">
-        <h2 className="text-sm sm:text-lg font-semibold mb-1">
+        <h2 className="text-lg md:text-xl font-semibold mb-1">
           Daily Performance
         </h2>
 
-        <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">
+        <p className="text-gray-400 text-lg md:text-xl mb-4 sm:mb-6">
           Last {range} days
         </p>
 

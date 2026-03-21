@@ -77,7 +77,7 @@ function Mylinks() {
     }
     return (
         <section className='text-white'>
-            <h1 className="text-4xl font-bold mb-5">My Links</h1>
+            <h1 className="text-4xl font-bold mb-5 text-center md:text-left">My Links</h1>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
                     <div className='flex flex-col items-center justify-between'>
@@ -134,6 +134,9 @@ function Mylinks() {
                                         >
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
+                                                    <span className="text-white font-semibold truncate">
+                                                        {link.name}
+                                                    </span>
                                                     <span className="text-blue-400 font-medium flex gap-2.5">
                                                         <a
                                                             href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
@@ -172,7 +175,7 @@ function Mylinks() {
                                             <td className="px-6 py-4 text-gray-400">{link.totalUniqueVisitors}</td>
                                             <td className="px-6 py-4 text-gray-400">{new Date(link.createdAt).toLocaleDateString()}</td>
 
-                                            <td className="flex my-5 gap-2 justify-center">
+                                            <td className="flex my-8 gap-2 justify-center">
                                                 <MdQrCode2
                                                     className="text-gray-400 hover:text-blue-400 cursor-pointer"
                                                     size={28}
@@ -217,7 +220,10 @@ function Mylinks() {
                                 key={link._id}
                                 onClick={() => navigate(`/dashboard/links/${link._id}`)}
                                 className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] space-y-3">
-                                <div>
+                                <div className='space-y-1'>
+                                    <p className="text-white font-semibold truncate">
+                                        {link.name}
+                                    </p>
                                     <p className="text-blue-400 font-medium flex flex-row gap-2">
                                         <a
                                             href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
@@ -254,7 +260,7 @@ function Mylinks() {
                                         {link.status.toUpperCase()}
                                     </span>
                                     <div className="space-x-2 text-lg flex flex-row">
-                                        <MdQrCode2                                            className="text-blue-400 cursor-pointer"
+                                        <MdQrCode2 className="text-blue-400 cursor-pointer"
                                             size={28}
                                             onClick={(e) => {
                                                 e.stopPropagation();

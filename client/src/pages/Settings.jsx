@@ -174,13 +174,13 @@ export default function Settings() {
     return <p className="text-white p-6">Loading user...</p>;
   }
   return (
-    <div className="min-h-screen text-white p-6">
+    <div className="min-h-screen text-white p-4">
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold">Account Settings</h1>
-          <p className="text-gray-400 mt-2">
+          <h1 className="text-4xl font-bold text-center md:text-left">Account Settings</h1>
+          <p className="text-gray-400 mt-2 text-center md:text-left">
             Manage your profile information and security preferences.
           </p>
         </div>

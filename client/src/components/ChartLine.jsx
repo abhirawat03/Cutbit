@@ -29,10 +29,9 @@ const chartConfig = {
 }
 
 export function ChartLine({ data = [], range }) {
-    console.log(data)
     return (
         <Card className="py-4 sm:py-0 bg-[#1e202399] text-white">
-            <CardHeader className="flex flex-col items-center border-b sm:flex-row py-3 pt-8">
+            <CardHeader className="flex flex-col items-center border-b sm:flex-row pt-4">
                 <div className="flex flex-1 flex-col justify-center gap-1">
                     <CardTitle>Click Activity</CardTitle>
                     <CardDescription className="text-gray-400">
@@ -49,8 +48,8 @@ export function ChartLine({ data = [], range }) {
                         accessibilityLayer
                         data={data}
                         margin={{
-                            left: 12,
-                            right: 12,
+                            left: -10,
+                            right: 30,
                         }}
                     >
                         {/* <CartesianGrid vertical={false} /> */}

@@ -38,43 +38,43 @@ function Dashboard() {
   const [range, setRange] = useState(7);
   const [ready, setReady] = useState(false);
   const { data: dashboard, isLoading, error } = useDashboard(range, ready);
-  const showSkeleton = useMinimumDelay( isLoading, 600);
+  const showSkeleton = useMinimumDelay(isLoading, 600);
   const createLinkMutation = useCreateLink();
   const navigate = useNavigate();
   const hasRun = useRef(false);
 
-useEffect(() => {
-  if (hasRun.current) return;
+  useEffect(() => {
+    if (hasRun.current) return;
 
-  const pending = localStorage.getItem("pendingLink");
+    const pending = localStorage.getItem("pendingLink");
 
-  const run = async () => {
-    try {
-      if (pending) {
-        hasRun.current = true;
-        localStorage.removeItem("pendingLink");
-        await createLinkMutation.mutateAsync(JSON.parse(pending));
+    const run = async () => {
+      try {
+        if (pending) {
+          hasRun.current = true;
+          localStorage.removeItem("pendingLink");
+          await createLinkMutation.mutateAsync(JSON.parse(pending));
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        // 🔥 ALWAYS enable dashboard fetch AFTER this
+        setReady(true);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      // 🔥 ALWAYS enable dashboard fetch AFTER this
-      setReady(true);
-    }
-  };
+    };
 
-  run();
-}, []);
+    run();
+  }, []);
 
   if (error) {
     return <p className="text-red-500">Failed to load dashboard</p>;
   }
   if (showSkeleton) {
     return <DashboardSkeleton />;
-  } 
+  }
   return (
     <section className='text-white'>
-      <h1 className="text-4xl font-bold mb-5">Dashboard</h1>
+      <h1 className="text-4xl font-bold mb-5 text-center md:text-left">Dashboard</h1>
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <div className='bg-gradient-to-br from-blue-900/60 to-[#1e293b62] p-8 rounded-2xl border-2 border-blue-900 relative overflow-hidden'>
           <div className='flex items-center mb-5 justify-between'>
@@ -248,60 +248,59 @@ useEffect(() => {
             </tbody>
           </table>
         </div>
-       {/* MOBILE RECENT LINKS */}
-<div className="md:hidden p-4 space-y-3">
-  {dashboard?.recentLinks?.length > 0 ? (
-    dashboard.recentLinks.map((link) => (
-      <div
-        key={link._id}
-        onClick={() => navigate(`/dashboard/links/${link._id}`)}
-        className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] h-[120px] flex flex-col justify-between active:scale-[0.98] transition cursor-pointer"
-      >
+        {/* MOBILE RECENT LINKS */}
+        <div className="md:hidden p-6 space-y-3">
+          {dashboard?.recentLinks?.length > 0 ? (
+            dashboard.recentLinks.map((link) => (
+              <div
+                key={link._id}
+                onClick={() => navigate(`/dashboard/links/${link._id}`)}
+                className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] h-[120px] flex flex-col justify-between active:scale-[0.98] transition cursor-pointer"
+              >
 
-        {/* Top */}
-        <div className="space-y-1 overflow-hidden">
-          <p className="text-sm font-medium text-white truncate">
-            {link.name}
-          </p>
+                {/* Top */}
+                <div className="space-y-1 overflow-hidden">
+                  <p className="text-sm font-medium text-white truncate">
+                    {link.name}
+                  </p>
 
-          <a
-            href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="text-blue-400 text-xs truncate block"
-          >
-            {link.shortUrl}
-          </a>
+                  <a
+                    href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-blue-400 text-xs truncate block"
+                  >
+                    {link.shortUrl}
+                  </a>
 
-          <p className="text-gray-500 text-xs mt-1 truncate w-70">
-            {link.originalUrl}
-          </p>
+                  <p className="text-gray-500 text-xs mt-1 truncate w-50">
+                    {link.originalUrl}
+                  </p>
+                </div>
+
+                {/* Bottom */}
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-400">
+                    {link.totalClicks} clicks
+                  </span>
+
+                  <span
+                    className={`px-2 py-1 text-[10px] rounded-md ${link.status === "active"
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : "bg-red-500/20 text-red-400"
+                      }`}
+                  >
+                    {link.status.toUpperCase()}
+                  </span>
+                </div>
+
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-400">No Links Yet</p>
+          )}
         </div>
-
-        {/* Bottom */}
-        <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-400">
-            {link.totalClicks} clicks
-          </span>
-
-          <span
-            className={`px-2 py-1 text-[10px] rounded-md ${
-              link.status === "active"
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-red-500/20 text-red-400"
-            }`}
-          >
-            {link.status.toUpperCase()}
-          </span>
-        </div>
-
-      </div>
-    ))
-  ) : (
-    <p className="text-center text-gray-400">No Links Yet</p>
-  )}
-</div>
       </div>
     </section>
   )

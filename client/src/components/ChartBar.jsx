@@ -30,19 +30,18 @@ export function ChartBar({ chartData = [] }) {
     return (
         <Card className="bg-[#0f172a] border border-[#1e293b] text-white">
             <CardHeader>
-                <CardTitle className="text-2xl tracking-wide">Total Clicks Trend</CardTitle>
-                <CardDescription className="text-lg text-gray-400">Aggregated click volume across all links</CardDescription>
+                <CardTitle className="text-lg tracking-wide md:text-2xl">Total Clicks Trend</CardTitle>
+                <CardDescription className="text-lg text-gray-400 hidden md:block">Aggregated click volume across all links</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
                     <BarChart accessibilityLayer data={chartData} className="text-lg">
-                        {/* <CartesianGrid vertical={false} /> */}
                         <XAxis
                             dataKey="date"
                             tickLine={false}
                             axisLine={false}
                             tickMargin={10}
-                            className="text-gray-400"
+                            className="text-gray-400 text-sm"
                             tickFormatter={(value) => {
                                 const d = new Date(value)
                                 return d.toLocaleDateString("en-US", {

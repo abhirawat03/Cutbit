@@ -38,11 +38,11 @@ export default function ChartPie({ data = {} }) {
   return (
     <div className="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 w-full">
 
-      <h2 className="text-white text-2xl font-bold mb-2">
+      <h2 className="text-white text-lg md:text-xl font-bold mb-2">
         Devices Distribution
       </h2>
 
-      <p className="text-lg text-gray-400">
+      <p className="text-lg hidden md:block text-gray-400">
         Breakdown of traffic by hardware category
       </p>
 

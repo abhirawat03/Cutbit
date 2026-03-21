@@ -148,7 +148,7 @@ function DashLayout() {
               closeSidebar();
               setIsCreateModalOpen(true);
             }}
-            className='flex items-center p-2 gap-2 bg-[#2563EB] px-4 rounded-md hover:bg-blue-700'
+            className='flex items-center p-2 gap-2 bg-[#2563EB] px-4 rounded-md hover:bg-blue-700 cursor-pointer'
           >
             <FaPlus />
             Create New Link
@@ -159,7 +159,7 @@ function DashLayout() {
             className={`p-2 rounded-md ${
               isLoggingOut
                 ? "bg-gray-600 cursor-not-allowed"
-                : "bg-red-600 hover:bg-red-700"
+                : "bg-red-600 hover:bg-red-700 cursor-pointer"
             }`}
             disabled={isLoggingOut}
             onClick={handleLogout}
@@ -192,7 +192,7 @@ function DashLayout() {
 
         {/* Toggle button */}
         <button
-          className="fixed top-4 left-4 md:hidden z-50 text-2xl"
+          className="fixed top-3 left-3 md:hidden z-50 text-2xl bg-[#0000008d] px-2 py-1 rounded-lg"
           onClick={() => setIsSidebarOpen(prev => !prev)}
         >
           {isSidebarOpen ? "✕" : "☰"}
