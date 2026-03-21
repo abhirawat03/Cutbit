@@ -18,6 +18,7 @@ import Privacy from "./pages/Privacy.jsx";
 import Terms from "./pages/Terms.jsx";
 import RedirectError from "./pages/RedirectError.jsx";
 import GlobalFetchingIndicator from "./components/GlobalFetchingIndicator.jsx";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -25,6 +26,7 @@ function App() {
   return (
     <BrowserRouter>
       <GlobalFetchingIndicator/>
+      <ScrollToTop />
       <Routes>
         {/* layout wrapper */}
         <Route element={<Layout />}>

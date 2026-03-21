@@ -118,20 +118,20 @@ function Home() {
     };
 
     return (
-        <div className="hide-scrollbar ">
-            <section className="min-h-screen mx-auto flex flex-col items-center justify-center relative overflow-hidden text-white border-b border-[#63686c5e]">
+        <div className="hide-scrollbar">
+            <section className="min-h-screen mx-auto px-3 flex flex-col items-center justify-center relative overflow-hidden text-white border-b border-[#63686c5e]">
                 {/* ===== Radial background glow ===== */}
                 <div className="absolute -top-48 left-1/3 -translate-x-1/2 w-[900px] h-[700px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-xl"></div>
-                <h1 className="text-6xl font-extrabold text-center">
+                <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-center">
                     Shorten your links,
                     <br />
                     <span className=" text-[#2563EB]">broaden your reach</span>
                 </h1>
 
-                <p className="text-xl text-gray-400 mt-6 max-w-[48rem] text-center mb-12">The professional-grade link management platform for modern marketers. Create, track, and optimize your customer touchpoints with ease.</p>
+                <p className="text-sm sm:text-lg md:text-xl text-gray-400 mt-6 max-w-[48rem] text-center mb-12 px-4">The professional-grade link management platform for modern marketers. Create, track, and optimize your customer touchpoints with ease.</p>
 
-                <div className="flex gap-2 z-10 bg-[#111827] w-[1000px] outline-2 outline-[#1E293B] rounded-xl p-2 shadow-lg">
-                    <div className="flex p-3 items-center gap-2 rounded-lg bg-[#26324bbd]">
+                <div className="flex flex-col md:flex-row gap-2 z-10 bg-[#111827] w-full max-w-[1000px] outline-2 outline-[#1E293B] rounded-xl p-2 shadow-lg">
+                    <div className="flex p-3 items-center gap-2 rounded-lg bg-[#26324bbd] w-full md:w-auto">
                         <input
                             type="text"
                             placeholder="Link Name"
@@ -140,7 +140,7 @@ function Home() {
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
-                    <div className="flex flex-1 p-3 rounded-lg bg-[#26324bbd] items-center gap-2">
+                    <div className="flex flex-1 p-3 rounded-lg bg-[#26324bbd] items-center gap-2 w-full">
                         <MdOutlineLink size={20} />
                         <input
                             type="text"
@@ -150,7 +150,7 @@ function Home() {
                             onChange={(e) => setUrl(e.target.value)}
                         />
                     </div>
-                    <div className="flex p-3 items-center gap-2 rounded-lg bg-[#26324bbd]">
+                    <div className="flex p-3 items-center gap-2 rounded-lg bg-[#26324bbd] w-full md:w-auto">
                         <PiTagSimpleFill size={20} />
                         <input
                             type="text"
@@ -164,7 +164,7 @@ function Home() {
                     <button
                         onClick={handleShorten}
                         disabled={createLinkMutation.isPending}
-                        className={`font-bold text-white px-6 rounded-lg flex items-center gap-2
+                        className={`w-full md:w-auto font-bold text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2
                         ${createLinkMutation.isPending
                                 ? "bg-gray-600 cursor-not-allowed"
                                 : "bg-[#2563EB] hover:bg-blue-700 cursor-pointer"
@@ -175,47 +175,61 @@ function Home() {
                     </button>
                 </div>
                 {shortUrl && (
-                    <div className="mt-8 bg-[#111827] max-w-[900px] w-full p-4 rounded-lg shadow flex gap-5 items-center z-10">
-                        <div className="w-15 h-15 flex flex-col items-center justify-center rounded-md cursor-pointer bg-[#2563EB]"
+                    <div className="mt-8 bg-[#111827] max-w-[900px] w-full p-4 rounded-lg shadow flex flex-col md:flex-row gap-4 md:gap-5 items-start md:items-center z-10">
+
+                        {/* QR */}
+                        <div
+                            className="w-14 h-14 md:w-16 md:h-16 flex flex-col items-center justify-center rounded-md cursor-pointer bg-[#2563EB] shrink-0"
                             onClick={() => setShowQR(true)}
                         >
-                            <IoQrCodeSharp className="text-[#111827]" size={40} />
-                            <div className=" text-black text-[8px] font-extrabold bottom-0 ">
-                                <p>Click to view</p>
-                            </div>
+                            <IoQrCodeSharp className="text-[#111827]" size={28} />
+                            <p className="text-black text-[9px] font-bold leading-none mt-1">
+                                View
+                            </p>
                         </div>
-                        <div className="flex items-center justify-between w-full">
-                            <div className="flex flex-col">
-                                <div className="flex gap-2 items-center">
-                                    <p className="font-semibold text-white">Short Link:</p>
-                                    <a href={`${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 flex items-center">
+
+                        {/* Content */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-4">
+
+                            {/* Links */}
+                            <div className="flex flex-col gap-1 w-full overflow-hidden">
+                                <div className="flex gap-2 items-center flex-wrap">
+                                    <p className="font-semibold text-white text-sm">Short Link:</p>
+
+                                    <a
+                                        href={`${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-indigo-400 flex items-center gap-1 text-sm break-all"
+                                    >
                                         {shortUrl}
-                                        <RxExternalLink />
+                                        <RxExternalLink size={14} />
                                     </a>
                                 </div>
 
-                                <p className="text-white">{url}</p>
+                                <p className="text-gray-400 text-xs sm:text-sm break-all">
+                                    {url}
+                                </p>
                             </div>
 
-                            <div className="flex items-center justify-center gap-2">
+                            {/* Actions */}
+                            <div className="flex flex-row md:flex-row w-full md:w-auto gap-2">
                                 <button
                                     onClick={copyToClipboard}
-                                    className="bg-[#2563EB] hover:bg-blue-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 cursor-pointer"
+                                    className="flex-1 md:flex-none bg-[#2563EB] hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm"
                                 >
-                                    <IoCopySharp /> Copy Link
+                                    <IoCopySharp /> Copy
                                 </button>
+
                                 <button
                                     onClick={handleShare}
-                                    className="px-3 py-3 bg-transparent outline outline-[#ffffff60] rounded-md hover:bg-[#78747426]"
+                                    className="flex-1 md:flex-none px-3 py-2.5 bg-transparent outline outline-[#ffffff60] rounded-md hover:bg-[#78747426] flex items-center justify-center"
                                 >
-                                    <ImShare2 size={20} />
+                                    <ImShare2 size={18} />
                                 </button>
                             </div>
 
-
-
                         </div>
-
                     </div>
                 )}
                 {showQR && (
@@ -242,10 +256,10 @@ function Home() {
                 {/* ===== Radial background glow ===== */}
                 <div className="absolute -bottom-48 -right-1/3 -translate-x-1/2 w-[900px] h-[700px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-xl"></div>
             </section>
-            <section id="features" className="min-h-screen border-[#63686c5e] text-white border-b scroll-mt-34">
-                <div className="flex flex-row items-center justify-between mt-35 mx-10">
+            <section id="insights" className="min-h-screen border-[#63686c5e] text-white border-b scroll-mt-27 md:scroll-mt-34">
+                <div className="flex flex-col md:flex-row items-center justify-between mt-10 mb-10 md:mt-35 px-5 md:mx-10 gap-10">
                     <div className="max-w-[600px] flex flex-col gap-5">
-                        <h2 className="text-[2.6rem] font-extrabold">Deep insights into every click</h2>
+                        <h2 className="text-2xl md:text-[2.6rem] font-extrabold">Deep insights into every click</h2>
                         <p className="text-xl font-normal mb-3 text-[#9098a4]">Go beyond basic click counting. Understand your audience behavior with enterprise-grade analytics delivered in real-time.</p>
                         <ul className="space-y-5">
                             <li className="flex flex-row gap-4 items-center">
@@ -278,12 +292,12 @@ function Home() {
                         </ul>
                     </div>
                     <div className="">
-                        <img src={graph} alt="" className="rounded-3xl w-170 shadow-2xl shadow-[#03146487]" />
+                        <img src={graph} alt="" className="rounded-3xl w-full max-w-[700px] shadow-2xl shadow-[#03146487]" />
                     </div>
                 </div>
             </section>
-            <section className="min-h-screen border-b border-[#63686c5e] text-white flex flex-row items-center justify-evenly">
-                <div className="bg-[#27437e40] rounded-2xl w-[370px] shadow-2xl shadow-[#0d2aab72]">
+            <section id="features" className="min-h-screen border-b border-[#63686c5e] text-white flex flex-col md:flex-row items-center justify-evenly gap-6 p-10">
+                <div className="bg-[#27437e40] rounded-2xl w-full md:w-[370px] shadow-2xl shadow-[#0d2aab72]">
                     <div className="flex flex-col p-12 gap-2">
                         <FaStopwatch size={24} className="text-[#2563EB]" />
                         <h4 className="text-[1.20rem] font-bold">Real-time tracking</h4>
@@ -291,7 +305,7 @@ function Home() {
                         </p>
                     </div>
                 </div>
-                <div className="bg-[#27437e40] rounded-2xl w-[390px] shadow-2xl shadow-[#0d2aab72]">
+                <div className="bg-[#27437e40] rounded-2xl w-full md:w-[390px] shadow-2xl shadow-[#0d2aab72]">
                     <div className="flex flex-col p-12 gap-2">
                         <PiTagSimpleFill size={24} className="text-[#2563EB]" />
                         <h4 className="text-[1.20rem] font-bold">Custom Aliases</h4>
@@ -299,7 +313,7 @@ function Home() {
                     </div>
                 </div>
 
-                <div className="bg-[#27437e40] rounded-2xl w-[370px] shadow-2xl shadow-[#0d2aab72]">
+                <div className="bg-[#27437e40] rounded-2xl w-full md:w-[370px] shadow-2xl shadow-[#0d2aab72]">
                     <div className="flex flex-col p-12 gap-2">
                         <IoQrCodeSharp size={24} className="text-[#2563EB]" />
                         <h4 className="text-[1.20rem] font-bold">QR Code Generation</h4>
@@ -307,26 +321,45 @@ function Home() {
                     </div>
                 </div>
             </section>
-            <section id="how" className="min-h-screen text-white flex items-center w-full relative">
-                <div className="flex text-3xl absolute left-1/2 -translate-1/2 ] text-[#2564eb4a]">---------------------------------------------------------------</div>
-                <div className="flex flex-col items-center gap-20 w-full px-25">
+            <section id="how" className="min-h-screen text-white flex items-center w-full relative scroll-mt-17">
+                <div className="hidden md:flex text-3xl absolute left-1/2 -translate-1/2 text-[#2564eb4a]">
+                    ---------------------------------------------------------------
+                </div>
+                <div className="flex flex-col items-center gap-16 w-full py-10 px-5 md:px-15">
                     <h1 className="text-3xl font-extrabold">How it Works</h1>
-                    <div className="flex w-full justify-between">
-                        <div className="flex flex-col items-center gap-5 max-w-[300px]">
-                            <div className="w-18 h-18 text-3xl font-bold bg-[#2563EB] rounded-full flex items-center justify-center shadow-2xl shadow-[#0c2dc1]">1</div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 w-full justify-items-center">
+
+                        <div className="flex flex-col items-center gap-5 max-w-[300px] text-center">
+                            <div className="w-18 h-18 text-3xl font-bold bg-[#2563EB] rounded-full flex items-center justify-center shadow-2xl shadow-[#0c2dc1]">
+                                1
+                            </div>
                             <h4 className="text-xl font-bold">Paste your long link</h4>
-                            <p className="text-center text-[#9098a4]">Drop your long, messy URL into our shortener tool to get started instantly.</p>
+                            <p className="text-[#9098a4]">
+                                Drop your long, messy URL into our shortener tool to get started instantly.
+                            </p>
                         </div>
-                        <div className="flex flex-col items-center gap-5 max-w-[300px]">
-                            <div className="w-18 h-18 text-3xl font-bold bg-[#2563EB] rounded-full flex items-center justify-center shadow-2xl shadow-[#0c2dc1] ">2</div>
+
+                        <div className="flex flex-col items-center gap-5 max-w-[300px] text-center">
+                            <div className="w-18 h-18 text-3xl font-bold bg-[#2563EB] rounded-full flex items-center justify-center shadow-2xl shadow-[#0c2dc1]">
+                                2
+                            </div>
                             <h4 className="text-xl font-bold">Customize your alias</h4>
-                            <p className="text-center text-[#9098a4]">Create a memorable, branded link that builds trust and increases click-through rates.</p>
+                            <p className="text-[#9098a4]">
+                                Create a memorable, branded link that builds trust and increases click-through rates.
+                            </p>
                         </div>
-                        <div className="flex flex-col items-center gap-5 max-w-[300px]">
-                            <div className="w-18 h-18 text-3xl font-bold bg-[#2563EB] rounded-full flex items-center justify-center shadow-2xl shadow-[#0c2dc1]">3</div>
+
+                        <div className="flex flex-col items-center gap-5 max-w-[300px] text-center">
+                            <div className="w-18 h-18 text-3xl font-bold bg-[#2563EB] rounded-full flex items-center justify-center shadow-2xl shadow-[#0c2dc1]">
+                                3
+                            </div>
                             <h4 className="text-xl font-bold">Share and track</h4>
-                            <p className="text-center text-[#9098a4]">Distribute your link and watch real-time analytics come to life with deep insights.</p>
+                            <p className="text-[#9098a4]">
+                                Distribute your link and watch real-time analytics come to life with deep insights.
+                            </p>
                         </div>
+
                     </div>
                 </div>
             </section>
