@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Api from "../api/axios";
 import { QRCodeCanvas } from "qrcode.react";
 import { AiFillThunderbolt } from "react-icons/ai";
 import { MdOutlineLink } from "react-icons/md";
@@ -100,7 +99,7 @@ function Home() {
         document.body.removeChild(link);
     };
     const handleShare = async () => {
-        const url = `${import.meta.env.VITE_BACKEND_URL_ID}/${shortUrl}`;
+        const url = `${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`;
 
         if (navigator.share) {
             try {
@@ -189,7 +188,7 @@ function Home() {
                             <div className="flex flex-col">
                                 <div className="flex gap-2 items-center">
                                     <p className="font-semibold text-white">Short Link:</p>
-                                    <a href={`https://wcrfjq87-8000.inc1.devtunnels.ms/${shortUrl}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 flex items-center">
+                                    <a href={`${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 flex items-center">
                                         {shortUrl}
                                         <RxExternalLink />
                                     </a>
@@ -224,7 +223,7 @@ function Home() {
 
                         <div className="bg-[#111827] p-8 rounded-xl flex flex-col items-center">
 
-                            <QRCodeCanvas value={`https://wcrfjq87-8000.inc1.devtunnels.ms/${shortUrl}`} size={220} bgColor="#111827" id="big-qr" fgColor="#2563EB" level="H" />
+                            <QRCodeCanvas value={`${import.meta.env.VITE_BACKEND_URL}/${shortUrl}`} size={220} bgColor="#111827" id="big-qr" fgColor="#2563EB" level="H" />
 
                             <button onClick={downloadQR} className="mt-3 bg-green-600 text-white px-4 py-2 rounded">
                                 Download QR
