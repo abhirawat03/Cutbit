@@ -36,6 +36,12 @@ function DashLayout() {
   });
   }, [location.pathname]);
 
+  useEffect(() => {
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual';
+  }
+}, []);
+
   // ✅ always close sidebar on route change (important)
   useEffect(() => {
     setIsSidebarOpen(false);
