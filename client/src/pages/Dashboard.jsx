@@ -41,24 +41,23 @@ function Dashboard() {
   const createLinkMutation = useCreateLink();
   const navigate = useNavigate();
   useEffect(() => {
-    const pending = localStorage.getItem("pendingLink");
+    const init = async () => {
+      const pending = localStorage.getItem("pendingLink");
 
-    if (!pending) return;
+      if (pending) {
+        try {
+          await createLinkMutation.mutateAsync(JSON.parse(pending));
+        } catch (e) {
+          console.error(e);
+        }
 
-    const run = async () => {
-      try {
-        await createLinkMutation.mutateAsync(JSON.parse(pending));
-      } catch (e) {
-        console.error(e);
+        localStorage.removeItem("pendingLink");
       }
 
-      localStorage.removeItem("pendingLink");
-
-      // 🔥 NOW allow dashboard fetch
       setReady(true);
     };
 
-    run();
+    init();
   }, [createLinkMutation]);
 
   if (error) {
@@ -66,7 +65,7 @@ function Dashboard() {
   }
   if (showSkeleton) {
     return <DashboardSkeleton />;
-  }
+  } 
   return (
     <section className='text-white'>
       <h1 className="text-4xl font-bold mb-5">Dashboard</h1>
@@ -243,59 +242,60 @@ function Dashboard() {
             </tbody>
           </table>
         </div>
-        {/* MOBILE RECENT LINKS */}
-        <div className="md:hidden p-4 space-y-3">
-          {dashboard?.recentLinks?.length > 0 ? (
-            dashboard.recentLinks.map((link) => (
-              <div
-                key={link._id}
-                onClick={() => navigate(`/dashboard/links/${link._id}`)}
-                className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] h-[120px] flex flex-col justify-between active:scale-[0.98] transition cursor-pointer"
-              >
+       {/* MOBILE RECENT LINKS */}
+<div className="md:hidden p-4 space-y-3">
+  {dashboard?.recentLinks?.length > 0 ? (
+    dashboard.recentLinks.map((link) => (
+      <div
+        key={link._id}
+        onClick={() => navigate(`/dashboard/links/${link._id}`)}
+        className="bg-[#111827] rounded-xl p-4 border border-[#1e293b] h-[120px] flex flex-col justify-between active:scale-[0.98] transition cursor-pointer"
+      >
 
-                {/* Top */}
-                <div className="space-y-1 overflow-hidden">
-                  <p className="text-sm font-medium text-white truncate">
-                    {link.name}
-                  </p>
+        {/* Top */}
+        <div className="space-y-1 overflow-hidden">
+          <p className="text-sm font-medium text-white truncate">
+            {link.name}
+          </p>
 
-                  <a
-                    href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-blue-400 text-xs truncate block"
-                  >
-                    {link.shortUrl}
-                  </a>
+          <a
+            href={`${import.meta.env.VITE_BACKEND_URL}/${link.shortUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-400 text-xs truncate block"
+          >
+            {link.shortUrl}
+          </a>
 
-                  <p className="text-gray-500 text-xs mt-1 truncate w-70">
-                    {link.originalUrl}
-                  </p>
-                </div>
-
-                {/* Bottom */}
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-400">
-                    {link.totalClicks} clicks
-                  </span>
-
-                  <span
-                    className={`px-2 py-1 text-[10px] rounded-md ${link.status === "active"
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-red-500/20 text-red-400"
-                      }`}
-                  >
-                    {link.status.toUpperCase()}
-                  </span>
-                </div>
-
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-400">No Links Yet</p>
-          )}
+          <p className="text-gray-500 text-xs mt-1 truncate w-70">
+            {link.originalUrl}
+          </p>
         </div>
+
+        {/* Bottom */}
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-gray-400">
+            {link.totalClicks} clicks
+          </span>
+
+          <span
+            className={`px-2 py-1 text-[10px] rounded-md ${
+              link.status === "active"
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-red-500/20 text-red-400"
+            }`}
+          >
+            {link.status.toUpperCase()}
+          </span>
+        </div>
+
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-400">No Links Yet</p>
+  )}
+</div>
       </div>
     </section>
   )
