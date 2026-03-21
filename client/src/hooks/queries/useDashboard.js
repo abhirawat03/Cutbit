@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStats } from "../../services/dashboardService";
 
-export const useDashboard = (ready,range) => {
+export const useDashboard = (range,enabled) => {
   return useQuery({
     queryKey: ["dashboardStats", range],
     queryFn: () => getDashboardStats(range),
-    enabled: ready, 
-    staleTime:120000,
+    staleTime:1000 * 60 * 2,
+    enabled
   });
 };

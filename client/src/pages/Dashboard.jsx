@@ -10,6 +10,7 @@ import { useCreateLink } from "../hooks/mutations/useCreateLink";
 import { TrendingUp, TrendingDown } from "lucide-react"
 import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import useMinimumDelay from "../hooks/useMinimumDelay.js";
+import { useRef } from "react";
 
 function GrowthBadge({ value = 0, range }) {
   const isPositive = value > 0
@@ -36,29 +37,34 @@ function GrowthBadge({ value = 0, range }) {
 function Dashboard() {
   const [range, setRange] = useState(7);
   const [ready, setReady] = useState(false);
-  const { data: dashboard, isLoading, error } = useDashboard(ready, range);
-  const showSkeleton = useMinimumDelay(!ready || isLoading, 600);
+  const { data: dashboard, isLoading, error } = useDashboard(range, ready);
+  const showSkeleton = useMinimumDelay( isLoading, 600);
   const createLinkMutation = useCreateLink();
   const navigate = useNavigate();
-  useEffect(() => {
-    const init = async () => {
-      const pending = localStorage.getItem("pendingLink");
+  const hasRun = useRef(false);
 
+useEffect(() => {
+  if (hasRun.current) return;
+
+  const pending = localStorage.getItem("pendingLink");
+
+  const run = async () => {
+    try {
       if (pending) {
-        try {
-          await createLinkMutation.mutateAsync(JSON.parse(pending));
-        } catch (e) {
-          console.error(e);
-        }
-
+        hasRun.current = true;
         localStorage.removeItem("pendingLink");
+        await createLinkMutation.mutateAsync(JSON.parse(pending));
       }
-
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // 🔥 ALWAYS enable dashboard fetch AFTER this
       setReady(true);
-    };
+    }
+  };
 
-    init();
-  }, [createLinkMutation]);
+  run();
+}, []);
 
   if (error) {
     return <p className="text-red-500">Failed to load dashboard</p>;
