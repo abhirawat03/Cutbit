@@ -3,7 +3,7 @@ import logo from "../assets/images/logo.png";
 import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
   return (
     <nav className="fixed top-0 z-50 left-0 w-full bg-[#030a2a] border-b-2 border-[#202733]">
       {/* content */}
@@ -23,7 +23,7 @@ function Navbar() {
           </div>
           <div className="text-gray-300 text-2xl font-semibold">|</div>
           <div className="flex gap-6 font-bold items-center">
-            {isAuthenticated ? (
+            {user ? (
               <Link
                 to="/dashboard"
                 className="text-white hover:bg-blue-700 bg-[#2563EB] px-4 py-2 rounded-xl"
