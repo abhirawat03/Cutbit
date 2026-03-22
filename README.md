@@ -68,19 +68,38 @@ Cutbit focuses on **near real-time analytics**, **scalable data tracking**, and 
 
 ---
 
-## 🧠 How It Works
+## ⚙️ How Cutbit Works
 
-1. User submits a long URL (and optional metadata)
-2. Backend generates a unique short ID
-3. Short link is stored in MongoDB
-4. User shares the link or QR code
-5. When someone clicks:
+1. User creates a short link mapped to an original URL  
+2. When a short link is accessed:
+   - Request is validated (expiry, status)
+   - Bot traffic is filtered using user-agent + headers
+   - A visitor ID is assigned using cookies (visitorId)
+   - Device, country, and referrer are extracted
+   - Click and visitor data are recorded and aggregated per day
+3. User is redirected to the original URL
 
-   * Request hits backend
-   * Analytics data is captured (IP → geo, user agent → device)
-   * Click event is stored instantly
-   * User is redirected to the original URL
-6. Dashboard fetches and displays analytics using React Query (optimized caching & refetching)
+---
+
+## 📊 Analytics Approach
+
+- Click tracking is request-based (each valid request increments count)
+- Bot traffic is filtered using user-agent and request header checks
+- Unique visitors are tracked using cookies with daily deduplication
+- Device type is derived from user-agent parsing
+- Referrer data is normalized to remove internal traffic noise
+- Country-level data is estimated using GeoIP lookup
+
+---
+
+## 🏗️ Architecture
+
+Client (React) → API (Express) → MongoDB
+
+- Redirect route handles validation, bot filtering, and analytics tracking in a single request cycle  
+- Visitor data is stored separately to track unique visits using cookies  
+- Analytics are aggregated per day for efficient querying and chart rendering  
+- Frontend uses React Query for optimized data fetching and caching
 
 ---
 
@@ -188,9 +207,11 @@ server/
 
 ## ⚠️ Notes / Limitations
 
-* Analytics are near real-time but not streaming (depends on request frequency)
-* Free-tier backend (Render) may experience cold starts
-
+- Analytics are near real-time but not streaming (depends on request frequency)
+- Bot traffic is filtered using heuristics (user-agent + headers) and may not be perfect
+- Unique visitors are cookie-based and may be slightly inflated due to browser/device differences
+- Geo-location is IP-based and may be inaccurate for VPN/proxy users
+- Free-tier backend (Render) may experience cold starts
 ---
 
 ## 🧑‍💻 Author
