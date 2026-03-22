@@ -68,6 +68,22 @@ Cutbit focuses on **near real-time analytics**, **scalable data tracking**, and 
 
 ---
 
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](./screenshot/dashboard.png)
+
+### My Links
+![My Links](./screenshot/mylinks.png)
+
+### Link Details
+![Link Details](./screenshot/linkdetail.png)
+
+### Link Analytics
+![Link Analytics](./screenshot/linkanalytics.png)
+
+---
+
 ## ⚙️ How Cutbit Works
 
 1. User creates a short link mapped to an original URL  
