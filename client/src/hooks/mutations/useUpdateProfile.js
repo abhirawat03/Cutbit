@@ -8,9 +8,6 @@ export const useUpdateProfile = () => {
     onSuccess: (updatedUser) => {
       // ⚡ instant UI update
       queryClient.setQueryData(["me"], updatedUser);
-
-      // 🔄 ensure fresh sync
-      queryClient.invalidateQueries(["me"]);
     },
   });
 };

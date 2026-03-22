@@ -66,7 +66,7 @@ export default function LinkView() {
         return <LinkViewSkeleton />;
     }
     return (
-        <div className="h-full text-white p-4">
+        <div className="text-white p-2">
             <div className="max-w-7xl mx-auto mb-6 items-center gap-3 text-sm text-gray-400 hidden md:flex">
 
                 <button

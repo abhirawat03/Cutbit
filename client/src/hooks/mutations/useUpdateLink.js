@@ -10,6 +10,7 @@ export const useUpdateLink = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["links"]});
       queryClient.invalidateQueries({ queryKey: ["link"]});
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"]});
       queryClient.invalidateQueries({ queryKey: ["linkStats"]});
     }
   });

@@ -11,6 +11,7 @@ import { TrendingUp, TrendingDown } from "lucide-react"
 import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import useMinimumDelay from "../hooks/useMinimumDelay.js";
 import { useRef } from "react";
+import CreateNewLink from '../components/CreateNewLink.jsx';
 
 function GrowthBadge({ value = 0, range }) {
   const isPositive = value > 0
@@ -37,6 +38,7 @@ function GrowthBadge({ value = 0, range }) {
 function Dashboard() {
   const [range, setRange] = useState(7);
   const [ready, setReady] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { data: dashboard, isLoading, error } = useDashboard(range, ready);
   const showSkeleton = useMinimumDelay(isLoading, 600);
   const createLinkMutation = useCreateLink();
@@ -74,8 +76,26 @@ function Dashboard() {
   }
   return (
     <section className='text-white'>
-      <h1 className="text-4xl font-bold mb-5 text-center md:text-left">Dashboard</h1>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold">Dashboard</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Manage and track your links performance
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setIsCreateModalOpen(true);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg font-medium text-sm md:text-base w-full md:w-auto"
+        >
+          + Create New Link
+        </button>
+
+      </div>
+      <div className='grid grid-cols-1 md:grid-cols-1 xl:grid-cols-3 gap-6'>
         <div className='bg-gradient-to-br from-blue-900/60 to-[#1e293b62] p-8 rounded-2xl border-2 border-blue-900 relative overflow-hidden'>
           <div className='flex items-center mb-5 justify-between'>
             <h2 className='uppercase text-xl font-bold tracking-widest text-blue-600'>Total Engagement</h2>
@@ -138,11 +158,11 @@ function Dashboard() {
         </button>
 
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mt-6'>
-        <div className='md:col-span-2 rounded-2xl'>
+      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6 w-full'>
+        <div className='xl:col-span-2 rounded-2xl'>
           <ChartLine data={dashboard?.chart || []} range={range} />
         </div>
-        <div className='p-6 bg-[#33373d55] rounded-2xl flex flex-col border'>
+        <div className='p-6 bg-[#33373d55] rounded-2xl flex flex-col border min-w-full'>
           <div className='flex mb-8 items-center gap-3'>
             <GiAlliedStar className='text-orange-400' size={28} />
             <h1 className='text-xl text-gray-300 font-bold'>
@@ -177,12 +197,12 @@ function Dashboard() {
       </div>
       <div className='grid mt-6 bg-[#33373d55] rounded-t-xl  border border-[#334155]'>
         <div className='flex flex-row justify-between items-center p-6'>
-          <h2 className='text-2xl font-medium'>Recent Links</h2>
+          <h2 className='text-lg md:text-2xl font-medium'>Recent Links</h2>
           <Link to="/dashboard/links">
-            <button className="text-blue-500 hover:text-blue-300 text-base cursor-pointer">View All Links</button>
+            <button className="text-blue-500 hover:text-blue-300 text-sm md:text-base cursor-pointer">View All Links</button>
           </Link>
         </div>
-        <div className='hidden md:block overflow-x-auto'>
+        <div className='hidden lg:block overflow-x-auto'>
           <table className='w-full min-w-[700px] text-sm'>
             <thead className="text-left text-gray-300 uppercase text-xs sm:text-sm bg-[#23293891] tracking-widest">
               <tr>
@@ -249,7 +269,7 @@ function Dashboard() {
           </table>
         </div>
         {/* MOBILE RECENT LINKS */}
-        <div className="md:hidden p-6 space-y-3">
+        <div className="lg:hidden p-2 space-y-3">
           {dashboard?.recentLinks?.length > 0 ? (
             dashboard.recentLinks.map((link) => (
               <div
@@ -287,8 +307,8 @@ function Dashboard() {
 
                   <span
                     className={`px-2 py-1 text-[10px] rounded-md ${link.status === "active"
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-red-500/20 text-red-400"
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "bg-red-500/20 text-red-400"
                       }`}
                   >
                     {link.status.toUpperCase()}
@@ -302,6 +322,11 @@ function Dashboard() {
           )}
         </div>
       </div>
+      {isCreateModalOpen && (
+        <CreateNewLink
+          onClose={() => setIsCreateModalOpen(false)}
+        />
+      )}
     </section>
   )
 }

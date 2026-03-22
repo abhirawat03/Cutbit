@@ -9,7 +9,7 @@ import {useNavigate } from 'react-router-dom';
 import DeleteAccountConfirm from "../components/DeleteAccountConfirm";
 
 export default function Settings() {
-  const { user, loading: isLoading, logout, refetchUser } = useAuth();
+  const { user, loading: isLoading, logout } = useAuth();
   const updateProfileMutation = useUpdateProfile();
   const updateAvatarMutation = useUpdateAvatar();
   const deleteAvatarMutation = useDeleteAvatar();
@@ -61,11 +61,6 @@ export default function Settings() {
 
     updateAvatarMutation.mutate(formData, {
       onSuccess: async() => {
-        const freshUser = await refetchUser();
-        setForm(prev => ({
-          ...prev,
-          avatar: freshUser.avatar
-        }));
         setAvatarImg(null);
       }
     });
@@ -75,11 +70,6 @@ export default function Settings() {
     deleteAvatarMutation.mutate(undefined, {
       
       onSuccess: async() => {
-        const freshUser = await refetchUser();
-        setForm(prev => ({
-          ...prev,
-          avatar: freshUser.avatar
-        }));
         setAvatarImg(null);
       }
     });
@@ -94,16 +84,6 @@ export default function Settings() {
       {
         fullName: form.fullName,
         email: form.email
-      },
-      {
-        onSuccess: async() => {
-          const freshUser = await refetchUser();
-          setForm({
-            avatar: freshUser.avatar,
-            email: freshUser.email,
-            fullName: freshUser.fullName
-          });
-        }
       }
     );
   };

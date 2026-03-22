@@ -1,7 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { IoClose } from "react-icons/io5";
-import Api from "../api/axios.js";
 import { QRCodeCanvas } from 'qrcode.react';
 import { useCreateLink } from "../hooks/mutations/useCreateLink";
 

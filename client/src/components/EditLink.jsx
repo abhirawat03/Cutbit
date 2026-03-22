@@ -36,10 +36,11 @@ export default function EditLink({ link, onClose}) {
 };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       
       {/* Modal */}
-      <div className="w-full max-w-2xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]" onClick={(e) => e.stopPropagation()}
+>
 
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-[#1e293b]">
@@ -83,7 +84,7 @@ export default function EditLink({ link, onClose}) {
                 onChange={(e) =>  
                   setForm({ ...form, shortUrl: e.target.value })
                 }
-                className="flex-1 bg-[#1e293b] border border-[#334155] rounded-r-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-[#1e293b] border border-[#334155] rounded-r-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>

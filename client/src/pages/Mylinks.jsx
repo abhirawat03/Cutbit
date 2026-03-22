@@ -72,15 +72,28 @@ function Mylinks() {
         };
     }, [editOpen]);
 
+    useEffect(() => {
+        const handleEsc = (e) => {
+            if (e.key === "Escape") {
+                setQrOpen(false);
+                setConfirmDelete(false);
+                setEditOpen(false);
+            }
+        };
+
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, []);
+
     if (showSkeleton) {
         return <LinksSkeleton />;
     }
     return (
         <section className='text-white'>
             <h1 className="text-4xl font-bold mb-5 text-center md:text-left">My Links</h1>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
-                    <div className='flex flex-col items-center justify-between'>
+                    <div className='flex flex-row items-center gap-5 xl:flex-col xl:items-center xl:justify-between xl:gap-0'>
                         <div className='bg-blue-600/20 py-4 px-3 rounded-lg'>
                             <IoLink size={25} className='text-blue-500' />
                         </div>
@@ -89,7 +102,7 @@ function Mylinks() {
                     <h3 className='text-2xl sm:text-3xl md:text-4xl mb-2 font-semibold'>{stats?.totalActive ?? 0}</h3>
                 </div>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
-                    <div className='flex flex-col items-center justify-between'>
+                    <div className='flex flex-row items-center gap-5 xl:flex-col xl:items-center xl:justify-between xl:gap-0'>
                         <div className='bg-violet-600/20 py-4 px-3 rounded-lg'>
                             <MdAdsClick size={25} className='text-violet-500' />
                         </div>
@@ -98,7 +111,7 @@ function Mylinks() {
                     <h3 className='text-2xl sm:text-3xl md:text-4xl mb-2 font-semibold'>{stats?.totalClicks ?? 0}</h3>
                 </div>
                 <div className='flex flex-row items-center justify-between bg-[#1e293b62] p-8 rounded-2xl border-2 border-gray-800 overflow-hidden'>
-                    <div className='flex flex-col items-center justify-between'>
+                    <div className='flex flex-row items-center gap-5 xl:flex-col  xl:justify-between xl:gap-0'>
                         <div className='bg-green-600/20 py-4 px-3 rounded-lg'>
                             <MdOutlinePersonOutline size={25} className='text-green-500' />
                         </div>
@@ -108,7 +121,7 @@ function Mylinks() {
                 </div>
             </div>
             <div className="bg-[#0f172a] rounded-xl mt-6 border border-[#1e293b] overflow-hidden">
-                <div className="hidden md:block overflow-x-auto">
+                <div className="hidden xl:block overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-[#111c2d] text-gray-400 uppercase text-xs tracking-wider">
                             <tr>
@@ -213,7 +226,7 @@ function Mylinks() {
                         </tbody>
                     </table>
                 </div>
-                <div className="md:hidden space-y-4 p-4">
+                <div className="xl:hidden space-y-4 p-4">
                     {links.length > 0 ? (
                         links.map((link) => (
                             <div
@@ -294,8 +307,8 @@ function Mylinks() {
                     />
                 )}
                 {qrOpen && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 text-center w-[320px]">
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setQrOpen(false)}>
+                        <div className="bg-[#0f172a] border border-[#1e293b] rounded-xl p-6 text-center w-[300px]" onClick={(e) => e.stopPropagation()}>
 
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-white font-semibold">QR Code</h2>
@@ -341,9 +354,9 @@ function Mylinks() {
                     </div>
                 )}
                 {confirmDelete && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50" onClick={() => setConfirmDelete(false)}>
 
-                        <div className="bg-[#111827] p-6 rounded-xl w-[350px] text-center">
+                        <div className="bg-[#111827] p-6 rounded-xl w-[350px] text-center" onClick={(e) => e.stopPropagation()}>
 
                             <h2 className="text-lg font-semibold mb-2">
                                 Delete Link
