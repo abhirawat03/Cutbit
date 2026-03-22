@@ -4,8 +4,8 @@ import { Url } from "../models/url.js";
 import { calculateGrowth } from "../utils/growth.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { getCache, setCache } from "../utils/cache.js";
 
-const cache = new Map();
 export const getDashboardData = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -14,10 +14,11 @@ export const getDashboardData = async (req, res) => {
     if (!allowedRanges.includes(range)) {
       range = 7;
     }
-    const cacheKey = `${userId}-${range}`;
+    const cacheKey = `dashboard:${userId}-${range}`;
+    const cached = getCache(cacheKey);
 
-    if (cache.has(cacheKey)) {
-      return res.status(200).json(cache.get(cacheKey));
+    if (cached) {
+      return res.json(new ApiResponse(200, cached, "Cached dashboard"));
     }
 
     const today = new Date(
@@ -151,7 +152,7 @@ export const getDashboardData = async (req, res) => {
         },
       ]),
 
-      Url.find({userId})
+      Url.find({ userId })
         .sort({ createdAt: -1 })
         .limit(5)
         .select("shortUrl originalUrl name totalClicks status")
@@ -197,7 +198,7 @@ export const getDashboardData = async (req, res) => {
     });
 
     const chart = dates.map((date) => {
-      const key = date.toLocaleDateString("en-CA");
+      const key = d.toISOString().slice(0, 10);
       return {
         date: key,
         clicks: analyticsMap.get(key)?.clicks || 0,
@@ -209,20 +210,15 @@ export const getDashboardData = async (req, res) => {
       stats,
       growth,
       chart,
-      topLink: topLink,
+      topLink,
       recentLinks,
     };
 
-    const response = new ApiResponse(
-      200,
-      data,
-      "Dashboard data fetched successfully",
+    setCache(cacheKey, data, 60000);
+
+    return res.json(
+      new ApiResponse(200, data, "Dashboard data fetched successfully")
     );
-
-    cache.set(cacheKey, response);
-    setTimeout(() => cache.delete(cacheKey), 60 * 1000);
-
-    return res.status(200).json(response);
   } catch (error) {
     throw new ApiError(500, "Failed to load dashboard");
   }

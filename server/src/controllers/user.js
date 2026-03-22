@@ -9,6 +9,7 @@ import { Url } from "../models/url.js";
 import mongoose from "mongoose";
 import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
+import { clearCacheByPrefix } from "../utils/cache.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -66,7 +67,7 @@ const registerUser = async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "None"
+    sameSite: "None",
   };
 
   return res
@@ -114,37 +115,31 @@ const loginUser = async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "None"
+    sameSite: "None",
   };
 
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
-        200,
-        loggedInUser,
-        "User logged in successfully",
-      ),
-    );
+    .json(new ApiResponse(200, loggedInUser, "User logged in successfully"));
 };
 
 const googleAuthCallback = async (req, res) => {
-
   const user = req.user;
 
   if (!user) {
     throw new ApiError(401, "Google authentication failed");
   }
 
-  const { accessToken, refreshToken } =
-    await generateAccessAndRefreshTokens(user._id);
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id,
+  );
 
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "None"
+    sameSite: "None",
   };
 
   return res
@@ -168,7 +163,7 @@ const logoutUser = async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "None"
+    sameSite: "None",
   };
 
   return res
@@ -207,7 +202,7 @@ const refreshAccessToken = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
-      sameSite: "None"
+      sameSite: "None",
     };
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -391,11 +386,18 @@ const deleteUserProfile = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    clearCacheByPrefix(`dashboard:${userId}`);
+    clearCacheByPrefix(`links:${userId}`);
+    clearCacheByPrefix(`stats:${userId}`);
+    for (const id of urlIds) {
+      clearCacheByPrefix(`analytics:${id.toString()}`);
+    }
+
     // 7️⃣ Clear cookies
     const options = {
       httpOnly: true,
       secure: true,
-      sameSite: "None"
+      sameSite: "None",
     };
 
     return res
@@ -403,7 +405,6 @@ const deleteUserProfile = async (req, res) => {
       .clearCookie("accessToken", options)
       .clearCookie("refreshToken", options)
       .json(new ApiResponse(200, {}, "Account deleted successfully"));
-
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -423,5 +424,5 @@ export {
   updateUserAvatar,
   deleteUserAvatar,
   googleAuthCallback,
-  deleteUserProfile
+  deleteUserProfile,
 };

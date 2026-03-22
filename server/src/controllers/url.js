@@ -7,6 +7,7 @@ import { validateAlias } from "../utils/validateAlias.js";
 import { Analytics } from "../models/analytics.js";
 import { Visitor } from "../models/visitor.js";
 import { calculateGrowth } from "../utils/growth.js";
+import { getCache, setCache, clearCacheByPrefix } from "../utils/cache.js";
 
 const validateProductionUrl = async(url) => {
   let parsed;
@@ -36,7 +37,7 @@ const validateProductionUrl = async(url) => {
   return parsed.toString();
 };
 
-  const createShortUrl = async (req, res) => {
+const createShortUrl = async (req, res) => {
     const userId = req.user?._id;
     if (!userId) throw new ApiError(401, "unauthorized");
     const { name, originalUrl, customAlias, expiryDate } = req.body;
@@ -78,6 +79,9 @@ const validateProductionUrl = async(url) => {
         shortUrl,
         ...(validExpiry && { expiryDate: validExpiry }),
       });
+      clearCacheByPrefix(`dashboard:${userId}`);
+      clearCacheByPrefix(`links:${userId}`);
+      clearCacheByPrefix(`stats:${userId}`);
       return res
         .status(201)
         .json(new ApiResponse(201, newUrl, "Shorturl created successfully"));
@@ -88,7 +92,7 @@ const validateProductionUrl = async(url) => {
       throw err;
     }
     
-  };
+};
 
 const getalllinks = async (req, res) => {
   const userId = req.user._id;
@@ -97,6 +101,13 @@ const getalllinks = async (req, res) => {
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(parseInt(req.query.limit) || 10, 50);
   const skip = (page - 1) * limit;
+
+  const cacheKey = `links:${userId}:${page}:${limit}`;
+  const cached = getCache(cacheKey);
+
+  if (cached) {
+    return res.json(new ApiResponse(200, cached, "Cached links"));
+  }
 
   const result = await Url.aggregate([
     {
@@ -116,17 +127,21 @@ const getalllinks = async (req, res) => {
   const links = result[0].links;
   const totalLinks = result[0].totalCount[0]?.count || 0;
 
+  const responseData = {
+    links,
+    pagination: {
+      totalLinks,
+      page,
+      totalPages: Math.max(Math.ceil(totalLinks / limit), 1),
+    },
+  };
+
+  setCache(cacheKey, responseData, 60000);
+
   return res.status(200).json(
     new ApiResponse(
       200,
-      {
-        links,
-        pagination: {
-          totalLinks,
-          page,
-          totalPages: Math.max(Math.ceil(totalLinks / limit), 1),
-        },
-      },
+      responseData,
       "Links fetched successfully",
     ),
   );
@@ -138,6 +153,7 @@ const getlink = async (req, res) => {
   const { linkId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(linkId))
     throw new ApiError(400, "Invalid id");
+
   const link = await Url.findOne({
     userId,
     _id: linkId,
@@ -202,6 +218,11 @@ const updateLink = async (req, res) => {
     throw new ApiError(404, "Link not found");
   }
 
+  clearCacheByPrefix(`links:${userId}`);
+  clearCacheByPrefix(`stats:${userId}`);
+  clearCacheByPrefix(`analytics:${linkId}`);
+  clearCacheByPrefix(`dashboard:${userId}`);
+
   return res
     .status(200)
     .json(new ApiResponse(200, link, "Link updated successfully"));
@@ -233,6 +254,11 @@ const deleteLink = async (req, res) => {
   
     await session.commitTransaction();
     session.endSession();
+
+    clearCacheByPrefix(`dashboard:${userId}`);
+    clearCacheByPrefix(`links:${userId}`);
+    clearCacheByPrefix(`stats:${userId}`);
+    clearCacheByPrefix(`analytics:${linkId}`);
     
     return res
       .status(200)
@@ -246,6 +272,12 @@ const deleteLink = async (req, res) => {
 
 const getstats = async (req, res) => {
   const userId = req.user._id;
+  const cacheKey = `stats:${userId}`;
+  const cached = getCache(cacheKey);
+
+  if (cached) {
+    return res.json(new ApiResponse(200, cached, "Cached stats"));
+  }
 
   const stats = await Url.aggregate([
     {
@@ -287,6 +319,8 @@ const getstats = async (req, res) => {
     totalActive: 0,
   };
 
+  setCache(cacheKey, data, 60000);
+
   return res
     .status(200)
     .json(new ApiResponse(200, data, "Links stats fetched successfully"));
@@ -295,16 +329,25 @@ const getstats = async (req, res) => {
 const getLinkAnalytics = async (req, res) => {
   const { linkId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(linkId))
+  if (!mongoose.Types.ObjectId.isValid(linkId)) {
     throw new ApiError(400, "Invalid id");
+  }
 
   const userId = req.user?._id;
   if (!userId) throw new ApiError(401, "Unauthorized");
 
   const allowedRanges = [7, 30];
   let range = parseInt(req.query.range) || 7;
-
   if (!allowedRanges.includes(range)) range = 7;
+
+  // ✅ cache key
+  const cacheKey = `analytics:${linkId}:${range}`;
+
+  // ✅ check cache
+  const cached = getCache(cacheKey);
+  if (cached) {
+    return res.json(new ApiResponse(200, cached, "Cached analytics"));
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -321,7 +364,7 @@ const getLinkAnalytics = async (req, res) => {
   const objectUserId = new mongoose.Types.ObjectId(userId);
   const objectLinkId = new mongoose.Types.ObjectId(linkId);
 
-  // Fetch link
+  // ✅ Fetch link (lean = faster)
   const link = await Url.findOne({
     _id: linkId,
     userId,
@@ -331,69 +374,99 @@ const getLinkAnalytics = async (req, res) => {
 
   if (!link) throw new ApiError(404, "Link not found");
 
-  // DAILY ANALYTICS (aggregation)
-  const analytics = await Analytics.aggregate([
+  // ✅ SINGLE aggregation (daily + current + previous)
+  const [analyticsResult] = await Analytics.aggregate([
     {
       $match: {
         urlId: objectLinkId,
         userId: objectUserId,
-        date: { $gte: startDate }
-      }
+      },
     },
     {
-      $group: {
-        _id: {
-          $dateToString: {
-            format: "%Y-%m-%d",
-            date: "$date",
-            timezone: "Asia/Kolkata"
-          }
-        },
-        clicks: { $sum: "$clicks" },
-        uniqueVisitors: { $sum: "$uniqueVisitors" }
-      }
+      $facet: {
+        daily: [
+          { $match: { date: { $gte: startDate } } },
+          {
+            $group: {
+              _id: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: "$date",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+              clicks: { $sum: "$clicks" },
+              uniqueVisitors: { $sum: "$uniqueVisitors" },
+            },
+          },
+          { $sort: { _id: 1 } },
+        ],
+        current: [
+          { $match: { date: { $gte: startDate } } },
+          {
+            $group: {
+              _id: null,
+              clicks: { $sum: "$clicks" },
+              uniqueVisitors: { $sum: "$uniqueVisitors" },
+            },
+          },
+        ],
+        previous: [
+          {
+            $match: {
+              date: { $gte: previousStart, $lte: previousEnd },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              clicks: { $sum: "$clicks" },
+              uniqueVisitors: { $sum: "$uniqueVisitors" },
+            },
+          },
+        ],
+        stats: [
+          { $match: { date: { $gte: startDate } } },
+          {
+            $group: {
+              _id: null,
+              deviceStats: { $push: "$deviceStats" },
+              countryStats: { $push: "$countryStats" },
+              referrerStats: { $push: "$referrerStats" },
+            },
+          },
+        ],
+      },
     },
-    { $sort: { _id: 1 } }
   ]);
 
-  // Previous period analytics
-  const previousStats = await Analytics.aggregate([
-    {
-      $match: {
-        urlId: objectLinkId,
-        userId: objectUserId,
-        date: { $gte: previousStart, $lte: previousEnd }
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        clicks: { $sum: "$clicks" },
-        uniqueVisitors: { $sum: "$uniqueVisitors" }
-      }
-    }
-  ]);
+  // ✅ Extract results
+  const daily = analyticsResult.daily || [];
+  const current = analyticsResult.current[0] || {
+    clicks: 0,
+    uniqueVisitors: 0,
+  };
+  const previous = analyticsResult.previous[0] || {
+    clicks: 0,
+    uniqueVisitors: 0,
+  };
+  const stats = analyticsResult.stats[0] || {};
 
-  const previousClicks = previousStats[0]?.clicks || 0;
-  const previousUnique = previousStats[0]?.uniqueVisitors || 0;
+  // ✅ Growth
+  const clickGrowth = calculateGrowth(current.clicks, previous.clicks) || 0;
+  const uniqueGrowth =
+    calculateGrowth(current.uniqueVisitors, previous.uniqueVisitors) || 0;
 
-  const currentClicks = analytics.reduce((sum, a) => sum + a.clicks, 0);
-  const currentUnique = analytics.reduce((sum, a) => sum + a.uniqueVisitors, 0);
-
-  const clickGrowth = calculateGrowth(currentClicks, previousClicks) || 0;
-  const uniqueGrowth = calculateGrowth(currentUnique, previousUnique) || 0;
-
-  // Convert analytics to map
+  // ✅ Convert daily to map
   const analyticsMap = new Map();
-
-  analytics.forEach((item) => {
+  daily.forEach((item) => {
     analyticsMap.set(item._id, {
       clicks: item.clicks,
-      uniqueVisitors: item.uniqueVisitors
+      uniqueVisitors: item.uniqueVisitors,
     });
   });
 
-  // Fill missing days
+  // ✅ Fill missing days
   const chartData = [];
 
   for (let i = range - 1; i >= 0; i--) {
@@ -401,55 +474,50 @@ const getLinkAnalytics = async (req, res) => {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
 
-    const key = d.toLocaleDateString("en-CA");
+    const key = d.toISOString().slice(0, 10);
 
     chartData.push({
       date: key,
       clicks: analyticsMap.get(key)?.clicks || 0,
-      uniqueVisitors: analyticsMap.get(key)?.uniqueVisitors || 0
+      uniqueVisitors: analyticsMap.get(key)?.uniqueVisitors || 0,
     });
   }
 
-  // Device / Country / Referrer stats
-  const rawStats = await Analytics.find({
-    urlId: linkId,
-    userId,
-    date: { $gte: startDate }
-  }).lean();
-
-  const deviceStats = {};
-  const countryStats = {};
-  const referrerStats = {};
-
-  for (const a of rawStats) {
-    for (const [k, v] of Object.entries(a.deviceStats || {})) {
-      deviceStats[k] = (deviceStats[k] || 0) + v;
+  // ✅ Helper to merge stats arrays
+  const mergeStats = (arr = []) => {
+    const result = {};
+    for (const obj of arr) {
+      for (const [k, v] of Object.entries(obj || {})) {
+        result[k] = (result[k] || 0) + v;
+      }
     }
+    return result;
+  };
 
-    for (const [k, v] of Object.entries(a.countryStats || {})) {
-      countryStats[k] = (countryStats[k] || 0) + v;
-    }
+  const deviceStats = mergeStats(stats.deviceStats);
+  const countryStats = mergeStats(stats.countryStats);
+  const referrerStats = mergeStats(stats.referrerStats);
 
-    for (const [k, v] of Object.entries(a.referrerStats || {})) {
-      referrerStats[k] = (referrerStats[k] || 0) + v;
-    }
-  }
+  const responseData = {
+    shortUrl: link.shortUrl,
+    originalUrl: link.originalUrl,
+    totalClicks: link.totalClicks,
+    totalUniqueVisitors: link.totalUniqueVisitors,
+    clickGrowth,
+    uniqueGrowth,
+    chartData,
+    deviceStats,
+    countryStats,
+    referrerStats,
+  };
 
-  return res.status(200).json(
+  // ✅ cache result (60 sec)
+  setCache(cacheKey, responseData, 60000);
+
+  return res.json(
     new ApiResponse(
       200,
-      {
-        shortUrl: link.shortUrl,
-        originalUrl: link.originalUrl,
-        totalClicks: link.totalClicks,
-        totalUniqueVisitors: link.totalUniqueVisitors,
-        clickGrowth,
-        uniqueGrowth,
-        chartData,
-        deviceStats,
-        countryStats,
-        referrerStats
-      },
+      responseData,
       "Link analytics fetched successfully"
     )
   );
