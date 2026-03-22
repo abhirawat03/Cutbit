@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import passport from "passport";
 import helmet from "helmet"
+import compression from "compression";
 import {errorHandler} from "./middleware/errorHandler.js"
 import "./config/passport.js"
 import { globalLimiter } from "./middleware/rateLimiter.js";
@@ -17,6 +18,12 @@ app.use(
         credentials:true
     })
 )
+app.use(
+    compression({
+        level: 6,
+        threshold: 1024, // only compress >1KB
+    })
+);
 
 app.use(express.json({limit:"16kb"}))
 app.use(express.urlencoded({extended:true, limit:"16kb"}))
