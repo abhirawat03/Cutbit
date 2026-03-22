@@ -36,7 +36,7 @@ function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex flex-row gap-8 items-center">
+        <div className="hidden md:flex lg:gap-8 md:gap-4 items-center">
           
           <div className="flex gap-6 font-bold">
             <Link to="/" className="text-gray-300 hover:text-white">Home</Link>
@@ -82,7 +82,7 @@ function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden px-4 pb-4 flex flex-col gap-4 bg-[#030a2a] border-t border-[#202733]">
+        <div className="md:hidden min-h-screen px-4 pb-4 pt-8 flex flex-col items-center gap-4 bg-[#030a2a] border-t border-[#202733]">
 
           <Link
             to="/"
@@ -128,7 +128,7 @@ function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setOpen(false)}
-                  className="text-gray-300 hover:text-white text-center"
+                  className="text-white bg-[#2563EB] px-4 py-2 rounded-lg text-center"
                 >
                   Login
                 </Link>
@@ -136,7 +136,7 @@ function Navbar() {
                 <Link
                   to="/register"
                   onClick={() => setOpen(false)}
-                  className="text-white bg-[#2563EB] px-4 py-2 rounded-xl text-center"
+                  className="text-white bg-[#2563EB] px-4 py-2 rounded-lg text-center"
                 >
                   Get Started
                 </Link>
