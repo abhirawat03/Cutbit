@@ -89,7 +89,7 @@ function Dashboard() {
           onClick={() => {
             setIsCreateModalOpen(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg font-medium text-sm md:text-base w-full md:w-auto"
+          className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg font-medium text-sm md:text-base w-full md:w-auto cursor-pointer"
         >
           + Create New Link
         </button>
@@ -104,7 +104,7 @@ function Dashboard() {
             </div>
           </div>
           <div >
-            <h1 className='text-3xl sm:text-4xl md:text-5xl mb-2 font-extrabold'>{dashboard?.stats?.totalLinks ?? 0}</h1>
+            <h1 className='text-5xl mb-2 font-extrabold'>{dashboard?.stats?.totalLinks ?? 0}</h1>
           </div>
           <IoLink className='absolute bottom-0 -right-4 text-gray-700' size={120} />
         </div>

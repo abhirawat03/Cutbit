@@ -256,8 +256,8 @@ function Home() {
                 {/* ===== Radial background glow ===== */}
                 <div className="absolute -bottom-48 -right-1/3 -translate-x-1/2 w-[900px] h-[700px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-xl"></div>
             </section>
-            <section id="insights" className="min-h-screen border-[#63686c5e] text-white border-b scroll-mt-27 md:scroll-mt-34">
-                <div className="flex flex-col md:flex-row items-center justify-between mt-10 mb-10 md:mt-35 px-5 md:mx-10 gap-10">
+            <section id="insights" className="min-h-screen border-[#63686c5e] text-white border-b scroll-mt-17 flex items-center">
+                <div className="flex flex-col md:mx-auto md:gap-15 xl:flex-row items-center mt-10 mb-10 md:mt-15 px-5 xl:gap-40">
                     <div className="max-w-[600px] flex flex-col gap-5">
                         <h2 className="text-2xl md:text-[2.6rem] font-extrabold">Deep insights into every click</h2>
                         <p className="text-xl font-normal mb-3 text-[#9098a4]">Go beyond basic click counting. Understand your audience behavior with enterprise-grade analytics delivered in real-time.</p>
@@ -296,33 +296,45 @@ function Home() {
                     </div>
                 </div>
             </section>
-            <section id="features" className="min-h-screen border-b border-[#63686c5e] text-white flex flex-col md:flex-row items-center justify-evenly gap-6 p-10">
-                <div className="bg-[#27437e40] rounded-2xl w-full md:w-[370px] shadow-2xl shadow-[#0d2aab72]">
-                    <div className="flex flex-col p-12 gap-2">
+            <section
+                id="features"
+                className="min-h-screen border-b border-[#63686c5e] text-white 
+  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 
+  gap-6 p-10 
+  place-items-center content-center"
+            >
+                <div className="bg-[#27437e40] rounded-2xl h-full shadow-2xl shadow-[#0d2aab72]">
+                    <div className="flex flex-col p-12 gap-2 h-full">
                         <FaStopwatch size={24} className="text-[#2563EB]" />
                         <h4 className="text-[1.20rem] font-bold">Real-time tracking</h4>
-                        <p>Watch your campaigns come to life as clicks happen. Instant feedback on every link you share.
+                        <p className="flex-grow">
+                            Watch your campaigns come to life as clicks happen. Instant feedback on every link you share.
                         </p>
                     </div>
                 </div>
-                <div className="bg-[#27437e40] rounded-2xl w-full md:w-[390px] shadow-2xl shadow-[#0d2aab72]">
-                    <div className="flex flex-col p-12 gap-2">
+
+                <div className="bg-[#27437e40] rounded-2xl h-full shadow-2xl shadow-[#0d2aab72]">
+                    <div className="flex flex-col p-12 gap-2 h-full">
                         <PiTagSimpleFill size={24} className="text-[#2563EB]" />
                         <h4 className="text-[1.20rem] font-bold">Custom Aliases</h4>
-                        <p>Create memorable, branded links using custom aliases that fit your campaigns goals and build trust with your audience.</p>
+                        <p className="flex-grow">
+                            Create memorable, branded links using custom aliases that fit your campaigns goals and build trust with your audience.
+                        </p>
                     </div>
                 </div>
 
-                <div className="bg-[#27437e40] rounded-2xl w-full md:w-[370px] shadow-2xl shadow-[#0d2aab72]">
-                    <div className="flex flex-col p-12 gap-2">
+                <div className="bg-[#27437e40] rounded-2xl h-full shadow-2xl shadow-[#0d2aab72]">
+                    <div className="flex flex-col p-12 gap-2 h-full">
                         <IoQrCodeSharp size={24} className="text-[#2563EB]" />
                         <h4 className="text-[1.20rem] font-bold">QR Code Generation</h4>
-                        <p>Bridge the gap between offline and online. Generate beautiful, trackable QR codes for every link instantly.</p>
+                        <p className="flex-grow">
+                            Bridge the gap between offline and online. Generate beautiful, trackable QR codes for every link instantly.
+                        </p>
                     </div>
                 </div>
             </section>
             <section id="how" className="min-h-screen text-white flex items-center w-full relative scroll-mt-17">
-                <div className="hidden md:flex text-3xl absolute left-1/2 -translate-1/2 text-[#2564eb4a]">
+                <div className="hidden xl:flex text-3xl absolute left-1/2 -translate-1/2 text-[#2564eb4a]">
                     ---------------------------------------------------------------
                 </div>
                 <div className="flex flex-col items-center gap-16 w-full py-10 px-5 md:px-15">
