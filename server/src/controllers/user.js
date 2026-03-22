@@ -295,15 +295,15 @@ const updateUserAvatar = async (req, res) => {
       req.user?._id,
       {
         $set: {
-          avatar: avatar.url,
+          avatar: avatar.secure_url,
         },
       },
       { new: true },
     ).select("-password");
     if (!user) throw new Error("DB update failed");
   } catch (error) {
-    if (avatar?.url) {
-      const publicId = avatar.url.split("/").pop().split(".")[0];
+    if (avatar?.secure_url) {
+      const publicId = avatar.secure_url.split("/").pop().split(".")[0];
       await cloudinary.uploader.destroy(publicId).catch(() => {});
     }
     throw new ApiError(500, "Avatar update failed");
