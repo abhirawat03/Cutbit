@@ -1,6 +1,6 @@
 import mongoose,{Schema} from "mongoose"
 import jwt from "jsonwebtoken"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 const userSchema = new Schema({
     fullName:{
         type:String,
@@ -34,7 +34,16 @@ const userSchema = new Schema({
     },
     refreshToken:{
         type:String
-    }
+    },
+    passwordChangedAt: {
+        type:Date
+    },
+    resetPasswordToken: {
+        type:String
+    },
+    resetPasswordExpiry: {
+        type:Date
+    },
 },{timestamps:true})
 
 userSchema.pre("save", async function(){

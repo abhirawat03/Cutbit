@@ -176,7 +176,7 @@ const logoutUser = async (req, res) => {
 const refreshAccessToken = async (req, res) => {
   const incomingRefreshToken = req.cookies.refreshToken;
 
-  if (!incomingRefreshToken) throw new ApiError(401, "unauthorized request");
+  if (!incomingRefreshToken) throw new ApiError(401, "TOKEN_INVALID");
 
   try {
     const decodedToken = jwt.verify(
@@ -186,7 +186,7 @@ const refreshAccessToken = async (req, res) => {
 
     const user = await User.findById(decodedToken?._id);
     if (!user) {
-      throw new ApiError(401, "Invalid refresh token");
+      throw new ApiError(401, "TOKEN_INVALID");
     }
 
     // 🔐 Hash incoming token before comparing
@@ -196,7 +196,7 @@ const refreshAccessToken = async (req, res) => {
       .digest("hex");
 
     if (hashedIncomingToken !== user?.refreshToken) {
-      throw new ApiError(401, "Refresh token is expired or used");
+      throw new ApiError(401, "TOKEN_EXPIRED");
     }
 
     const options = {
@@ -228,19 +228,39 @@ const refreshAccessToken = async (req, res) => {
 const changeCurrentPassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  if (newPassword.length < 8 || newPassword.length > 64) {
+    throw new ApiError(400, "Password must be 8–64 characters");
+  }
+
+  if (currentPassword === newPassword) {
+    throw new ApiError(400, "New password must be different");
+  }
+
   const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
   const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
 
   if (!isPasswordCorrect) {
-    throw new ApiError(400, "Invalid old password");
+    throw new ApiError(400, "Invalid current password");
   }
 
   user.password = newPassword;
-  await user.save({ validateBeforeSave: false });
+
+  user.passwordChangedAt = Date.now();
+
+  await user.save(); 
 
   return res
     .status(200)
-    .json(new ApiResponse(200, {}, "Password changes Successfully"));
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
 };
 
 const getCurrentUser = async (req, res) => {
@@ -316,6 +336,7 @@ const updateUserAvatar = async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "avatar updated successfully"));
 };
+
 const deleteUserAvatar = async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -344,6 +365,7 @@ const deleteUserAvatar = async (req, res) => {
     .status(204)
     .json(new ApiResponse(204, {}, "Avatar removed successfully"));
 };
+
 const deleteUserProfile = async (req, res) => {
   const userId = req.user?._id;
 
