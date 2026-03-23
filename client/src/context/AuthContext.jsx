@@ -1,7 +1,8 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useCurrentUser } from "../hooks/queries/useCurrentUser";
 import { useQueryClient } from "@tanstack/react-query";
 import { logoutUser } from "../services/userService";
+import { setLogoutHandler } from "../lib/logoutHandler.js";
 
 const AuthContext = createContext();
 
@@ -15,9 +16,13 @@ export const AuthProvider = ({ children }) => {
     } catch {
       //
     }
-    queryClient.setQueryData(["me"], null);
-    queryClient.removeQueries({ queryKey: ["me"] });
+    queryClient.clear();
+
   };
+
+  useEffect(() => {
+    setLogoutHandler(logout);
+  }, []);
 
   return (
     <AuthContext.Provider

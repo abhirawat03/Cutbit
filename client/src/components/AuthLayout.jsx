@@ -1,26 +1,34 @@
-import React from 'react'
-import { FcGoogle } from "react-icons/fc";
-import logo from "../assets/images/logo.png"
-import { Link, Outlet } from 'react-router-dom';
+import React from "react";
+import { Link, Outlet } from "react-router-dom";
+import logo from "../assets/images/logo.png";
 
-function Signup() {
+function AuthLayout() {
   return (
-    <section className='text-white flex flex-col min-h-screen gap-8 relative bg-[#030a2a] select-none'>
-        <div className="hidden md:block absolute -top-48 left-1/3 -translate-x-1/2 w-[900px] h-[700px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-xl"></div>
-        <div className='mt-2 ml-2 z-10'>
-            <Link to="/" className='cursor-pointer'>
-                <div className="flex flex-row gap-2 items-center ">
-                    <img src={logo} alt="" className="w-15 h-15" />
-                    <h1 className="font-bold text-white text-3xl">Cutbit</h1>
-                </div>
-            </Link>
+    <section className="relative min-h-screen bg-[#030a2a] text-white overflow-hidden flex flex-col">
+
+      {/* Background glow */}
+      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-3xl"></div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-3xl"></div>
+
+      {/* Header */}
+      <div className="z-10 px-4 py-4">
+        <Link to="/" className="flex items-center gap-2 w-fit">
+          <img src={logo} alt="logo" className="w-10 h-10" />
+          <h1 className="text-2xl font-bold">Cutbit</h1>
+        </Link>
+      </div>
+
+      {/* Centered Content */}
+      <div className="flex flex-1 items-center justify-center px-4 z-10">
+        
+        {/* Card */}
+        <div className="w-full max-w-md bg-[#040d3863] border border-[#63686c5e] shadow-xl shadow-[#2564eb4f] rounded-2xl p-6 sm:p-8 backdrop-blur-md">
+          <Outlet />
         </div>
-        <div className='flex flex-col items-center bg-[#040d3863] shadow-xl px-3 shadow-[#2564eb4f] border border-[#63686c5e] gap-4 rounded-2xl mx-auto z-10'>
-            <Outlet/>
-        </div>
-        <div className="hidden md:block absolute bottom-0 translate-x-1/2 w-[900px] h-[700px] bg-[radial-gradient(circle,#2563EB,transparent_70%)] opacity-20 blur-xl"></div>
+
+      </div>
     </section>
-  )
+  );
 }
 
-export default Signup
+export default AuthLayout;

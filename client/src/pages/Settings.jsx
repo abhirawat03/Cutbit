@@ -5,7 +5,6 @@ import { useUpdateAvatar } from "../hooks/mutations/useUpdateAvatar";
 import { useDeleteAvatar } from "../hooks/mutations/useDeleteAvatar";
 import { useChangePassword } from "../hooks/mutations/useChangePassword";
 import { useDeleteAccount } from "../hooks/mutations/useDeleteAccount";
-import {useNavigate } from 'react-router-dom';
 import DeleteAccountConfirm from "../components/DeleteAccountConfirm";
 
 export default function Settings() {
@@ -14,7 +13,6 @@ export default function Settings() {
   const updateAvatarMutation = useUpdateAvatar();
   const deleteAvatarMutation = useDeleteAvatar();
   const deleteAccountMutation = useDeleteAccount();
-  const navigate = useNavigate();
   const changePasswordMutation = useChangePassword();
   const [avatarImg, setAvatarImg] = useState(null);
   const [showAvatar, setShowAvatar] = useState(false)
@@ -112,7 +110,7 @@ export default function Settings() {
       return;
     }
 
-    if (passwordForm.newPassword.length < 8) {
+    if (passwordForm.newPassword.length < 8 || passwordForm.newPassword.length> 64) {
       alert("Password must be at least 8 characters");
       return;
     }
@@ -123,14 +121,15 @@ export default function Settings() {
         newPassword: passwordForm.newPassword
       },
       {
-        onSuccess: () => {
+        onSuccess: async() => {
 
           setPasswordForm({
             currentPassword: "",
             newPassword: "",
             confirmPassword: ""
           });
-
+          await logout();         // clear react-query + backend logout
+          window.location.href = "/login";
         }
       }
     );
@@ -139,7 +138,7 @@ export default function Settings() {
   deleteAccountMutation.mutate(confirmText, {
     onSuccess: async () => {
       await logout();
-      navigate("/");
+      window.location.href = "/login";
     },
   });
 };

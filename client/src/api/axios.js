@@ -1,77 +1,105 @@
 import axios from "axios";
+import { triggerLogout } from "../lib/logoutHandler";
 
 const Api = axios.create({
-    baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
-    withCredentials: true,
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
+  withCredentials: true,
 });
 
 let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error) => {
-    failedQueue.forEach((prom) => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve();
-        }
-    });
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
 
-    failedQueue = [];
+  failedQueue = [];
+};
+
+const forceLogout = () => {
+  triggerLogout(); // only clear state
 };
 
 Api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-        if (!error.response) {
-            return Promise.reject(error);
-        }
-        const isAuthRoute =
-            originalRequest.url.includes("/refresh-token") ||
-            originalRequest.url.includes("/login") ||
-            originalRequest.url.includes("/register")||
-            originalRequest.url.includes("/current-user");
-        // avoid infinite loop
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry &&
-            !isAuthRoute
-        ) {
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                })
-                    .then(() => {
-                        return Api(originalRequest);
-                    })
-                    .catch((err) => {
-                        return Promise.reject(err);
-                    });
-            }
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config || {};
+    const url = originalRequest.url || "";
+    if (!error.response) {
+      return Promise.reject(error);
+    }
 
-            originalRequest._retry = true;
-            isRefreshing = true;
+    const status = error.response.status;
+    const code = error.response?.data?.message;
 
-            try {
-                await Api.post("/users/refresh-token");
+    const isExpired =
+        status === 401 && code === "TOKEN_EXPIRED";
 
-                processQueue(null);
+    const isAuthRoute =
+      url.includes("/refresh-token") ||
+      url.includes("/login") ||
+      url.includes("/register") ||
+      url.includes("/me");
 
-                return Api(originalRequest);
-            } catch (err) {
-                processQueue(err);
-                if (err.response?.status === 401) {
-                  // means no refresh token → user is logged out
-                  return Promise.reject(err); // just stop here
-                }
-            } finally {
-                isRefreshing = false;
-            }
-        }
+    //logout immediately if NOT expired
+    // if (error.response?.status === 401 && !isExpired && !isAuthRoute) {
+    //   triggerLogout();
+    //   if (window.location.pathname !== "/login") {
+    //     window.location.href = "/login";
+    //   }
+    //   return Promise.reject(error);
+    // }
+    // refresh only if expired
+    if (
+      status === 401 &&
+      isExpired &&
+      !originalRequest._retry &&
+      !isAuthRoute
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => Api(originalRequest))
+          .catch((err) => Promise.reject(err));
+      }
 
-        return Promise.reject(error);
-    },
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        await Api.post("/users/refresh-token");
+
+        processQueue(null);
+
+        return Api(originalRequest);
+      } catch (err) {
+        processQueue(err);
+        //refresh failed → logout
+        forceLogout();
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+    // 🔥 2. HANDLE INVALID TOKEN (NO RECOVERY)
+    if (
+      status === 401 &&
+      !isExpired &&
+      !isAuthRoute &&
+      !originalRequest._retry
+    ) {
+      forceLogout();
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  },
+
 );
 
 export default Api;

@@ -19,6 +19,8 @@ import Terms from "./pages/Terms.jsx";
 import RedirectError from "./pages/RedirectError.jsx";
 import GlobalFetchingIndicator from "./components/GlobalFetchingIndicator.jsx";
 import ScrollToTop from "./components/scrollToTop.jsx";
+import ForgotPassword from "./pages/ForgotPasswordPage.jsx";
+import ResetPassword from "./pages/ResetPasswordPage.jsx";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -40,6 +42,8 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
           </Route>
         </Route>
 

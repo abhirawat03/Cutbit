@@ -67,7 +67,7 @@ function Signup() {
 
   return (
   <>
-    <div className="w-full mx-auto px-4 py-8 flex flex-col gap-4">
+    <div className="w-full mx-auto flex flex-col gap-3 items-center">
 
       <h1 className="text-xl sm:text-2xl font-bold text-center sm:text-left">
         Create your account
@@ -91,7 +91,7 @@ function Signup() {
       </button>
 
       {/* Divider */}
-      <div className="flex items-center w-full gap-2 my-2">
+      <div className="flex items-center w-full gap-2">
         <div className="flex-1 border-b border-[#63686c5e]"></div>
         <h1 className="uppercase text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">
           Or Continue With Email
@@ -151,7 +151,7 @@ function Signup() {
         <button
           type="submit"
           disabled={signupMutation.isPending}
-          className={`p-2 sm:p-3 rounded-md mt-3 cursor-pointer ${
+          className={`p-2 sm:p-3 rounded-md mt-2 cursor-pointer ${
             signupMutation.isPending
               ? "bg-blue-400 cursor-not-allowed"
               : "bg-[#2563EB] hover:bg-blue-700"
