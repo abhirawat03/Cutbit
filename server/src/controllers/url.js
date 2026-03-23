@@ -355,7 +355,8 @@ const getLinkAnalytics = async (req, res) => {
   const today = new Date(
     now.toLocaleString("en-US", { timeZone: tz })
   );
-
+  const endOfToday = new Date(today);
+  endOfToday.setHours(23, 59, 59, 999);
   const startDate = new Date(today);
   startDate.setDate(today.getDate() - (range - 1));
 
