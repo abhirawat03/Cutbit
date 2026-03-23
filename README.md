@@ -46,11 +46,12 @@ Cutbit focuses on **near real-time analytics**, **scalable data tracking**, and 
 ### 🔍 Link Analytics
 
 * Track total clicks and unique visitors for each link
-* View performance over time (7 days / 30 days)
+* View performance over time with daily time-based tracking (7D / 30D)
+* Timezone-consistent analytics aggregation (IST-based)
 * See which devices users are coming from (mobile, desktop, tablet)
 * Identify traffic sources (referrer tracking)
 * Understand audience location (country-level data)
-* Get a complete breakdown of each link’s performance (device, referrer, geography, clicks and unique visitors charts)
+* Complete performance breakdown with click & unique visitor trends, device insights, referrer sources, and geographic data
 
 ### 📈 Dashboard
 
@@ -105,6 +106,7 @@ Cutbit focuses on **near real-time analytics**, **scalable data tracking**, and 
 - Device type is derived from user-agent parsing
 - Referrer data is normalized to remove internal traffic noise
 - Country-level data is estimated using GeoIP lookup
+- Analytics are grouped using a consistent timezone (IST) to ensure accurate daily aggregation and chart alignment
 
 ---
 
@@ -228,6 +230,7 @@ server/
 - Unique visitors are cookie-based and may be slightly inflated due to browser/device differences
 - Geo-location is IP-based and may be inaccurate for VPN/proxy users
 - Free-tier backend (Render) may experience cold starts
+- Analytics currently use a fixed timezone (IST); global timezone support is not yet implemented
 ---
 
 ## 🧑‍💻 Author
