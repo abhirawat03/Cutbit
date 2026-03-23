@@ -349,8 +349,12 @@ const getLinkAnalytics = async (req, res) => {
     return res.json(new ApiResponse(200, cached, "Cached analytics"));
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const tz = "Asia/Kolkata";
+
+  const now = new Date();
+  const today = new Date(
+    now.toLocaleString("en-US", { timeZone: tz })
+  );
 
   const startDate = new Date(today);
   startDate.setDate(today.getDate() - (range - 1));
@@ -385,7 +389,7 @@ const getLinkAnalytics = async (req, res) => {
     {
       $facet: {
         daily: [
-          { $match: { date: { $gte: startDate } } },
+          { $match: { date: { $gte: startDate, $lte: endOfToday } } },
           {
             $group: {
               _id: {
@@ -474,7 +478,7 @@ const getLinkAnalytics = async (req, res) => {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
 
-    const key = d.toISOString().slice(0, 10);
+    const key = d.toLocaleDateString("en-CA", { timeZone: tz });
 
     chartData.push({
       date: key,

@@ -21,8 +21,11 @@ export const getDashboardData = async (req, res) => {
       return res.json(new ApiResponse(200, cached, "Cached dashboard"));
     }
 
+    const tz = "Asia/Kolkata";
+
+    const now = new Date();
     const today = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
+      now.toLocaleString("en-US", { timeZone: tz })
     );
     today.setHours(0, 0, 0, 0);
 
@@ -90,7 +93,7 @@ export const getDashboardData = async (req, res) => {
                     $dateToString: {
                       format: "%Y-%m-%d",
                       date: "$date",
-                      timezone: "Asia/Kolkata",
+                      timezone: tz,
                     },
                   },
                   clicks: { $sum: "$clicks" },
@@ -198,7 +201,7 @@ export const getDashboardData = async (req, res) => {
     });
 
     const chart = dates.map((date) => {
-      const key = d.toISOString().slice(0, 10);
+      const key = date.toLocaleDateString("en-CA", { timeZone: tz });
       return {
         date: key,
         clicks: analyticsMap.get(key)?.clicks || 0,
