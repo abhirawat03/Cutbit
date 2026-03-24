@@ -1,8 +1,7 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext } from "react";
 import { useCurrentUser } from "../hooks/queries/useCurrentUser";
 import { useQueryClient } from "@tanstack/react-query";
 import { logoutUser } from "../services/userService";
-import { setLogoutHandler } from "../lib/logoutHandler.js";
 
 const AuthContext = createContext();
 
@@ -12,17 +11,14 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await logoutUser();
+      await logoutUser(); // optional, backend cleanup
     } catch {
       //
     }
-    queryClient.clear();
 
+    queryClient.setQueryData(["me"], null);
+    queryClient.invalidateQueries(["me"]); // ✅ THIS is real logout
   };
-
-  useEffect(() => {
-    setLogoutHandler(logout);
-  }, []);
 
   return (
     <AuthContext.Provider

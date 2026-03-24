@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 export default function GlobalFetchingIndicator() {
   const isFetching = useIsFetching();
   const [visible, setVisible] = useState(false);
-  console.log("isFetching:", isFetching);
 
    useEffect(() => {
     let showTimer;

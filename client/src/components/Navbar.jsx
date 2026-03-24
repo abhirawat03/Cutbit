@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 
 function Navbar() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   useEffect(() => {
   if (open) {
@@ -48,7 +48,7 @@ function Navbar() {
           <div className="text-gray-300 text-2xl font-semibold">|</div>
 
           <div className="flex gap-6 font-bold items-center">
-            {user ? (
+            {loading ? null : user ? (
               <Link
                 to="/dashboard"
                 className="text-white hover:bg-blue-700 bg-[#2563EB] px-4 py-2 rounded-xl"
@@ -115,7 +115,7 @@ function Navbar() {
           </Link>
 
           <div className="border-t border-[#202733] pt-4 flex flex-col gap-3">
-            {user ? (
+            {loading ? null:user ? (
               <Link
                 to="/dashboard"
                 onClick={() => setOpen(false)}

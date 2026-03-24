@@ -63,10 +63,10 @@ function DashLayout() {
   if (loading) return null;
   if (!user) return null;
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
       setIsLoggingOut(true);
-      await logout();
+      logout();
       navigate('/');
     } catch (err) {
       console.error("Logout failed", err);
