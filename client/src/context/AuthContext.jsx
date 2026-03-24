@@ -16,8 +16,7 @@ export const AuthProvider = ({ children }) => {
       //
     }
 
-    queryClient.setQueryData(["me"], null);
-    queryClient.invalidateQueries(["me"]); // ✅ THIS is real logout
+    queryClient.clear();
   };
 
   return (

@@ -9,7 +9,7 @@ import CreateNewLink from './CreateNewLink';
 import { useAuth } from "../context/AuthContext";
 
 function DashLayout() {
-  const { user, loading, logout } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const contentRef = useRef(null);
   const navigate = useNavigate();
@@ -60,14 +60,11 @@ function DashLayout() {
     };
   }, [isSidebarOpen]);
 
-  if (loading) return null;
-  if (!user) return null;
-
   const handleLogout = () => {
     try {
       setIsLoggingOut(true);
       logout();
-      navigate('/');
+      navigate('/',{ replace: true });
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
