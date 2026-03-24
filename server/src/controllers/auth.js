@@ -63,10 +63,12 @@ const resetPassword = async (req, res) => {
   user.passwordChangedAt = Date.now(); // ✅ invalidate old sessions
   user.resetPasswordToken = undefined;
   user.resetPasswordExpiry = undefined;
+   // invalidate sessions
+  user.refreshToken = undefined;
 
   await user.save();
 
-  return res.json({ message: "Password reset successful" });
+  return res.json({ message: "Password reset successful. Please login again." });
 };
 
 export {

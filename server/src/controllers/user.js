@@ -176,7 +176,7 @@ const logoutUser = async (req, res) => {
 const refreshAccessToken = async (req, res) => {
   const incomingRefreshToken = req.cookies.refreshToken;
 
-  if (!incomingRefreshToken) throw new ApiError(401, "TOKEN_INVALID");
+  if (!incomingRefreshToken) throw new ApiError(401, "No refresh token", "TOKEN_INVALID");
 
   try {
     const decodedToken = jwt.verify(
@@ -186,28 +186,42 @@ const refreshAccessToken = async (req, res) => {
 
     const user = await User.findById(decodedToken?._id);
     if (!user) {
-      throw new ApiError(401, "TOKEN_INVALID");
+      throw new ApiError(401, "No refresh token", "TOKEN_INVALID");
     }
 
-    // 🔐 Hash incoming token before comparing
+    // CRITICAL FIX
+    if (user.passwordChangedAt && decodedToken.iat) {
+      const changedTime = parseInt(
+        user.passwordChangedAt.getTime() / 1000,
+        10
+      );
+
+      if (decodedToken.iat < changedTime) {
+        throw new ApiError(
+          401,
+          "Password changed, please login again",
+          "TOKEN_INVALID"
+        );
+      }
+    }
+
+    // Hash incoming token before comparing
     const hashedIncomingToken = crypto
       .createHash("sha256")
       .update(incomingRefreshToken)
       .digest("hex");
 
     if (hashedIncomingToken !== user?.refreshToken) {
-      throw new ApiError(401, "TOKEN_EXPIRED");
+      throw new ApiError(401, "Invalid refresh token", "TOKEN_INVALID");
     }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
     const options = {
       httpOnly: true,
       secure: true,
       sameSite: "None",
     };
-
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-      user._id,
-    );
 
     return res
       .status(200)
@@ -221,7 +235,15 @@ const refreshAccessToken = async (req, res) => {
         ),
       );
   } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid refresh token");
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (error.name === "TokenExpiredError") {
+      throw new ApiError(401, "Refresh token expired", "TOKEN_INVALID");
+    }
+
+    throw new ApiError(401, "Invalid refresh token", "TOKEN_INVALID");
   }
 };
 
@@ -254,7 +276,7 @@ const changeCurrentPassword = async (req, res) => {
 
   user.password = newPassword;
 
-  user.passwordChangedAt = Date.now();
+  user.passwordChangedAt = new Date(Date.now() - 1000);
 
   await user.save(); 
 

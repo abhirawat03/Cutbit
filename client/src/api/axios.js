@@ -30,7 +30,10 @@ Api.interceptors.response.use(
     const isExpired =
       status === 401 && code === "TOKEN_EXPIRED";
 
-    // ✅ try refresh ONLY if token expired
+    const isInvalid =
+      status === 401 && code === "TOKEN_INVALID";
+
+    // try refresh ONLY if token expired
     if (isExpired && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -55,7 +58,13 @@ Api.interceptors.response.use(
       }
     }
 
-    // ❌ no force logout here
+    //Logout on invalid token (password change/reset)
+    if (isInvalid) {
+      // clear auth state manually
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );
