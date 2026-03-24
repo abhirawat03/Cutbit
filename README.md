@@ -1,8 +1,10 @@
 # 🔗 Cutbit
 
-A full-stack URL shortener built with the MERN stack, designed for developers and marketers who want more than just short links — real analytics, performance insights, and clean architecture.
+Cutbit is a **link tracking and analytics system** that transforms every redirect into a structured data event to generate insights about user behavior.
 
-Cutbit focuses on **near real-time analytics**, **scalable data tracking**, and **performance-optimized frontend fetching using React Query**.
+Instead of just shortening URLs, it captures metadata like **device, referrer, and location** on each request and aggregates it into **time-based analytics**.
+
+> Built to explore how real-world tracking systems work — from request handling to data aggregation.
 
 ---
 
@@ -12,127 +14,149 @@ Cutbit focuses on **near real-time analytics**, **scalable data tracking**, and 
 
 ---
 
-## ⚙️ Tech Stack
+## ⚡ What Makes It Different
 
-### Frontend
-
-* React (Vite)
-* Tailwind CSS
-* React Router
-* React Query
-
-### Backend
-
-* Node.js
-* Express.js
-* MongoDB (Mongoose)
-
-### Other Tools
-
-* geoip-lite (geolocation tracking)
-* ua-parser-js (device & browser detection)
-* Google OAuth (authentication)
+- Treats each redirect as a **tracking event**, not just a URL lookup  
+- Implements **unique visitor tracking** using cookie-based identification  
+- Uses **daily aggregation** for efficient analytics queries  
+- Applies **bot filtering heuristics** to improve data quality  
+- Uses **in-memory caching (Map)** to reduce database reads  
+- Designed with **scaling considerations** (distributed cache, async processing)
 
 ---
 
-## ✨ Features
+## 🧠 Core System Flow
 
-### 🔗 Core Functionality
+When a user hits a short link:
 
-* Create short URLs from long links
-* Custom aliases for links
-* Share links or QR codes instantly
+1. Validate link (expiry, status)  
+2. Check in-memory cache (Map) → fallback to database  
+3. Filter bot traffic (user-agent + headers)  
+4. Identify visitor via cookie (`visitorId`)  
+5. Extract metadata:
+   - Device (user-agent parsing)
+   - Referrer (traffic source)
+   - Location (GeoIP)
+6. Store tracking event and update daily aggregates  
+7. Redirect user  
 
-### 🔍 Link Analytics
-
-* Track total clicks and unique visitors for each link
-* View performance over time with daily time-based tracking (7D / 30D)
-* Timezone-consistent analytics aggregation (IST-based)
-* See which devices users are coming from (mobile, desktop, tablet)
-* Identify traffic sources (referrer tracking)
-* Understand audience location (country-level data)
-* Complete performance breakdown with click & unique visitor trends, device insights, referrer sources, and geographic data
-
-### 📈 Dashboard
-
-* Centralized dashboard for all links
-* Growth trends visualization
-
-### 🔐 Authentication
-
-* JWT-based authentication
-* Email & password login
-* Google OAuth login
-* Protected routes
-* User-specific data isolation
-* Secure password hashing
+> Each request is treated as a tracking event and processed into analytics data.
 
 ---
 
-## 📸 Screenshots
+## 📊 Analytics Design
 
-### Dashboard
-![Dashboard](./screenshot/dashboard.png)
-
-### My Links
-![My Links](./screenshot/mylinks.png)
-
-### Link Details
-![Link Details](./screenshot/linkdetail.png)
-
-### Link Analytics
-![Link Analytics](./screenshot/linkanalytics.png)
+- **Request-based tracking** → every valid hit is logged  
+- **Unique visitors** → cookie + daily deduplication  
+- **Time-series aggregation** → optimized for charts (7D / 30D)  
+- **Referrer normalization** → removes internal traffic noise  
+- **Geo + device parsing** → enriches event data  
 
 ---
 
-## ⚙️ How Cutbit Works
+## ⚖️ Key Design Decisions
 
-1. User creates a short link mapped to an original URL  
-2. When a short link is accessed:
-   - Request is validated (expiry, status)
-   - Bot traffic is filtered using user-agent + headers
-   - A visitor ID is assigned using cookies (visitorId)
-   - Device, country, and referrer are extracted
-   - Click and visitor data are recorded and aggregated per day
-3. User is redirected to the original URL
+- **Synchronous tracking during redirect**
+  - Simple and ensures consistency  
+  - Adds latency at higher traffic  
 
----
+- **In-memory caching (Map)**
+  - Fast and reduces DB reads  
+  - Not persistent or distributed  
 
-## 📊 Analytics Approach
+- **Cookie-based visitor tracking**
+  - Stateless and easy to implement  
+  - Inaccurate across devices/browsers  
 
-- Click tracking is request-based (each valid request increments count)
-- Bot traffic is filtered using user-agent and request header checks
-- Unique visitors are tracked using cookies with daily deduplication
-- Device type is derived from user-agent parsing
-- Referrer data is normalized to remove internal traffic noise
-- Country-level data is estimated using GeoIP lookup
-- Analytics are grouped using a consistent timezone (IST) to ensure accurate daily aggregation and chart alignment
+- **Daily aggregation**
+  - Improves query performance  
+  - Less flexible for custom ranges  
 
 ---
 
 ## 🏗️ Architecture
-
+```
 Client (React) → API (Express) → MongoDB
+```
 
-- Redirect route handles validation, bot filtering, and analytics tracking in a single request cycle  
-- Visitor data is stored separately to track unique visits using cookies  
-- Analytics are aggregated per day for efficient querying and chart rendering  
-- Frontend uses React Query for optimized data fetching and caching
+- Redirect route handles **validation + caching + tracking + response**  
+- Event data stored separately for analytics  
+- Aggregation reduces query load  
+- React Query optimizes frontend data fetching  
 
 ---
 
-## ⚡ Setup Instructions
+## 📦 Scaling Considerations
 
-### 1. Clone Repository
+The current system works well for moderate traffic. At higher scale, the following improvements would be required:
+
+- Replace in-memory cache with **distributed cache (Redis)**  
+- Move tracking to **asynchronous processing (queue-based)**  
+- Pre-aggregate analytics data for faster queries  
+- Use **CDN / edge-based redirects** for high traffic  
+
+---
+
+## 📸 Screenshots 
+### Dashboard 
+![Dashboard](./screenshot/dashboard.png) 
+### My Links 
+![My Links](./screenshot/mylinks.png) 
+### Link Details 
+![Link Details](./screenshot/linkdetail.png) 
+### Link Analytics 
+![Link Analytics](./screenshot/linkanalytics.png)
+
+---
+
+## ⚙️ Tech Stack
+
+**Frontend**
+- React (Vite)
+- Tailwind CSS
+- React Router
+- React Query  
+
+**Backend**
+- Node.js
+- Express.js
+- MongoDB (Mongoose)  
+
+**Tracking Tools**
+- geoip-lite  
+- ua-parser-js  
+
+---
+
+## 🔐 Authentication
+
+- JWT-based authentication  
+- Refresh token flow  
+- Google OAuth  
+- Protected routes and user isolation  
+
+---
+
+## ⚠️ Limitations
+
+- Analytics are near real-time (not streaming)  
+- Bot filtering is heuristic-based and not perfect  
+- Unique visitors may be inflated across devices  
+- Geo-location may be inaccurate for VPN/proxy users  
+- **Cold start latency** due to free-tier deployment (Render)  
+- In-memory cache is not persistent or distributed  
+- Fixed timezone (IST) for aggregation  
+
+---
+
+## ⚡ Setup
 
 ```bash
 git clone https://github.com/abhirawat03/Cutbit.git
 cd cutbit
 ```
 
-### 2. Install Dependencies
-
-#### Frontend
+Frontend
 
 ```bash
 cd client
@@ -140,8 +164,7 @@ npm install
 npm run dev
 ```
 
-#### Backend
-
+Backend
 ```bash
 cd server
 npm install
@@ -155,29 +178,30 @@ npm run dev
 ### Backend (.env)
 
 ```env
+# Server
 PORT=8000
-DB_NAME=
 MONGODB_URL=
 
+# Authentication
 ACCESS_TOKEN_SECRET=
-ACCESS_TOKEN_EXPIRY=
 REFRESH_TOKEN_SECRET=
-REFRESH_TOKEN_EXPIRY=
 
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
+# OAuth (Google)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
+# External Services
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+RESEND_API_KEY=   # Email service (e.g., verification, password reset)
+
+# App URLs
 FRONTEND_URL=
 BACKEND_URL=
-RESEND_API_KEY=
 ```
 
 ### Frontend (.env)
-
 ```env
 VITE_BACKEND_URL=
 ```
@@ -185,58 +209,23 @@ VITE_BACKEND_URL=
 ---
 
 ## 📁 Project Structure
-
 ```
-client/
-  src/
-    components/
-    pages/
-    hooks/
-    services/
-    context/
-    providers/
-    lib/
-    assets/
-    api/
-    App.jsx
-    main.jsx
-
-server/
-  src/
-    controllers/
-    routes/
-    models/
-    middleware/
-    config/
-    db/
-    utils/
-    app.js
-    index.js
+client/   # React frontend
+server/   # Express backend
 ```
 
 ---
 
-## 🚀 Deployment
-
+## 🚀 Deployment 
 * Frontend: Vercel
 * Backend: Render
 * Database: MongoDB Atlas
 
 ---
 
-## ⚠️ Notes / Limitations
-
-- Analytics are near real-time but not streaming (depends on request frequency)
-- Bot traffic is filtered using heuristics (user-agent + headers) and may not be perfect
-- Unique visitors are cookie-based and may be slightly inflated due to browser/device differences
-- Geo-location is IP-based and may be inaccurate for VPN/proxy users
-- Free-tier backend (Render) may experience cold starts
-- Analytics currently use a fixed timezone (IST); global timezone support is not yet implemented
----
-
 ## 🧑‍💻 Author
 
-Abhishek Rawat
+Abhishek Rawat 
 
 ---
 
