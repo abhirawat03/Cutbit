@@ -60,10 +60,10 @@ function Signup() {
     window.location.href =`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`
   }
   useEffect(() => {
-  if (!loading && user) {
+  if (user) {
     navigate("/dashboard");
   }
-}, [user, loading, navigate]);
+}, [user, navigate]);
 
   return (
   <>
