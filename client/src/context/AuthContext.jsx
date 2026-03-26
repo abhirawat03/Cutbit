@@ -6,7 +6,7 @@ import { logoutUser } from "../services/userService";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const { data: user, isLoading } = useCurrentUser();
+  const { data, isLoading } = useCurrentUser();
   const queryClient = useQueryClient();
 
   const logout = async () => {
@@ -15,14 +15,13 @@ export const AuthProvider = ({ children }) => {
     } catch {
       //
     }
-
     queryClient.clear();
   };
 
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user: data || null,
         loading: isLoading,
         logout,
       }}

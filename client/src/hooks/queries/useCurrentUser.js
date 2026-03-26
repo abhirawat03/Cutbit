@@ -4,19 +4,13 @@ import { getCurrentUser } from "../../services/userService";
 export const useCurrentUser = () => {
   return useQuery({
     queryKey: ["me"],
-    queryFn: async () => {
-      try {
-        return await getCurrentUser();
-      } catch (err) {
-        if (err.response?.status === 401) {
-          return null; // ✅ not logged in
-        }
-        throw err;
-      }
-    },
-    staleTime: 1000 * 60 * 5,
-    refetchOnMount: false, // important
-    refetchOnWindowFocus: false,
+    queryFn: getCurrentUser,
     retry: false,
+
+    staleTime: 0,              // don't trust old auth
+    cacheTime: 5 * 60 * 1000,  // keep in memory for reuse
+
+    refetchOnMount: true,      // verify when needed
+    refetchOnWindowFocus: false,
   });
 };

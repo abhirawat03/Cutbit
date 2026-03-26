@@ -10,7 +10,6 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Mylinks from "./pages/Mylinks.jsx";
 import LinkBrief from "./pages/LinkBrief.jsx";
 import Settings from "./pages/Settings.jsx";
-// import Link from "./pages/Link.jsx";
 import LinkView from "./pages/Link.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -23,7 +22,6 @@ import ForgotPassword from "./pages/ForgotPasswordPage.jsx";
 import ResetPassword from "./pages/ResetPasswordPage.jsx";
 
 function App() {
-  // const [count, setCount] = useState(0)
 
   return (
     <BrowserRouter>

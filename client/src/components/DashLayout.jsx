@@ -4,19 +4,21 @@ import { MdDashboard } from "react-icons/md";
 import { IoLinkSharp } from "react-icons/io5";
 import { BsGearFill } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
-import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import CreateNewLink from './CreateNewLink';
 import { useAuth } from "../context/AuthContext";
 
 function DashLayout() {
   const { user, logout } = useAuth();
+  
   const location = useLocation();
   const contentRef = useRef(null);
-  const navigate = useNavigate();
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  
 
   const DEFAULT_AVATAR =
     "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -60,11 +62,11 @@ function DashLayout() {
     };
   }, [isSidebarOpen]);
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
     try {
       setIsLoggingOut(true);
-      logout();
-      navigate('/',{ replace: true });
+      await logout();
+      window.location.replace("/");
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
