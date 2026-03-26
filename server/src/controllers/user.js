@@ -286,6 +286,13 @@ const changeCurrentPassword = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
+  res.set("Cache-Control", "no-store");
+
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
+  }
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "current user fetched Successfully"));
